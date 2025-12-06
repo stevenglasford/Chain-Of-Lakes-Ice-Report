@@ -1,0 +1,3034 @@
+[
+  {
+    "date":"2025-03-11",
+    "lake":"Harriet",
+    "lat":"44\u00b055'01.7\"N",
+    "long":"93\u00b018'03.3\"W",
+    "thickness_cm":"?",
+    "description":"15 5\/8 honey,\n15 5\/8"
+  },
+  {
+    "date":"2025-03-11",
+    "lake":"Bde Maka Ska",
+    "lat":"44\u00b056'09.1\"N",
+    "long":"93\u00b018'53.0\"W",
+    "thickness_cm":"?",
+    "description":"11 3\/4 honey, 11 3\/4"
+  },
+  {
+    "date":"2025-03-11",
+    "lake":"Lake of the Isles",
+    "lat":"44\u00b057'07.9\"N",
+    "long":"93\u00b018'28.8\"W",
+    "thickness_cm":"?",
+    "description":"9 3\/8, honey\n15 7\/8"
+  },
+  {
+    "date":"2025-03-11",
+    "lake":"Kennilworth Lagoon",
+    "lat":"44\u00b057'17.4\"N",
+    "long":"93\u00b018'49.7\"W",
+    "thickness_cm":"?",
+    "description":"5 5\/8 honey,\n20 1\/8"
+  },
+  {
+    "date":"2025-03-11",
+    "lake":"Cedar Lake",
+    "lat":"44\u00b057'55.3\"N",
+    "long":"93\u00b019'11.3\"W",
+    "thickness_cm":"?",
+    "description":"12 3\/8 honey, 12 3\/8"
+  },
+  {
+    "date":"2025-03-11",
+    "lake":"Loring Lake",
+    "lat":"44\u00b058'07.3\"N",
+    "long":"93\u00b017'03.9\"W",
+    "thickness_cm":"?",
+    "description":"12 honey, 12"
+  },
+  {
+    "date":"2025-03-04",
+    "lake":"Lake Harriet",
+    "lat":"44\u00b055'23.1\"N ",
+    "long":"93\u00b018'16.9\"W",
+    "thickness_cm":"9 1\/4",
+    "description":"6 honey 15 1\/4"
+  },
+  {
+    "date":"2025-03-04",
+    "lake":"Loring Lake",
+    "lat":"44\u00b058'09.3\"N",
+    "long":"93\u00b017'05.9\"W",
+    "thickness_cm":6,
+    "description":"4 1\/2 honey, 10 1\/2"
+  },
+  {
+    "date":"2025-03-04",
+    "lake":"Loring Lake",
+    "lat":"44\u00b058'08.2\"N",
+    "long":"93\u00b017'03.4\"W",
+    "thickness_cm":"8 1\/4",
+    "description":"4 3\/4 honey, 13"
+  },
+  {
+    "date":"2025-03-04",
+    "lake":"Loring Lake",
+    "lat":"44\u00b058'07.3\"N",
+    "long":"93\u00b017'01.2\"W",
+    "thickness_cm":"6 3\/4",
+    "description":"5 3\/8 honey, 12 1\/8"
+  },
+  {
+    "date":"2025-03-04",
+    "lake":"Cedar Lake",
+    "lat":"44\u00b057'55.1\"N ",
+    "long":"93\u00b019'11.7\"W",
+    "thickness_cm":"9 3\/4",
+    "description":"4 7\/8 honey, 14 5\/8"
+  },
+  {
+    "date":"2025-03-04",
+    "lake":"Cedar Lake",
+    "lat":"44\u00b057'47.9\"N ",
+    "long":"93\u00b019'16.1\"W",
+    "thickness_cm":"6 5\/8",
+    "description":"7 honey, 13 5\/8"
+  },
+  {
+    "date":"2025-03-04",
+    "lake":"Cedar Lake",
+    "lat":"44\u00b057'39.2\"N ",
+    "long":"93\u00b019'20.0\"W",
+    "thickness_cm":"11 1\/8",
+    "description":"5 1\/2 honey, 16 5\/8"
+  },
+  {
+    "date":"2025-03-04",
+    "lake":"Cedar Lale",
+    "lat":"44\u00b057'31.1\"N",
+    "long":"93\u00b019'20.2\"W",
+    "thickness_cm":"9 1\/2",
+    "description":"6 honey, 15 1\/2"
+  },
+  {
+    "date":"2025-03-04",
+    "lake":"Cedar Lake",
+    "lat":"44\u00b057'22.7\"N",
+    "long":"93\u00b019'18.8\"W",
+    "thickness_cm":"7 1\/2",
+    "description":"7 3\/4 honey, 15 1\/4"
+  },
+  {
+    "date":"2025-03-04",
+    "lake":"Cedar Lake",
+    "lat":"44\u00b057'14.1\"N",
+    "long":"93\u00b019'15.2\"W",
+    "thickness_cm":"13 5\/8",
+    "description":"4 1\/2 honey, 18 1\/8"
+  },
+  {
+    "date":"2025-03-04",
+    "lake":"Kennilworth Lagoon",
+    "lat":"44\u00b057'17.5\"N",
+    "long":"93\u00b018'50.8\"W",
+    "thickness_cm":"16 1\/4",
+    "description":"4 1\/4 honey, 20 1\/2"
+  },
+  {
+    "date":"2025-03-04",
+    "lake":"Kennilworth Lagoon",
+    "lat":"44\u00b057'16.8\"N",
+    "long":"93\u00b018'43.3\"W",
+    "thickness_cm":"19 3\/8",
+    "description":"19 3\/8"
+  },
+  {
+    "date":"2025-03-04",
+    "lake":"Lake of the Isles",
+    "lat":"44\u00b057'17.1\"N",
+    "long":"93\u00b018'40.4\"W",
+    "thickness_cm":"14 3\/8",
+    "description":"3 3\/4 honey, 18 1\/8"
+  },
+  {
+    "date":"2025-03-04",
+    "lake":"Lake of the Isles",
+    "lat":"44\u00b057'17.4\"N",
+    "long":"93\u00b018'29.6\"W",
+    "thickness_cm":"12 3\/8",
+    "description":"4 3\/4 honey, 17 1\/8"
+  },
+  {
+    "date":"2025-03-04",
+    "lake":"Lake of the Isles",
+    "lat":"44\u00b057'19.8\"N",
+    "long":"93\u00b018'18.3\"W",
+    "thickness_cm":"11 5\/8",
+    "description":"4 1\/4 honey, 15 7\/8"
+  },
+  {
+    "date":"2025-03-04",
+    "lake":"Lake of the Isles",
+    "lat":"44\u00b057'17.5\"N",
+    "long":"93\u00b018'09.7\"W",
+    "thickness_cm":11,
+    "description":"5 honey, 16"
+  },
+  {
+    "date":"2025-03-04",
+    "lake":"Lake of the Isles",
+    "lat":"44\u00b057'04.4\"N",
+    "long":"93\u00b018'21.8\"W",
+    "thickness_cm":"17 1\/4",
+    "description":"17 1\/4"
+  },
+  {
+    "date":"2025-03-04",
+    "lake":"Lake of the Isles",
+    "lat":"44\u00b057'10.8\"N",
+    "long":"93\u00b018'19.1\"W",
+    "thickness_cm":9,
+    "description":"3 3\/4 honey, 12 3\/4"
+  },
+  {
+    "date":"2025-03-04",
+    "lake":"Lake of the Isles",
+    "lat":"44\u00b057'07.4\"N",
+    "long":"93\u00b018'29.1\"W",
+    "thickness_cm":"12 1\/4",
+    "description":"4 honey, 16 1\/4"
+  },
+  {
+    "date":"2025-03-04",
+    "lake":"Bde Maka Ska",
+    "lat":"44\u00b056'54.4\"N ",
+    "long":"93\u00b018'28.9\"W",
+    "thickness_cm":"9 1\/4",
+    "description":"4 1\/4 honey, 15 1\/4"
+  },
+  {
+    "date":"2025-03-04",
+    "lake":"Bde Maka Ska",
+    "lat":"44\u00b056'41.5\"N",
+    "long":"93\u00b018'35.2\"W",
+    "thickness_cm":"12 1\/4",
+    "description":"4 3\/4 honey, 17"
+  },
+  {
+    "date":"2025-03-04",
+    "lake":"Bde Maka Ska",
+    "lat":"44\u00b056'29.9\"N ",
+    "long":"93\u00b018'43.2\"W",
+    "thickness_cm":11,
+    "description":"5 honey, 16"
+  },
+  {
+    "date":"2025-03-04",
+    "lake":"Bde Maka Ska",
+    "lat":"44\u00b056'20.1\"N ",
+    "long":"93\u00b018'49.7\"W",
+    "thickness_cm":"12 1\/8",
+    "description":"5 5\/8 honey, 17 3\/4"
+  },
+  {
+    "date":"2025-03-04",
+    "lake":"Bde Maka Ska",
+    "lat":"44\u00b056'11.6\"N",
+    "long":"93\u00b018'54.8\"W",
+    "thickness_cm":"10 1\/8",
+    "description":"5 7\/8 honey, 16"
+  },
+  {
+    "date":"2025-03-04",
+    "lake":"Lake Harriet",
+    "lat":"44\u00b055'40.4\"N",
+    "long":"93\u00b018'25.3\"W",
+    "thickness_cm":"10 1\/8",
+    "description":"8 3\/8 honey, 18 1\/2"
+  },
+  {
+    "date":"2025-03-04",
+    "lake":"Lake Harriet",
+    "lat":"44\u00b055'32.4\"N ",
+    "long":"93\u00b018'21.3\"W",
+    "thickness_cm":9,
+    "description":"8 honey, 17"
+  },
+  {
+    "date":"2025-03-04",
+    "lake":"Lake Harriet",
+    "lat":"44\u00b055'12.7\"N",
+    "long":"93\u00b018'10.7\"W",
+    "thickness_cm":"11 1\/2",
+    "description":"6 3\/4 honey, 18 1\/4"
+  },
+  {
+    "date":"2025-03-04",
+    "lake":"Lake Harriet",
+    "lat":"44\u00b055'06.2\"N ",
+    "long":"93\u00b018'06.7\"W",
+    "thickness_cm":"11 3\/8",
+    "description":"6 3\/8 honey, 17 3\/4"
+  },
+  {
+    "date":"2025-03-04",
+    "lake":"Lake Harriet ",
+    "lat":"44\u00b055'03.8\"N",
+    "long":"93\u00b018'04.5\"W",
+    "thickness_cm":15,
+    "description":"2 honey, 17"
+  },
+  {
+    "date":"2025-02-25",
+    "lake":"Cedar Lake Channel",
+    "lat":"44\u00b057'22.2\"N",
+    "long":"93\u00b019'03.9\"W",
+    "thickness_cm":"?",
+    "description":"open water"
+  },
+  {
+    "date":"2025-02-25",
+    "lake":"Lake of the Isles",
+    "lat":"44\u00b057'17.2\"N",
+    "long":"93\u00b018'39.4\"W",
+    "thickness_cm":"20 3\/8",
+    "description":"21 7\/8"
+  },
+  {
+    "date":"2025-02-25",
+    "lake":"Bde Maka Ska",
+    "lat":"44\u00b056'57.4\"N",
+    "long":"93\u00b018'26.5\"W",
+    "thickness_cm":"?",
+    "description":"flowing water"
+  },
+  {
+    "date":"2025-02-25",
+    "lake":"Lake of the Isles",
+    "lat":"44\u00b057'18.9\"N",
+    "long":"93\u00b018'07.5\"W",
+    "thickness_cm":"20 1\/4",
+    "description":"1 3\/4 honey, 22"
+  },
+  {
+    "date":"2025-02-25",
+    "lake":"Loring Lake",
+    "lat":"44\u00b058'07.4\"N",
+    "long":"93\u00b017'01.1\"W",
+    "thickness_cm":"12 1\/2",
+    "description":"3 1\/2 honey, 16"
+  },
+  {
+    "date":"2025-02-25",
+    "lake":"Loring Lake",
+    "lat":"44\u00b058'08.5\"N ",
+    "long":"93\u00b017'04.0\"W",
+    "thickness_cm":"13 7\/8",
+    "description":"2 3\/8 honey, 16 1\/4"
+  },
+  {
+    "date":"2025-02-25",
+    "lake":"Loring Lake",
+    "lat":"44\u00b058'09.4\"N",
+    "long":"93\u00b017'06.3\"W",
+    "thickness_cm":"11 1\/2",
+    "description":"4 1\/2 honey, 16"
+  },
+  {
+    "date":"2025-02-25",
+    "lake":"Cedar Lake",
+    "lat":"44\u00b057'54.9\"N ",
+    "long":"93\u00b019'11.6\"W",
+    "thickness_cm":"16 5\/8",
+    "description":"1 3\/4 honey, 18 3\/8"
+  },
+  {
+    "date":"2025-02-25",
+    "lake":"Cedar Lake",
+    "lat":"44\u00b057'47.3\"N",
+    "long":"93\u00b019'15.7\"W",
+    "thickness_cm":"18 1\/8",
+    "description":"1 1\/4 honey, 19 3\/8"
+  },
+  {
+    "date":"2025-02-25",
+    "lake":"Cedar Lake",
+    "lat":"44\u00b057'39.3\"N",
+    "long":"93\u00b019'20.3\"W",
+    "thickness_cm":"21 7\/8",
+    "description":"1\/2 honey, 22 3\/8"
+  },
+  {
+    "date":"2025-02-25",
+    "lake":"Cedar Lake",
+    "lat":"44\u00b057'30.9\"N",
+    "long":"93\u00b019'19.8\"W",
+    "thickness_cm":"14 5\/8",
+    "description":"4 3\/8 honey, 19"
+  },
+  {
+    "date":"2025-02-25",
+    "lake":"Cedar Lake",
+    "lat":"44\u00b057'22.4\"N",
+    "long":"93\u00b019'17.5\"W",
+    "thickness_cm":"15 1\/8",
+    "description":"4 1\/2 honey, 19 5\/8"
+  },
+  {
+    "date":"2025-02-25",
+    "lake":"Cedar Lake Channel",
+    "lat":"44\u00b057'14.2\"N",
+    "long":"93\u00b019'15.3\"W",
+    "thickness_cm":"21 3\/4",
+    "description":"1\/2 honey, 22 1\/4"
+  },
+  {
+    "date":"2025-02-25",
+    "lake":"Kennilworth Lagoon",
+    "lat":"44\u00b057'17.9\"N ",
+    "long":"93\u00b018'51.8\"W",
+    "thickness_cm":"25 1\/4",
+    "description":"1\/2 honey, 25 3\/4"
+  },
+  {
+    "date":"2025-02-25",
+    "lake":"Kennilworth Lagoon",
+    "lat":"44\u00b057'16.8\"N ",
+    "long":"93\u00b018'43.6\"W",
+    "thickness_cm":"22 1\/2",
+    "description":"22 1\/2"
+  },
+  {
+    "date":"2025-02-25",
+    "lake":"Lake of the Isles",
+    "lat":"44\u00b057'17.4\"N ",
+    "long":"93\u00b018'29.4\"W",
+    "thickness_cm":"19 5\/8",
+    "description":"2 1\/8 honey, 21 3\/4"
+  },
+  {
+    "date":"2025-02-25",
+    "lake":"Lake of the Isles",
+    "lat":"44\u00b057'20.0\"N ",
+    "long":"93\u00b018'16.3\"W",
+    "thickness_cm":"17 5\/8",
+    "description":"1 honey, 18 5\/8"
+  },
+  {
+    "date":"2025-02-25",
+    "lake":"Lake of the Isles",
+    "lat":"44\u00b057'13.9\"N",
+    "long":"93\u00b018'14.4\"W",
+    "thickness_cm":"18 1\/4",
+    "description":"1 3\/4 honey, 20"
+  },
+  {
+    "date":"2025-02-25",
+    "lake":"Lake of the Isles",
+    "lat":"44\u00b057'11.5\"N ",
+    "long":"93\u00b018'19.4\"W",
+    "thickness_cm":"16 3\/4",
+    "description":"1 1\/4 honey, 18"
+  },
+  {
+    "date":"2025-02-25",
+    "lake":"Lake of the Isles",
+    "lat":"44\u00b057'07.8\"N",
+    "long":"93\u00b018'28.8\"W",
+    "thickness_cm":"19 1\/2",
+    "description":"1 3\/4 honey, 21 1\/4"
+  },
+  {
+    "date":"2025-02-25",
+    "lake":"Bde Maka Ska",
+    "lat":"44\u00b056'56.4\"N",
+    "long":"93\u00b018'27.2\"W",
+    "thickness_cm":15,
+    "description":"3 1\/2 honey, 18 1\/2"
+  },
+  {
+    "date":"2025-02-25",
+    "lake":"Bde Maka Ska",
+    "lat":"44\u00b056'51.5\"N",
+    "long":"44\u00b056'51.5\"N",
+    "thickness_cm":"18 1\/2",
+    "description":"2 honey, 20 1\/2"
+  },
+  {
+    "date":"2025-02-25",
+    "lake":"Bde Maka Ska",
+    "lat":"44\u00b056'42.5\"N",
+    "long":"93\u00b018'36.9\"W",
+    "thickness_cm":"16 3\/8",
+    "description":"4 honey, 1 1\/4 pooling, 20 3\/8"
+  },
+  {
+    "date":"2025-02-25",
+    "lake":"Bde Maka Ska",
+    "lat":"44\u00b056'32.1\"N ",
+    "long":"93\u00b018'41.9\"W",
+    "thickness_cm":"16 5\/8",
+    "description":"3 1\/2 honey, 20 1\/8"
+  },
+  {
+    "date":"2025-02-25",
+    "lake":"Bde Maka Ska",
+    "lat":"44\u00b056'12.3\"N",
+    "long":" 93\u00b018'55.3\"W",
+    "thickness_cm":"18 1\/4",
+    "description":"2 3\/8 honey, 20 5\/8"
+  },
+  {
+    "date":"2025-02-25",
+    "lake":"Lake Harriet",
+    "lat":"44\u00b055'40.4\"N ",
+    "long":" 93\u00b018'25.0\"W",
+    "thickness_cm":"18 7\/8",
+    "description":"3 honey, 21 7\/8"
+  },
+  {
+    "date":"2025-02-25",
+    "lake":"Lake Harriet",
+    "lat":"44\u00b055'31.6\"N",
+    "long":"93\u00b018'21.4\"W",
+    "thickness_cm":"17 7\/8",
+    "description":"3 honey, 20 7\/8"
+  },
+  {
+    "date":"2025-02-25",
+    "lake":"Lake Harriet",
+    "lat":"44\u00b055'20.5\"N",
+    "long":"93\u00b018'16.4\"W",
+    "thickness_cm":"15 5\/8",
+    "description":"3 honey, 18 5\/8"
+  },
+  {
+    "date":"2025-02-25",
+    "lake":"Lake Harriet",
+    "lat":"44\u00b055'15.3\"N",
+    "long":"93\u00b018'13.7\"W",
+    "thickness_cm":"17 1\/2",
+    "description":"3 honey, 20 1\/2"
+  },
+  {
+    "date":"2025-02-25",
+    "lake":"Lake Harriet",
+    "lat":"44\u00b055'10.4\"N",
+    "long":"93\u00b018'09.9\"W",
+    "thickness_cm":"18 1\/2",
+    "description":"3 honey, 21 1\/2"
+  },
+  {
+    "date":"2025-02-25",
+    "lake":"Lake Harriet",
+    "lat":"44\u00b055'02.9\"N ",
+    "long":" 93\u00b018'03.6\"W",
+    "thickness_cm":"19 3\/4",
+    "description":null
+  },
+  {
+    "date":"2025-02-18",
+    "lake":"Lake of the Isles",
+    "lat":"44\u00b057'17.9\"N ",
+    "long":"93\u00b018'36.3\"W",
+    "thickness_cm":"20 1\/2",
+    "description":"20 1\/2"
+  },
+  {
+    "date":"2025-02-18",
+    "lake":"Lake of the Isles",
+    "lat":"44\u00b057'17.9\"N ",
+    "long":"93\u00b018'28.9\"W",
+    "thickness_cm":"M",
+    "description":"Mud"
+  },
+  {
+    "date":"2025-02-18",
+    "lake":"Lake of the Isles",
+    "lat":"44\u00b057'20.0\"N",
+    "long":"93\u00b018'15.5\"W",
+    "thickness_cm":20,
+    "description":20
+  },
+  {
+    "date":"2025-02-18",
+    "lake":"Lake of the Isles",
+    "lat":"44\u00b057'20.1\"N",
+    "long":"93\u00b018'08.2\"W",
+    "thickness_cm":"19 5\/8",
+    "description":"19 5\/8"
+  },
+  {
+    "date":"2025-02-18",
+    "lake":"Lake of the Isles",
+    "lat":"44\u00b057'12.0\"N",
+    "long":"93\u00b018'15.1\"W",
+    "thickness_cm":"20 5\/8",
+    "description":"20 5\/8"
+  },
+  {
+    "date":"2025-02-18",
+    "lake":"Lake of the Isles",
+    "lat":"44\u00b057'04.2\"N ",
+    "long":" 93\u00b018'22.0\"W",
+    "thickness_cm":"19 3\/4",
+    "description":"19 3\/4"
+  },
+  {
+    "date":"2025-02-18",
+    "lake":"Midtown Greenway Bridge",
+    "lat":"44\u00b057'01.9\"N",
+    "long":"93\u00b018'22.4\"W",
+    "thickness_cm":"15 5\/8",
+    "description":"15 5\/8"
+  },
+  {
+    "date":"2025-02-18",
+    "lake":"Lake Street Bridge",
+    "lat":"44\u00b056'57.5\"N",
+    "long":"93\u00b018'26.4\"W",
+    "thickness_cm":"8 1\/2",
+    "description":"8 1\/2"
+  },
+  {
+    "date":"2025-02-18",
+    "lake":"Lake Street Bridge",
+    "lat":"44\u00b056'57.4\"N",
+    "long":"93\u00b018'26.5\"W",
+    "thickness_cm":"9 3\/4",
+    "description":"9 3\/4"
+  },
+  {
+    "date":"2025-02-18",
+    "lake":"Bde Maka Ska",
+    "lat":"44\u00b056'57.0\"N ",
+    "long":" 93\u00b018'26.6\"W",
+    "thickness_cm":"16 7\/8",
+    "description":"16 7\/8"
+  },
+  {
+    "date":"2025-02-18",
+    "lake":"Bde Maka Ska",
+    "lat":"44\u00b056'46.5\"N ",
+    "long":" 93\u00b018'32.4\"W",
+    "thickness_cm":"20 3\/8",
+    "description":"20 3\/8"
+  },
+  {
+    "date":"2025-02-18",
+    "lake":"Bde Maka Ska",
+    "lat":"44\u00b056'36.9\"N",
+    "long":"93\u00b018'37.2\"W",
+    "thickness_cm":"19 1\/2",
+    "description":"19 1\/2"
+  },
+  {
+    "date":"2025-02-18",
+    "lake":"Bde Maka Ska",
+    "lat":"44\u00b056'26.3\"N ",
+    "long":"93\u00b018'42.4\"W",
+    "thickness_cm":"19 1\/4",
+    "description":"19 1\/4"
+  },
+  {
+    "date":"2025-02-18",
+    "lake":"Bde Maka Ska",
+    "lat":"44\u00b056'18.4\"N",
+    "long":"93\u00b018'47.1\"W",
+    "thickness_cm":"20 1\/2",
+    "description":"20 1\/2"
+  },
+  {
+    "date":"2025-02-18",
+    "lake":"Bde Maka Ska",
+    "lat":"44\u00b056'10.0\"N",
+    "long":"93\u00b018'52.1\"W",
+    "thickness_cm":"21 1\/4",
+    "description":"21 1\/4"
+  },
+  {
+    "date":"2025-02-18",
+    "lake":"Lake Harriet",
+    "lat":"44\u00b055'40.8\"N",
+    "long":"93\u00b018'25.1\"W",
+    "thickness_cm":"19 7\/8",
+    "description":"19 7\/8"
+  },
+  {
+    "date":"2025-02-18",
+    "lake":"Lake Harriet",
+    "lat":"44\u00b055'35.5\"N",
+    "long":"93\u00b018'23.7\"W",
+    "thickness_cm":"22 3\/8",
+    "description":"22 3\/8"
+  },
+  {
+    "date":"2025-02-18",
+    "lake":"Lake Harriet",
+    "lat":"44\u00b055'28.1\"N ",
+    "long":"93\u00b018'18.6\"W",
+    "thickness_cm":"20 1\/8",
+    "description":"20 1\/8"
+  },
+  {
+    "date":"2025-02-18",
+    "lake":"Lake Harriet",
+    "lat":"44\u00b055'17.9\"N",
+    "long":"93\u00b018'12.9\"W",
+    "thickness_cm":"20 3\/4",
+    "description":"20 3\/4"
+  },
+  {
+    "date":"2025-02-18",
+    "lake":"Lake Harriet",
+    "lat":"44\u00b055'10.4\"N",
+    "long":"93\u00b018'08.4\"W",
+    "thickness_cm":"20 7\/8",
+    "description":"20 7\/8"
+  },
+  {
+    "date":"2025-02-18",
+    "lake":"Lake Harriet",
+    "lat":"44\u00b055'02.7\"N ",
+    "long":"93\u00b018'03.1\"W",
+    "thickness_cm":23,
+    "description":23
+  },
+  {
+    "date":"2025-02-18",
+    "lake":"Kennilworth Lagoon",
+    "lat":"44\u00b057'16.9\"N ",
+    "long":"93\u00b018'43.7\"W",
+    "thickness_cm":22,
+    "description":22
+  },
+  {
+    "date":"2025-02-18",
+    "lake":"Kennilworth Lagoon",
+    "lat":"44\u00b057'18.0\"N ",
+    "long":"93\u00b018'52.4\"W",
+    "thickness_cm":"24 1\/8",
+    "description":"24 1\/8"
+  },
+  {
+    "date":"2025-02-18",
+    "lake":"Cedar Lake Channel",
+    "lat":"44\u00b057'20.0\"N ",
+    "long":"93\u00b019'00.3\"W",
+    "thickness_cm":"15 3\/4",
+    "description":"15 3\/4"
+  },
+  {
+    "date":"2025-02-18",
+    "lake":"Cedar Lake Channel",
+    "lat":"44\u00b057'22.3\"N ",
+    "long":"93\u00b019'03.9\"W",
+    "thickness_cm":14,
+    "description":14
+  },
+  {
+    "date":"2025-02-18",
+    "lake":"Cedar Lake Channel",
+    "lat":"44\u00b057'25.0\"N ",
+    "long":"93\u00b019'08.0\"W",
+    "thickness_cm":15,
+    "description":15
+  },
+  {
+    "date":"2025-02-18",
+    "lake":"Cedar Lake Channel",
+    "lat":"44\u00b057'26.5\"N",
+    "long":"93\u00b019'10.1\"W",
+    "thickness_cm":9,
+    "description":9
+  },
+  {
+    "date":"2025-02-18",
+    "lake":"Cedar Lake",
+    "lat":"44\u00b057'14.4\"N",
+    "long":"93\u00b019'14.7\"W",
+    "thickness_cm":"22 1\/8",
+    "description":"22 1\/8"
+  },
+  {
+    "date":"2025-02-18",
+    "lake":"Cedar Lake",
+    "lat":"44\u00b057'23.8\"N",
+    "long":"93\u00b019'17.5\"W",
+    "thickness_cm":"19 1\/8",
+    "description":"19 1\/8"
+  },
+  {
+    "date":"2025-02-18",
+    "lake":"Cedar Lake ",
+    "lat":"44\u00b057'31.8\"N",
+    "long":"93\u00b019'19.2\"W",
+    "thickness_cm":20,
+    "description":20
+  },
+  {
+    "date":"2025-02-18",
+    "lake":"Cedar Lake",
+    "lat":"44\u00b057'40.1\"N",
+    "long":"93\u00b019'20.2\"W",
+    "thickness_cm":"20 1\/8",
+    "description":"20 1\/8"
+  },
+  {
+    "date":"2025-02-18",
+    "lake":"Cedar Lake",
+    "lat":"44\u00b057'48.0\"N",
+    "long":"93\u00b019'16.2\"W",
+    "thickness_cm":"19 1\/8",
+    "description":"19 1\/8"
+  },
+  {
+    "date":"2025-02-18",
+    "lake":"Cedar Lake",
+    "lat":"44\u00b057'55.0\"N ",
+    "long":"93\u00b019'11.7\"W",
+    "thickness_cm":18,
+    "description":18
+  },
+  {
+    "date":"2025-02-18",
+    "lake":"Loring Lake",
+    "lat":"44\u00b058'09.1\"N",
+    "long":"93\u00b017'06.0\"W",
+    "thickness_cm":"16 3\/8",
+    "description":"16 3\/8"
+  },
+  {
+    "date":"2025-02-18",
+    "lake":"Loring Lake",
+    "lat":"44\u00b058'08.1\"N ",
+    "long":"93\u00b017'03.4\"W",
+    "thickness_cm":"16 3\/4",
+    "description":"16 3\/4"
+  },
+  {
+    "date":"2025-02-18",
+    "lake":"Loring Lake",
+    "lat":"44\u00b058'07.2\"N ",
+    "long":"93\u00b017'01.0\"W",
+    "thickness_cm":"16 3\/8",
+    "description":"16 3\/8"
+  },
+  {
+    "date":"2025-02-11",
+    "lake":"Loring Lake",
+    "lat":"44\u00b058'09.3\"N",
+    "long":"93\u00b017'05.9\"W",
+    "thickness_cm":"14 7\/8",
+    "description":"14 7\/8"
+  },
+  {
+    "date":"2025-02-11",
+    "lake":"Loring Lake",
+    "lat":"44\u00b058'08.4\"N",
+    "long":"93\u00b017'03.2\"W",
+    "thickness_cm":"15 3\/4",
+    "description":"15 3\/4"
+  },
+  {
+    "date":"2025-02-11",
+    "lake":"Loring Lake",
+    "lat":"44\u00b058'07.2\"N",
+    "long":"93\u00b017'01.1\"W",
+    "thickness_cm":"15 5\/8",
+    "description":null
+  },
+  {
+    "date":"2025-02-11",
+    "lake":"Cedar Lake",
+    "lat":"44\u00b057'55.1\"N",
+    "long":"93\u00b019'11.2\"W",
+    "thickness_cm":"16 7\/8",
+    "description":"16 7\/8"
+  },
+  {
+    "date":"2025-02-11",
+    "lake":"Cedar Lake",
+    "lat":"44\u00b057'47.1\"N",
+    "long":"93\u00b019'15.6\"W",
+    "thickness_cm":"18 7\/8",
+    "description":"18 7\/8"
+  },
+  {
+    "date":"2025-02-11",
+    "lake":"Cedar Lake",
+    "lat":"44\u00b057'35.7\"N",
+    "long":"93\u00b019'20.6\"W",
+    "thickness_cm":"18 1\/2",
+    "description":"18 1\/2"
+  },
+  {
+    "date":"2025-02-11",
+    "lake":"Cedar Lake",
+    "lat":"44\u00b057'24.0\"N",
+    "long":"93\u00b019'17.9\"W",
+    "thickness_cm":19,
+    "description":19
+  },
+  {
+    "date":"2025-02-11",
+    "lake":"Cedar Lake",
+    "lat":"44\u00b057'14.5\"N ",
+    "long":"93\u00b019'14.8\"W",
+    "thickness_cm":21,
+    "description":21
+  },
+  {
+    "date":"2025-02-11",
+    "lake":"Cedar Lake Channel",
+    "lat":"44\u00b057'26.1\"N",
+    "long":"93\u00b019'09.5\"W",
+    "thickness_cm":"12 1\/2",
+    "description":"12 1\/2"
+  },
+  {
+    "date":"2025-02-11",
+    "lake":"Cedar Lake Channel",
+    "lat":"44\u00b057'23.4\"N",
+    "long":"93\u00b019'05.5\"W",
+    "thickness_cm":"8 1\/2",
+    "description":"8 1\/2"
+  },
+  {
+    "date":"2025-02-11",
+    "lake":"Cedar Lake Channel",
+    "lat":"44\u00b057'22.3\"N ",
+    "long":"93\u00b019'03.9\"W",
+    "thickness_cm":"8 3\/4",
+    "description":"8 3\/4"
+  },
+  {
+    "date":"2025-02-11",
+    "lake":"Cedar Lake Channel",
+    "lat":"44\u00b057'22.0\"N",
+    "long":"93\u00b019'03.5\"W",
+    "thickness_cm":6,
+    "description":6
+  },
+  {
+    "date":"2025-02-11",
+    "lake":"Kennilworth Lagoon",
+    "lat":"44\u00b057'20.0\"N ",
+    "long":"93\u00b019'00.1\"W",
+    "thickness_cm":18,
+    "description":18
+  },
+  {
+    "date":"2025-02-11",
+    "lake":"Kennilworth Lagoon",
+    "lat":"44\u00b057'17.7\"N ",
+    "long":"93\u00b018'49.8\"W",
+    "thickness_cm":"22 1\/4",
+    "description":"22 1\/4"
+  },
+  {
+    "date":"2025-02-11",
+    "lake":"Lake of the Isles Parkway Bridge",
+    "lat":"44\u00b057'16.8\"N",
+    "long":"93\u00b018'43.6\"W",
+    "thickness_cm":"20 3\/8",
+    "description":"20 3\/8"
+  },
+  {
+    "date":"2025-02-11",
+    "lake":"Lake of the Isles",
+    "lat":"44\u00b057'17.6\"N",
+    "long":"93\u00b018'36.9\"W",
+    "thickness_cm":"19 1\/4",
+    "description":"19 1\/4"
+  },
+  {
+    "date":"2025-02-11",
+    "lake":"Lake of the Isles",
+    "lat":"44\u00b057'17.7\"N",
+    "long":"93\u00b018'28.3\"W",
+    "thickness_cm":"18 5\/8",
+    "description":"18 5\/8"
+  },
+  {
+    "date":"2025-02-11",
+    "lake":"Lake of the Isles",
+    "lat":"44\u00b057'19.3\"N",
+    "long":"93\u00b018'07.5\"W",
+    "thickness_cm":"19 1\/4",
+    "description":"19 1\/4"
+  },
+  {
+    "date":"2025-02-11",
+    "lake":"Lake of the Isles",
+    "lat":"44\u00b057'12.2\"N ",
+    "long":"93\u00b018'15.2\"W",
+    "thickness_cm":19,
+    "description":19
+  },
+  {
+    "date":"2025-02-11",
+    "lake":"Midtown Greenway Bridge",
+    "lat":"44\u00b057'01.9\"N",
+    "long":"93\u00b018'22.0\"W",
+    "thickness_cm":"13 5\/8",
+    "description":"13 5\/8"
+  },
+  {
+    "date":"2025-02-11",
+    "lake":"Lake of the Isles Parkway Bridge East",
+    "lat":"44\u00b057'04.0\"N ",
+    "long":"93\u00b018'22.1\"W",
+    "thickness_cm":"16 3\/4",
+    "description":"16 3\/4"
+  },
+  {
+    "date":"2025-02-11",
+    "lake":"Lake of the Isles",
+    "lat":"44\u00b057'07.9\"N ",
+    "long":"93\u00b018'29.1\"W",
+    "thickness_cm":"19 1\/8",
+    "description":"19 1\/8"
+  },
+  {
+    "date":"2025-02-11",
+    "lake":"Lake Street Bridge",
+    "lat":"44\u00b056'57.4\"N",
+    "long":"93\u00b018'26.4\"W",
+    "thickness_cm":"3 1\/4",
+    "description":"3 1\/4"
+  },
+  {
+    "date":"2025-02-11",
+    "lake":"Lake Street Bridge",
+    "lat":"44\u00b056'57.4\"N",
+    "long":"93\u00b018'26.5\"W",
+    "thickness_cm":6,
+    "description":6
+  },
+  {
+    "date":"2025-02-11",
+    "lake":"Lake Street Bridge",
+    "lat":"44\u00b056'57.2\"N ",
+    "long":"93\u00b018'26.5\"W",
+    "thickness_cm":6,
+    "description":6
+  },
+  {
+    "date":"2025-02-11",
+    "lake":"Bde Maka Ska",
+    "lat":"44\u00b056'56.6\"N ",
+    "long":"93\u00b018'27.1\"W",
+    "thickness_cm":16,
+    "description":16
+  },
+  {
+    "date":"2025-02-11",
+    "lake":"Bde Maka Ska",
+    "lat":"44\u00b056'47.1\"N",
+    "long":"93\u00b018'33.7\"W",
+    "thickness_cm":"19 7\/8",
+    "description":"19 7\/8"
+  },
+  {
+    "date":"2025-02-11",
+    "lake":"Bde Maka Ska",
+    "lat":"44\u00b056'39.6\"N",
+    "long":"93\u00b018'38.6\"W",
+    "thickness_cm":"18 1\/2",
+    "description":"18 1\/2"
+  },
+  {
+    "date":"2025-02-11",
+    "lake":"Bde Maka Ska",
+    "lat":"44\u00b056'30.2\"N",
+    "long":"93\u00b018'45.0\"W",
+    "thickness_cm":19,
+    "description":19
+  },
+  {
+    "date":"2025-02-11",
+    "lake":"Bde Maka Ska",
+    "lat":"44\u00b056'20.9\"N",
+    "long":"93\u00b018'50.8\"W",
+    "thickness_cm":"19 1\/8",
+    "description":"19 1\/8"
+  },
+  {
+    "date":"2025-02-11",
+    "lake":"Bde Maka Ska",
+    "lat":"44\u00b056'11.7\"N ",
+    "long":"93\u00b018'55.1\"W",
+    "thickness_cm":"19 1\/4",
+    "description":"19 1\/4"
+  },
+  {
+    "date":"2025-02-11",
+    "lake":"Lake Harriet",
+    "lat":"44\u00b055'40.6\"N ",
+    "long":"93\u00b018'24.9\"W",
+    "thickness_cm":"18 1\/8",
+    "description":"18 1\/8"
+  },
+  {
+    "date":"2025-02-11",
+    "lake":"Lake Harriet",
+    "lat":"44\u00b055'34.4\"N",
+    "long":"93\u00b018'20.6\"W",
+    "thickness_cm":"18 1\/4",
+    "description":"18 1\/4"
+  },
+  {
+    "date":"2025-02-11",
+    "lake":"Lake Harriet",
+    "lat":"44\u00b055'22.6\"N ",
+    "long":"93\u00b018'17.2\"W",
+    "thickness_cm":"17 1\/2",
+    "description":"17 1\/2"
+  },
+  {
+    "date":"2025-02-11",
+    "lake":"Lake Harriet",
+    "lat":"44\u00b055'12.3\"N",
+    "long":"93\u00b018'10.5\"W",
+    "thickness_cm":"18 5\/8",
+    "description":"18 5\/8"
+  },
+  {
+    "date":"2025-02-11",
+    "lake":"Lake Harriet ",
+    "lat":"44\u00b055'02.4\"N",
+    "long":"93\u00b018'03.2\"W",
+    "thickness_cm":22,
+    "description":22
+  },
+  {
+    "date":"2025-02-04",
+    "lake":"Bde Maka Ska",
+    "lat":"44\u00b056'57.3\"N",
+    "long":"93\u00b018'26.6\"W",
+    "thickness_cm":"10 1\/8",
+    "description":"10 1\/8"
+  },
+  {
+    "date":"2025-02-04",
+    "lake":"Lake Harriet",
+    "lat":"44\u00b055'01.9\"N",
+    "long":"93\u00b018'03.6\"W",
+    "thickness_cm":"20 1\/8",
+    "description":"20 1\/8"
+  },
+  {
+    "date":"2025-02-04",
+    "lake":"Lake Harriet",
+    "lat":"44\u00b055'11.9\"N ",
+    "long":"93\u00b018'11.0\"W",
+    "thickness_cm":18,
+    "description":18
+  },
+  {
+    "date":"2025-02-04",
+    "lake":"Lake Harriet",
+    "lat":"44\u00b055'18.6\"N",
+    "long":"93\u00b018'14.5\"W",
+    "thickness_cm":"16 5\/8",
+    "description":"16 5\/8"
+  },
+  {
+    "date":"2025-02-04",
+    "lake":"Lake Harriet ",
+    "lat":"44\u00b055'30.6\"N",
+    "long":"93\u00b018'20.3\"W",
+    "thickness_cm":"17 1\/4",
+    "description":"17 1\/4"
+  },
+  {
+    "date":"2025-02-04",
+    "lake":"Lake Harriet",
+    "lat":"44\u00b055'40.8\"N",
+    "long":"93\u00b018'25.1\"W",
+    "thickness_cm":"15 1\/4",
+    "description":"15 1\/4"
+  },
+  {
+    "date":"2025-02-04",
+    "lake":"Bde Maka Ska",
+    "lat":"44\u00b056'21.0\"N",
+    "long":"93\u00b018'49.6\"W",
+    "thickness_cm":"16 5\/8",
+    "description":"16 5\/8"
+  },
+  {
+    "date":"2025-02-04",
+    "lake":"Bde Maka Ska",
+    "lat":"44\u00b056'11.2\"N ",
+    "long":"93\u00b018'55.4\"W",
+    "thickness_cm":"17 1\/4",
+    "description":"17 1\/4"
+  },
+  {
+    "date":"2025-02-04",
+    "lake":"Bde Maka Ska",
+    "lat":"44\u00b056'29.6\"N",
+    "long":"93\u00b018'45.0\"W",
+    "thickness_cm":"17 1\/4",
+    "description":"17 1\/4"
+  },
+  {
+    "date":"2025-02-04",
+    "lake":"Bde Maka Ska",
+    "lat":"44\u00b056'39.7\"N ",
+    "long":"93\u00b018'38.1\"W",
+    "thickness_cm":"16 3\/8",
+    "description":"16 3\/8"
+  },
+  {
+    "date":"2025-02-04",
+    "lake":"Bde Maka Ska",
+    "lat":"44\u00b056'49.9\"N ",
+    "long":"93\u00b018'31.3\"W",
+    "thickness_cm":17,
+    "description":17
+  },
+  {
+    "date":"2025-02-04",
+    "lake":"Bde Maka Ska",
+    "lat":"44\u00b056'57.4\"N",
+    "long":"93\u00b018'26.5\"W",
+    "thickness_cm":1751932800000,
+    "description":1751932800000
+  },
+  {
+    "date":"2025-02-04",
+    "lake":"Lake of the Isles",
+    "lat":"44\u00b057'12.9\"N",
+    "long":"93\u00b018'16.7\"W",
+    "thickness_cm":"16 1\/4",
+    "description":"16 1\/4"
+  },
+  {
+    "date":"2025-02-04",
+    "lake":"Lake of the Isles",
+    "lat":"44\u00b057'07.5\"N ",
+    "long":"93\u00b018'28.8\"W",
+    "thickness_cm":"16 3\/8",
+    "description":"16 3\/8"
+  },
+  {
+    "date":"2025-02-04",
+    "lake":"Lake of the Isles East Parkway bridge",
+    "lat":"44\u00b057'03.9\"N",
+    "long":"93\u00b018'22.1\"W",
+    "thickness_cm":"14 5\/8",
+    "description":"14 5\/8"
+  },
+  {
+    "date":"2025-02-04",
+    "lake":"Midtown Greenway Bridge",
+    "lat":"44\u00b057'01.9\"N ",
+    "long":"93\u00b018'22.4\"W",
+    "thickness_cm":"10 1\/8",
+    "description":"10 1\/8"
+  },
+  {
+    "date":"2025-02-04",
+    "lake":"Lake of the Isles",
+    "lat":"44\u00b057'19.7\"N ",
+    "long":"93\u00b018'25.2\"W",
+    "thickness_cm":"14 1\/2",
+    "description":"14 1\/2"
+  },
+  {
+    "date":"2025-02-04",
+    "lake":"Lake of the Isles",
+    "lat":"44\u00b057'19.3\"N ",
+    "long":"93\u00b018'06.9\"W",
+    "thickness_cm":"14 1\/2",
+    "description":"14 1\/2"
+  },
+  {
+    "date":"2025-02-04",
+    "lake":"Lake of the Isles",
+    "lat":"44\u00b057'17.7\"N",
+    "long":"93\u00b018'35.5\"W",
+    "thickness_cm":"16 3\/4",
+    "description":"16 3\/4"
+  },
+  {
+    "date":"2025-02-04",
+    "lake":"West Lake of the Isles Parkway Bridge",
+    "lat":"44\u00b057'17.0\"N ",
+    "long":"93\u00b018'43.7\"W",
+    "thickness_cm":18,
+    "description":18
+  },
+  {
+    "date":"2025-02-04",
+    "lake":"Kennilworth Lagoon",
+    "lat":"44\u00b057'17.9\"N ",
+    "long":"93\u00b018'53.3\"W",
+    "thickness_cm":"21 3\/4",
+    "description":"21 3\/4"
+  },
+  {
+    "date":"2025-02-04",
+    "lake":"Cedar Lake Channel",
+    "lat":"44\u00b057'19.8\"N",
+    "long":"93\u00b019'00.2\"W",
+    "thickness_cm":"16 1\/4",
+    "description":"16 1\/4"
+  },
+  {
+    "date":"2025-02-04",
+    "lake":"Cedar Lake Channel",
+    "lat":"44\u00b057'21.6\"N",
+    "long":"93\u00b019'03.1\"W",
+    "thickness_cm":"4 1\/8",
+    "description":"4 1\/8"
+  },
+  {
+    "date":"2025-02-04",
+    "lake":"Cedar Lake",
+    "lat":"44\u00b057'14.0\"N ",
+    "long":"93\u00b019'15.2\"W",
+    "thickness_cm":"19 1\/4",
+    "description":"19 1\/4"
+  },
+  {
+    "date":"2025-02-04",
+    "lake":"Cedar Lake",
+    "lat":"44\u00b057'23.4\"N",
+    "long":"93\u00b019'18.4\"W",
+    "thickness_cm":"17 3\/8",
+    "description":"17 3\/8"
+  },
+  {
+    "date":"2025-02-04",
+    "lake":"Cedar Lake",
+    "lat":"44\u00b057'38.8\"N",
+    "long":"93\u00b019'20.4\"W",
+    "thickness_cm":18,
+    "description":18
+  },
+  {
+    "date":"2025-02-04",
+    "lake":"Cedar Lake",
+    "lat":"44\u00b057'33.4\"N ",
+    "long":"93\u00b019'20.2\"W",
+    "thickness_cm":"16 1\/2",
+    "description":"16 1\/2"
+  },
+  {
+    "date":"2025-02-04",
+    "lake":"Cedar Lake",
+    "lat":"44\u00b057'48.0\"N",
+    "long":"93\u00b019'15.6\"W",
+    "thickness_cm":17,
+    "description":17
+  },
+  {
+    "date":"2025-02-04",
+    "lake":"Cedar Lake",
+    "lat":"44\u00b057'55.3\"N",
+    "long":"93\u00b019'11.2\"W",
+    "thickness_cm":"15 1\/2",
+    "description":"15 1\/2"
+  },
+  {
+    "date":"2025-02-04",
+    "lake":"Loring Lake",
+    "lat":"44\u00b058'09.5\"N",
+    "long":"93\u00b017'06.2\"W",
+    "thickness_cm":"13 3\/4",
+    "description":"13 3\/4"
+  },
+  {
+    "date":"2025-02-04",
+    "lake":"Loring Lake",
+    "lat":"44\u00b058'08.8\"N",
+    "long":"93\u00b017'04.0\"W",
+    "thickness_cm":"14 3\/4",
+    "description":"14 3\/4"
+  },
+  {
+    "date":"2025-02-04",
+    "lake":"Loring Lake",
+    "lat":"44\u00b058'07.3\"N",
+    "long":" 93\u00b017'00.8\"W",
+    "thickness_cm":"14 1\/4",
+    "description":"14 1\/4"
+  },
+  {
+    "date":"2025-01-28",
+    "lake":"Loring Lake",
+    "lat":"44\u00b058'09.4\"N",
+    "long":"93\u00b017'06.2\"W",
+    "thickness_cm":14,
+    "description":14
+  },
+  {
+    "date":"2025-01-28",
+    "lake":"Loring Lake",
+    "lat":"44\u00b058'08.4\"N",
+    "long":"93\u00b017'03.3\"W",
+    "thickness_cm":"15 1\/4",
+    "description":"15 1\/4"
+  },
+  {
+    "date":"2025-01-28",
+    "lake":"Loring Lake",
+    "lat":"44\u00b058'07.3\"N",
+    "long":"93\u00b017'01.0\"W",
+    "thickness_cm":"15 3\/8",
+    "description":"15 3\/8"
+  },
+  {
+    "date":"2025-01-28",
+    "lake":"Cedar Lake Channel",
+    "lat":"44\u00b057'22.0\"N ",
+    "long":"93\u00b019'03.6\"W",
+    "thickness_cm":4,
+    "description":4
+  },
+  {
+    "date":"2025-01-28",
+    "lake":"Kennilworth Lagoon",
+    "lat":"44\u00b057'20.0\"N",
+    "long":"93\u00b018'60.0\"W",
+    "thickness_cm":"15 7\/8",
+    "description":"15 7\/8"
+  },
+  {
+    "date":"2025-01-28",
+    "lake":"Kennilworth Lagoon",
+    "lat":"44\u00b057'17.8\"N ",
+    "long":"93\u00b018'50.9\"W",
+    "thickness_cm":"20 7\/8",
+    "description":"20 7\/8"
+  },
+  {
+    "date":"2025-01-28",
+    "lake":"West Lake of the Isles Parkway Bridge",
+    "lat":"44\u00b057'17.0\"N",
+    "long":"93\u00b018'43.6\"W",
+    "thickness_cm":"17 1\/4",
+    "description":"17 1\/4"
+  },
+  {
+    "date":"2025-01-28",
+    "lake":"West Lake of the Isles Parkway Bridge",
+    "lat":"44\u00b057'17.0\"N",
+    "long":"93\u00b018'43.0\"W",
+    "thickness_cm":"18 1\/8",
+    "description":"18 1\/8"
+  },
+  {
+    "date":"2025-01-28",
+    "lake":"Lake of the Isles",
+    "lat":"44\u00b057'18.1\"N",
+    "long":"93\u00b018'36.6\"W",
+    "thickness_cm":17,
+    "description":17
+  },
+  {
+    "date":"2025-01-28",
+    "lake":"Lake of the Isles",
+    "lat":"44\u00b057'17.8\"N",
+    "long":"93\u00b018'28.4\"W",
+    "thickness_cm":"16 3\/8",
+    "description":"16 3\/8"
+  },
+  {
+    "date":"2025-01-28",
+    "lake":"Lake of the Isles",
+    "lat":"44\u00b057'20.3\"N",
+    "long":"93\u00b018'16.9\"W",
+    "thickness_cm":"16 1\/8",
+    "description":"16 1\/8"
+  },
+  {
+    "date":"2025-01-28",
+    "lake":"Lake of the Isles",
+    "lat":"44\u00b057'19.2\"N",
+    "long":"93\u00b018'06.8\"W",
+    "thickness_cm":"16 1\/2",
+    "description":"16 1\/2"
+  },
+  {
+    "date":"2025-01-28",
+    "lake":"Lake of the Isles",
+    "lat":"44\u00b057'14.5\"N ",
+    "long":"93\u00b018'13.2\"W",
+    "thickness_cm":"16 3\/8",
+    "description":"16 3\/8"
+  },
+  {
+    "date":"2025-01-28",
+    "lake":"Lake of the Isles",
+    "lat":"44\u00b057'09.2\"N ",
+    "long":"93\u00b018'20.5\"W",
+    "thickness_cm":"17 1\/2",
+    "description":"17 1\/2"
+  },
+  {
+    "date":"2025-01-28",
+    "lake":"East Lake of the Isles Parkway Bridge",
+    "lat":"44\u00b057'00.6\"N",
+    "long":"93\u00b018'23.3\"W",
+    "thickness_cm":"15 3\/8",
+    "description":"15 3\/8"
+  },
+  {
+    "date":"2025-01-28",
+    "lake":"Midtown Greenway Bridge",
+    "lat":"44\u00b057'01.9\"N",
+    "long":"93\u00b018'22.5\"W",
+    "thickness_cm":"11 3\/8",
+    "description":"11 3\/8"
+  },
+  {
+    "date":"2025-01-28",
+    "lake":"Lake Street Channel",
+    "lat":"44\u00b057'03.2\"N",
+    "long":"93\u00b018'22.2\"W",
+    "thickness_cm":"14 3\/4",
+    "description":"14 3\/4"
+  },
+  {
+    "date":"2025-01-28",
+    "lake":"Lake of the Isles",
+    "lat":"44\u00b057'07.1\"N ",
+    "long":"93\u00b018'29.1\"W",
+    "thickness_cm":"17 7\/8",
+    "description":"17 7\/8"
+  },
+  {
+    "date":"2025-01-28",
+    "lake":"Bde Maka Ska",
+    "lat":"44\u00b056'57.3\"N",
+    "long":"93\u00b018'26.7\"W",
+    "thickness_cm":"12 1\/8",
+    "description":"12 1\/8"
+  },
+  {
+    "date":"2025-01-28",
+    "lake":"Bde Maka Ska",
+    "lat":"44\u00b056'56.3\"N",
+    "long":"93\u00b018'27.2\"W",
+    "thickness_cm":"15 3\/4",
+    "description":"15 3\/4"
+  },
+  {
+    "date":"2025-01-28",
+    "lake":"Bde Maka Ska",
+    "lat":"44\u00b056'50.7\"N ",
+    "long":"93\u00b018'31.0\"W",
+    "thickness_cm":17,
+    "description":17
+  },
+  {
+    "date":"2025-01-28",
+    "lake":"Bde Maka Ska",
+    "lat":"44\u00b056'40.9\"N ",
+    "long":"93\u00b018'36.0\"W",
+    "thickness_cm":"17 3\/4",
+    "description":"17 3\/4"
+  },
+  {
+    "date":"2025-01-28",
+    "lake":"Bde Maka Ska",
+    "lat":"44\u00b056'30.6\"N",
+    "long":"93\u00b018'42.1\"W",
+    "thickness_cm":"17 1\/4",
+    "description":"17 1\/4"
+  },
+  {
+    "date":"2025-01-28",
+    "lake":"Bde Maka Ska",
+    "lat":"44\u00b056'21.5\"N ",
+    "long":"93\u00b018'48.0\"W",
+    "thickness_cm":17,
+    "description":17
+  },
+  {
+    "date":"2025-01-28",
+    "lake":"Bde Maka Ska",
+    "lat":"44\u00b056'10.9\"N ",
+    "long":"93\u00b018'55.5\"W",
+    "thickness_cm":"17 1\/2",
+    "description":"17 1\/2"
+  },
+  {
+    "date":"2025-01-28",
+    "lake":"Lake Harriet",
+    "lat":"44\u00b055'40.6\"N",
+    "long":"93\u00b018'25.0\"W",
+    "thickness_cm":"17 7\/8",
+    "description":"17 7\/8"
+  },
+  {
+    "date":"2025-01-28",
+    "lake":"Lake Harriet",
+    "lat":"44\u00b055'31.5\"N",
+    "long":"93\u00b018'19.8\"W",
+    "thickness_cm":17,
+    "description":17
+  },
+  {
+    "date":"2025-01-28",
+    "lake":"Lake Harriet",
+    "lat":"44\u00b055'20.4\"N",
+    "long":"93\u00b018'16.6\"W",
+    "thickness_cm":"16 7\/8",
+    "description":"16 7\/8"
+  },
+  {
+    "date":"2025-01-28",
+    "lake":"Lake Harriet",
+    "lat":"44\u00b055'11.5\"N",
+    "long":"93\u00b018'10.1\"W",
+    "thickness_cm":"15 7\/8",
+    "description":"15 7\/8"
+  },
+  {
+    "date":"2025-01-28",
+    "lake":"Lake Harriet",
+    "lat":"44\u00b055'02.1\"N",
+    "long":"93\u00b018'03.6\"W",
+    "thickness_cm":"20 1\/8",
+    "description":"20 1\/8"
+  },
+  {
+    "date":"2025-01-28",
+    "lake":"Cedar Lake",
+    "lat":"44\u00b057'14.1\"N ",
+    "long":"93\u00b019'14.4\"W",
+    "thickness_cm":"19 1\/8",
+    "description":"19 1\/8"
+  },
+  {
+    "date":"2025-01-28",
+    "lake":"Cedar Lake",
+    "lat":"44\u00b057'16.9\"N ",
+    "long":"93\u00b019'15.5\"W",
+    "thickness_cm":19,
+    "description":19
+  },
+  {
+    "date":"2025-01-28",
+    "lake":"Cedar Lake",
+    "lat":"44\u00b057'22.5\"N",
+    "long":"93\u00b019'17.3\"W",
+    "thickness_cm":"17 1\/8",
+    "description":"17 1\/8"
+  },
+  {
+    "date":"2025-01-28",
+    "lake":"Cedar Lake",
+    "lat":"44\u00b057'42.2\"N",
+    "long":"93\u00b019'18.5\"W",
+    "thickness_cm":17,
+    "description":17
+  },
+  {
+    "date":"2025-01-28",
+    "lake":"Cedar Lake",
+    "lat":"44\u00b057'46.6\"N",
+    "long":"93\u00b019'16.1\"W",
+    "thickness_cm":17,
+    "description":17
+  },
+  {
+    "date":"2025-01-28",
+    "lake":"Cedar Lake",
+    "lat":"44\u00b057'50.7\"N",
+    "long":"93\u00b019'13.7\"W",
+    "thickness_cm":"17 1\/4",
+    "description":"17 1\/4"
+  },
+  {
+    "date":"2025-01-28",
+    "lake":"Cedar Lake",
+    "lat":"44\u00b057'55.1\"N",
+    "long":"93\u00b019'11.3\"W",
+    "thickness_cm":"16 1\/4",
+    "description":"16 1\/4"
+  },
+  {
+    "date":"2025-01-21",
+    "lake":"Loring Lake",
+    "lat":"44\u00b058'09.4\"N ",
+    "long":"93\u00b017'06.1\"W",
+    "thickness_cm":"12 1\/4",
+    "description":"12 1\/4"
+  },
+  {
+    "date":"2025-01-21",
+    "lake":"Loring Lake",
+    "lat":"44\u00b058'08.5\"N",
+    "long":"93\u00b017'03.3\"W",
+    "thickness_cm":"13 1\/2",
+    "description":"13 1\/2"
+  },
+  {
+    "date":"2025-01-21",
+    "lake":"Loring Lake",
+    "lat":"44\u00b058'07.0\"N",
+    "long":"93\u00b017'00.7\"W",
+    "thickness_cm":"13 3\/4",
+    "description":"13 3\/4"
+  },
+  {
+    "date":"2025-01-21",
+    "lake":"Lake Street Bridge",
+    "lat":"44\u00b056'57.4\"N",
+    "long":"93\u00b018'26.5\"W",
+    "thickness_cm":8,
+    "description":"8 white"
+  },
+  {
+    "date":"2025-01-21",
+    "lake":"Lake Harriet",
+    "lat":"44\u00b055'12.9\"N",
+    "long":"93\u00b018'09.3\"W",
+    "thickness_cm":"15 1\/4",
+    "description":"15 1\/4"
+  },
+  {
+    "date":"2025-01-21",
+    "lake":"Lake Harriet",
+    "lat":"44\u00b055'22.0\"N",
+    "long":"93\u00b018'14.8\"W",
+    "thickness_cm":"15 1\/8",
+    "description":"15 1\/8"
+  },
+  {
+    "date":"2025-01-21",
+    "lake":"Lake Harriet",
+    "lat":"44\u00b055'33.1\"N",
+    "long":"93\u00b018'20.9\"W",
+    "thickness_cm":15,
+    "description":15
+  },
+  {
+    "date":"2025-01-21",
+    "lake":"Lake Harriet",
+    "lat":"44\u00b055'40.7\"N ",
+    "long":"93\u00b018'25.1\"W",
+    "thickness_cm":"15 1\/4",
+    "description":"15 1\/4"
+  },
+  {
+    "date":"2025-01-21",
+    "lake":"Bde Maka Ska",
+    "lat":"44\u00b056'11.1\"N",
+    "long":"93\u00b018'55.6\"W",
+    "thickness_cm":"15 3\/8",
+    "description":"15 3\/8"
+  },
+  {
+    "date":"2025-01-21",
+    "lake":"Bde Maka Ska",
+    "lat":"44\u00b056'21.3\"N",
+    "long":"93\u00b018'48.0\"W",
+    "thickness_cm":16,
+    "description":16
+  },
+  {
+    "date":"2025-01-21",
+    "lake":"Bde Maka Ska",
+    "lat":"44\u00b056'29.2\"N",
+    "long":"93\u00b018'42.2\"W",
+    "thickness_cm":"16 1\/2",
+    "description":"16 1\/2"
+  },
+  {
+    "date":"2025-01-21",
+    "lake":"Bde Maka Ska",
+    "lat":"44\u00b056'38.4\"N",
+    "long":"93\u00b018'36.5\"W",
+    "thickness_cm":15,
+    "description":15
+  },
+  {
+    "date":"2025-01-21",
+    "lake":"Bde Maka Ska",
+    "lat":"44\u00b056'49.0\"N",
+    "long":"93\u00b018'31.1\"W",
+    "thickness_cm":"15 1\/8",
+    "description":"15 1\/8"
+  },
+  {
+    "date":"2025-01-21",
+    "lake":"Bde Maka Ska",
+    "lat":"44\u00b056'57.1\"N",
+    "long":"93\u00b018'26.6\"W",
+    "thickness_cm":"10 7\/8",
+    "description":"10 7\/8"
+  },
+  {
+    "date":"2025-01-21",
+    "lake":"Midtown Greenway Bridge",
+    "lat":"44\u00b057'01.9\"N ",
+    "long":"93\u00b018'22.4\"W",
+    "thickness_cm":11,
+    "description":11
+  },
+  {
+    "date":"2025-01-21",
+    "lake":"Lake of the Isles",
+    "lat":"44\u00b057'10.9\"N",
+    "long":"93\u00b018'17.2\"W",
+    "thickness_cm":"15 5\/8",
+    "description":"15 5\/8"
+  },
+  {
+    "date":"2025-01-21",
+    "lake":"Lake of the Isles",
+    "lat":"44\u00b057'19.3\"N",
+    "long":"93\u00b018'07.3\"W",
+    "thickness_cm":"15 5\/8",
+    "description":"15 5\/8"
+  },
+  {
+    "date":"2025-01-21",
+    "lake":"Lake of the Isles",
+    "lat":"44\u00b057'18.0\"N",
+    "long":"93\u00b018'20.8\"W",
+    "thickness_cm":"17 1\/2",
+    "description":"17 1\/2"
+  },
+  {
+    "date":"2025-01-21",
+    "lake":"Lake of the Isles",
+    "lat":"44\u00b057'15.7\"N ",
+    "long":"93\u00b018'32.8\"W",
+    "thickness_cm":"16 3\/4",
+    "description":"16 3\/4"
+  },
+  {
+    "date":"2025-01-21",
+    "lake":"West Lake of the Isles Parkway Bridge",
+    "lat":"44\u00b057'16.7\"N",
+    "long":"93\u00b018'43.7\"W",
+    "thickness_cm":"15 3\/4",
+    "description":"15 3\/4"
+  },
+  {
+    "date":"2025-01-21",
+    "lake":"Cedar Lake Channel",
+    "lat":"44\u00b057'19.9\"N ",
+    "long":"93\u00b018'59.9\"W",
+    "thickness_cm":"13 7\/8",
+    "description":"13 7\/8"
+  },
+  {
+    "date":"2025-01-21",
+    "lake":"Burham Bridge",
+    "lat":"44\u00b057'21.8\"N",
+    "long":"93\u00b019'03.5\"W",
+    "thickness_cm":"6 1\/2",
+    "description":"6 1\/2"
+  },
+  {
+    "date":"2025-01-21",
+    "lake":"Cedar Lake Channel",
+    "lat":"44\u00b057'25.0\"N",
+    "long":"93\u00b019'08.2\"W",
+    "thickness_cm":"13 3\/4",
+    "description":"13 3\/4"
+  },
+  {
+    "date":"2025-01-21",
+    "lake":"Cedar Lake",
+    "lat":"44\u00b057'14.1\"N",
+    "long":"93\u00b019'14.6\"W",
+    "thickness_cm":"17 1\/2",
+    "description":"17 1\/2"
+  },
+  {
+    "date":"2025-01-21",
+    "lake":"Cedar Lake",
+    "lat":"44\u00b057'23.1\"N",
+    "long":"93\u00b019'17.7\"W",
+    "thickness_cm":"15 1\/8",
+    "description":"15 1\/8"
+  },
+  {
+    "date":"2025-01-21",
+    "lake":"Cedar Lake",
+    "lat":"44\u00b057'37.8\"N",
+    "long":"93\u00b019'20.1\"W",
+    "thickness_cm":16,
+    "description":16
+  },
+  {
+    "date":"2025-01-21",
+    "lake":"Cedar Lake ",
+    "lat":"44\u00b057'42.4\"N",
+    "long":"93\u00b019'18.4\"W",
+    "thickness_cm":"15 1\/4",
+    "description":"15 1\/4"
+  },
+  {
+    "date":"2025-01-21",
+    "lake":"Cedar Lake",
+    "lat":"44\u00b057'51.8\"N ",
+    "long":"93\u00b019'13.4\"W",
+    "thickness_cm":"15 1\/8",
+    "description":"15 1\/8"
+  },
+  {
+    "date":"2025-01-21",
+    "lake":"Cedar Lake",
+    "lat":"44\u00b057'47.0\"N",
+    "long":"93\u00b019'15.9\"W",
+    "thickness_cm":"15 3\/8",
+    "description":"15 3\/8"
+  },
+  {
+    "date":"2025-01-21",
+    "lake":"Cedar Lake",
+    "lat":"44\u00b057'55.2\"N",
+    "long":"93\u00b019'11.3\"W",
+    "thickness_cm":"14 3\/8",
+    "description":"14 3\/8"
+  },
+  {
+    "date":"2025-01-14",
+    "lake":"Loring Lake",
+    "lat":"44\u00b058'07.1\"N",
+    "long":"93\u00b017'00.8\"W",
+    "thickness_cm":"11 1\/2",
+    "description":"11 1\/2"
+  },
+  {
+    "date":"2025-01-14",
+    "lake":"Loring Lake",
+    "lat":"44\u00b058'08.5\"N ",
+    "long":"93\u00b017'03.7\"W",
+    "thickness_cm":"11 1\/4",
+    "description":"11 1\/4"
+  },
+  {
+    "date":"2025-01-14",
+    "lake":"Loring Lake",
+    "lat":"44\u00b058'09.5\"N",
+    "long":"93\u00b017'06.3\"W",
+    "thickness_cm":"10 3\/4",
+    "description":"10 3\/4"
+  },
+  {
+    "date":"2025-01-14",
+    "lake":"Lake Harriet",
+    "lat":"44\u00b055'01.8\"N ",
+    "long":"93\u00b018'02.9\"W",
+    "thickness_cm":"16 1\/4",
+    "description":"16 1\/4"
+  },
+  {
+    "date":"2025-01-14",
+    "lake":"Lake Harriet",
+    "lat":"44\u00b055'05.2\"N ",
+    "long":"93\u00b018'04.9\"W",
+    "thickness_cm":"13 1\/4",
+    "description":"13 1\/4"
+  },
+  {
+    "date":"2025-01-14",
+    "lake":"Lake Harriet",
+    "lat":"44\u00b055'09.8\"N",
+    "long":"93\u00b018'07.5\"W",
+    "thickness_cm":"12 5\/8",
+    "description":"12 5\/8"
+  },
+  {
+    "date":"2025-01-14",
+    "lake":"Lake Harriet",
+    "lat":"44\u00b055'14.5\"N",
+    "long":"93\u00b018'10.5\"W",
+    "thickness_cm":"12 1\/2",
+    "description":"12 1\/2"
+  },
+  {
+    "date":"2025-01-14",
+    "lake":"Lake Harriet",
+    "lat":"44\u00b055'19.4\"N ",
+    "long":"93\u00b018'13.3\"W",
+    "thickness_cm":12,
+    "description":12
+  },
+  {
+    "date":"2025-01-14",
+    "lake":"Lake Harriet",
+    "lat":"44\u00b055'25.4\"N ",
+    "long":"93\u00b018'16.6\"W",
+    "thickness_cm":12,
+    "description":12
+  },
+  {
+    "date":"2025-01-14",
+    "lake":"Lake Harriet",
+    "lat":"44\u00b055'30.9\"N",
+    "long":"93\u00b018'19.7\"W",
+    "thickness_cm":12,
+    "description":12
+  },
+  {
+    "date":"2025-01-14",
+    "lake":"Lake Harriet",
+    "lat":"44\u00b055'36.3\"N",
+    "long":"93\u00b018'22.4\"W",
+    "thickness_cm":12,
+    "description":12
+  },
+  {
+    "date":"2025-01-14",
+    "lake":"Lake Harriet",
+    "lat":"44\u00b055'40.9\"N",
+    "long":"93\u00b018'25.0\"W",
+    "thickness_cm":12,
+    "description":12
+  },
+  {
+    "date":"2025-01-14",
+    "lake":"Bde Maka Ska",
+    "lat":"44\u00b056'10.5\"N",
+    "long":"93\u00b018'55.5\"W",
+    "thickness_cm":"12 3\/8",
+    "description":"12 3\/8"
+  },
+  {
+    "date":"2025-01-14",
+    "lake":"Bde Maka Ska",
+    "lat":"44\u00b056'12.5\"N",
+    "long":"93\u00b018'53.9\"W",
+    "thickness_cm":12,
+    "description":12
+  },
+  {
+    "date":"2025-01-14",
+    "lake":"Bde Maka Ska",
+    "lat":"44\u00b056'26.6\"N ",
+    "long":"93\u00b018'43.5\"W",
+    "thickness_cm":"12 1\/2",
+    "description":"12 1\/2"
+  },
+  {
+    "date":"2025-01-14",
+    "lake":"Bde Maka Ska",
+    "lat":"44\u00b056'31.3\"N",
+    "long":"93\u00b018'40.2\"W",
+    "thickness_cm":"11 7\/8",
+    "description":"11 7\/8"
+  },
+  {
+    "date":"2025-01-14",
+    "lake":"Bde Maka Ska",
+    "lat":"44\u00b056'36.9\"N",
+    "long":"93\u00b018'35.6\"W",
+    "thickness_cm":"12 1\/4",
+    "description":"12 1\/4"
+  },
+  {
+    "date":"2025-01-14",
+    "lake":"Bde Maka Ska",
+    "lat":"44\u00b056'42.0\"N",
+    "long":"93\u00b018'31.7\"W",
+    "thickness_cm":"11 7\/8",
+    "description":"11 7\/8"
+  },
+  {
+    "date":"2025-01-14",
+    "lake":"Bde Maka Ska",
+    "lat":"44\u00b056'47.7\"N",
+    "long":"93\u00b018'27.6\"W",
+    "thickness_cm":"12 1\/8",
+    "description":"12 1\/8"
+  },
+  {
+    "date":"2025-01-14",
+    "lake":"Bde Maka Ska",
+    "lat":"44\u00b056'51.8\"N",
+    "long":"93\u00b018'24.5\"W",
+    "thickness_cm":"11 7\/8",
+    "description":"11 7\/8"
+  },
+  {
+    "date":"2025-01-14",
+    "lake":"Lake Street Bridge",
+    "lat":"44\u00b056'57.4\"N",
+    "long":"93\u00b018'26.5\"W",
+    "thickness_cm":4,
+    "description":"4!"
+  },
+  {
+    "date":"2025-01-14",
+    "lake":"Lake Street Bridge",
+    "lat":"44\u00b056'58.0\"N",
+    "long":"93\u00b018'26.0\"W",
+    "thickness_cm":"9 1\/2",
+    "description":"9 1\/2"
+  },
+  {
+    "date":"2025-01-14",
+    "lake":"Lake Street Lagoon",
+    "lat":"44\u00b056'60.0\"N",
+    "long":"93\u00b018'24.0\"W",
+    "thickness_cm":"12 5\/8",
+    "description":"12 5\/8"
+  },
+  {
+    "date":"2025-01-14",
+    "lake":"Midtown Greenway Bridge",
+    "lat":"44\u00b057'02.0\"N",
+    "long":"93\u00b018'22.5\"W",
+    "thickness_cm":"8 1\/2",
+    "description":"8 1\/2"
+  },
+  {
+    "date":"2025-01-14",
+    "lake":"East Lake of the Isles Parkway Bridge",
+    "lat":"44\u00b057'04.0\"N",
+    "long":"93\u00b018'21.8\"W",
+    "thickness_cm":"12 3\/4",
+    "description":"12 3\/4"
+  },
+  {
+    "date":"2025-01-14",
+    "lake":"Lake of the Isles",
+    "lat":"44\u00b057'09.7\"N",
+    "long":"93\u00b018'17.3\"W",
+    "thickness_cm":"12 3\/4",
+    "description":"12 3\/4"
+  },
+  {
+    "date":"2025-01-14",
+    "lake":"Lake of the Isles",
+    "lat":"44\u00b057'13.5\"N",
+    "long":"93\u00b018'13.6\"W",
+    "thickness_cm":"11 3\/4",
+    "description":"11 3\/4"
+  },
+  {
+    "date":"2025-01-14",
+    "lake":"Lake of the Isles",
+    "lat":"44\u00b057'16.8\"N",
+    "long":"93\u00b018'07.1\"W",
+    "thickness_cm":"12 3\/4",
+    "description":"12 3\/4"
+  },
+  {
+    "date":"2025-01-14",
+    "lake":"Lake of the Isles",
+    "lat":"44\u00b057'19.1\"N",
+    "long":"93\u00b018'12.0\"W",
+    "thickness_cm":"12 1\/2",
+    "description":"12 1\/2"
+  },
+  {
+    "date":"2025-01-14",
+    "lake":"Lake of the Isles",
+    "lat":"44\u00b057'18.8\"N",
+    "long":"93\u00b018'20.1\"W",
+    "thickness_cm":"13 3\/8",
+    "description":"13 3\/8"
+  },
+  {
+    "date":"2025-01-14",
+    "lake":"Lake of the Isles",
+    "lat":"44\u00b057'17.6\"N ",
+    "long":"93\u00b018'28.3\"W",
+    "thickness_cm":"12 1\/4",
+    "description":"12 1\/4"
+  },
+  {
+    "date":"2025-01-14",
+    "lake":"Lake of the Isles",
+    "lat":"44\u00b057'17.0\"N ",
+    "long":"93\u00b018'35.5\"W",
+    "thickness_cm":"12 7\/8",
+    "description":"12 7\/8"
+  },
+  {
+    "date":"2025-01-14",
+    "lake":"West Lake of the Isles Parkway Bridge",
+    "lat":"44\u00b057'16.8\"N",
+    "long":"93\u00b018'43.6\"W",
+    "thickness_cm":"13 5\/8",
+    "description":"13 5\/8"
+  },
+  {
+    "date":"2025-01-14",
+    "lake":"Kennilworth Lagoon",
+    "lat":"44\u00b057'18.2\"N",
+    "long":"93\u00b018'54.0\"W",
+    "thickness_cm":15,
+    "description":15
+  },
+  {
+    "date":"2025-01-14",
+    "lake":"Kenilworth LRT Bridge",
+    "lat":"44\u00b057'20.1\"N",
+    "long":"93\u00b019'00.3\"W",
+    "thickness_cm":13,
+    "description":13
+  },
+  {
+    "date":"2025-01-14",
+    "lake":"Burham Bridge",
+    "lat":"44\u00b057'22.7\"N",
+    "long":"93\u00b019'04.6\"W",
+    "thickness_cm":"7 1\/8",
+    "description":"7 1\/8"
+  },
+  {
+    "date":"2025-01-14",
+    "lake":"Cedar Lake Channel",
+    "lat":"44\u00b057'25.7\"N",
+    "long":"93\u00b019'08.9\"W",
+    "thickness_cm":"11 5\/8",
+    "description":"11 5\/8"
+  },
+  {
+    "date":"2025-01-14",
+    "lake":"Cedar Lake",
+    "lat":"44\u00b057'13.9\"N",
+    "long":"93\u00b019'14.4\"W",
+    "thickness_cm":"13 7\/8",
+    "description":"13 7\/8"
+  },
+  {
+    "date":"2025-01-14",
+    "lake":"Cedar Lake",
+    "lat":"44\u00b057'17.0\"N",
+    "long":"93\u00b019'15.6\"W",
+    "thickness_cm":14,
+    "description":14
+  },
+  {
+    "date":"2025-01-14",
+    "lake":"Cedar Lake",
+    "lat":"44\u00b057'22.0\"N",
+    "long":"93\u00b019'17.2\"W",
+    "thickness_cm":"12 1\/2",
+    "description":"12 1\/2"
+  },
+  {
+    "date":"2025-01-14",
+    "lake":"Cedar Lake",
+    "lat":"44\u00b057'27.0\"N",
+    "long":"93\u00b019'18.4\"W",
+    "thickness_cm":"12 3\/8",
+    "description":"12 3\/8"
+  },
+  {
+    "date":"2025-01-14",
+    "lake":"Cedar Lake",
+    "lat":"44\u00b057'32.5\"N",
+    "long":"93\u00b019'19.9\"W",
+    "thickness_cm":"12 1\/2",
+    "description":"12 1\/2"
+  },
+  {
+    "date":"2025-01-14",
+    "lake":"Cedar Lake",
+    "lat":"44\u00b057'37.6\"N",
+    "long":"93\u00b019'20.4\"W",
+    "thickness_cm":"12 1\/8",
+    "description":"12 1\/8"
+  },
+  {
+    "date":"2025-01-14",
+    "lake":"Cedar Lake",
+    "lat":"44\u00b057'42.3\"N",
+    "long":"93\u00b019'18.4\"W",
+    "thickness_cm":"12 1\/2",
+    "description":"12 1\/2"
+  },
+  {
+    "date":"2025-01-14",
+    "lake":"Cedar Lake",
+    "lat":"44\u00b057'46.8\"N ",
+    "long":"93\u00b019'16.1\"W",
+    "thickness_cm":"12 3\/4",
+    "description":"12 3\/4"
+  },
+  {
+    "date":"2025-01-14",
+    "lake":"Cedar Lake",
+    "lat":"44\u00b057'51.6\"N",
+    "long":"93\u00b019'13.4\"W",
+    "thickness_cm":"12 5\/8",
+    "description":"12 5\/8"
+  },
+  {
+    "date":"2025-01-14",
+    "lake":"Cedar Lake",
+    "lat":"44\u00b057'55.2\"N ",
+    "long":"93\u00b019'11.2\"W",
+    "thickness_cm":12,
+    "description":12
+  },
+  {
+    "date":"2025-01-07",
+    "lake":"Loring Lake",
+    "lat":"44\u00b058'09.0\"N",
+    "long":"93\u00b017'05.5\"W",
+    "thickness_cm":"10 3\/8",
+    "description":"10 3\/8"
+  },
+  {
+    "date":"2025-01-07",
+    "lake":"Loring Lake",
+    "lat":"44\u00b058'07.1\"N ",
+    "long":"93\u00b017'01.0\"W",
+    "thickness_cm":"10 1\/2",
+    "description":"10 1\/2"
+  },
+  {
+    "date":"2025-01-07",
+    "lake":"Loring Lake",
+    "lat":"44\u00b058'08.0\"N",
+    "long":"93\u00b017'03.0\"W",
+    "thickness_cm":10,
+    "description":10
+  },
+  {
+    "date":"2025-01-07",
+    "lake":"Lake Street Bridge",
+    "lat":"44\u00b056'57.3\"N ",
+    "long":"93\u00b018'27.7\"W",
+    "thickness_cm":"?",
+    "description":"Green Ice"
+  },
+  {
+    "date":"2025-01-07",
+    "lake":"Cedar Lake",
+    "lat":"44\u00b057'55.1\"N",
+    "long":"93\u00b019'11.2\"W",
+    "thickness_cm":10,
+    "description":10
+  },
+  {
+    "date":"2025-01-07",
+    "lake":"Cedar Lake",
+    "lat":"44\u00b057'51.6\"N",
+    "long":"93\u00b019'12.8\"W",
+    "thickness_cm":"10 7\/8",
+    "description":"10 7\/8"
+  },
+  {
+    "date":"2025-01-07",
+    "lake":"Cedar Lake",
+    "lat":"44\u00b057'47.8\"N",
+    "long":"93\u00b019'14.1\"W",
+    "thickness_cm":"10 3\/4",
+    "description":"10 3\/4"
+  },
+  {
+    "date":"2025-01-07",
+    "lake":"Cedar Lake",
+    "lat":"44\u00b057'42.9\"N",
+    "long":"93\u00b019'17.5\"W",
+    "thickness_cm":"10 3\/8",
+    "description":"10 3\/8"
+  },
+  {
+    "date":"2025-01-07",
+    "lake":"Cedar Lake",
+    "lat":"44\u00b057'36.8\"N",
+    "long":"93\u00b019'21.0\"W",
+    "thickness_cm":"10 3\/8",
+    "description":"10 3\/8"
+  },
+  {
+    "date":"2025-01-07",
+    "lake":"Cedar Lake",
+    "lat":"44\u00b057'31.5\"N",
+    "long":"93\u00b019'19.8\"W",
+    "thickness_cm":"10 3\/8",
+    "description":"10 3\/8"
+  },
+  {
+    "date":"2025-01-07",
+    "lake":"Cedar Lake",
+    "lat":"44\u00b057'24.9\"N ",
+    "long":"93\u00b019'17.9\"W",
+    "thickness_cm":"10 1\/4",
+    "description":"10 1\/4"
+  },
+  {
+    "date":"2025-01-07",
+    "lake":"Cedar Lake",
+    "lat":"44\u00b057'19.5\"N",
+    "long":"93\u00b019'16.4\"W",
+    "thickness_cm":10,
+    "description":10
+  },
+  {
+    "date":"2025-01-07",
+    "lake":"Cedar Lake",
+    "lat":"44\u00b057'13.8\"N ",
+    "long":"93\u00b019'14.4\"W",
+    "thickness_cm":"11 3\/4",
+    "description":"11 3\/4"
+  },
+  {
+    "date":"2025-01-07",
+    "lake":"Lake of the Isles",
+    "lat":"44\u00b057'20.7\"N",
+    "long":"93\u00b018'42.2\"W",
+    "thickness_cm":"10 3\/4",
+    "description":"10 3\/4"
+  },
+  {
+    "date":"2025-01-07",
+    "lake":"Lake of the Isles",
+    "lat":"44\u00b057'17.1\"N",
+    "long":"93\u00b018'29.9\"W",
+    "thickness_cm":"11 3\/4",
+    "description":"11 3\/4"
+  },
+  {
+    "date":"2025-01-07",
+    "lake":"Lake of the Isles",
+    "lat":"44\u00b057'18.7\"N",
+    "long":"93\u00b018'17.6\"W",
+    "thickness_cm":12,
+    "description":12
+  },
+  {
+    "date":"2025-01-07",
+    "lake":"Lake of the Isles",
+    "lat":"44\u00b057'17.9\"N",
+    "long":"93\u00b018'13.2\"W",
+    "thickness_cm":"11 1\/8",
+    "description":"11 1\/8"
+  },
+  {
+    "date":"2025-01-07",
+    "lake":"Lake of the Isles",
+    "lat":"44\u00b057'15.3\"N",
+    "long":"93\u00b018'08.7\"W",
+    "thickness_cm":"11 1\/8",
+    "description":"11 1\/8"
+  },
+  {
+    "date":"2025-01-07",
+    "lake":"Lake of the Isles",
+    "lat":"44\u00b057'15.3\"N ",
+    "long":"93\u00b018'13.6\"W",
+    "thickness_cm":11,
+    "description":11
+  },
+  {
+    "date":"2025-01-07",
+    "lake":"Lake of the Isles",
+    "lat":"44\u00b057'12.5\"N ",
+    "long":"93\u00b018'18.0\"W",
+    "thickness_cm":11,
+    "description":11
+  },
+  {
+    "date":"2025-01-07",
+    "lake":"Lake of the Isles",
+    "lat":"44\u00b057'09.5\"N",
+    "long":"93\u00b018'23.6\"W",
+    "thickness_cm":"11 3\/4",
+    "description":"11 3\/4"
+  },
+  {
+    "date":"2025-01-07",
+    "lake":"Lake of the Isles",
+    "lat":"44\u00b057'07.2\"N ",
+    "long":"93\u00b018'28.9\"W",
+    "thickness_cm":"12 1\/8",
+    "description":"12 1\/8"
+  },
+  {
+    "date":"2025-01-07",
+    "lake":"Bde Maka Ska",
+    "lat":"44\u00b056'57.0\"N ",
+    "long":"93\u00b018'26.7\"W",
+    "thickness_cm":8,
+    "description":8
+  },
+  {
+    "date":"2025-01-07",
+    "lake":"Lake Street Bridge",
+    "lat":"44\u00b056'57.5\"N",
+    "long":"93\u00b018'26.3\"W",
+    "thickness_cm":"?",
+    "description":"Open Water"
+  },
+  {
+    "date":"2025-01-07",
+    "lake":"Lake Street Bridge",
+    "lat":"44\u00b056'57.3\"N ",
+    "long":"93\u00b018'26.5\"W",
+    "thickness_cm":"6 1\/8",
+    "description":"6 1\/8"
+  },
+  {
+    "date":"2025-01-07",
+    "lake":"Bde Maka Ska",
+    "lat":"44\u00b056'56.2\"N",
+    "long":"93\u00b018'27.4\"W",
+    "thickness_cm":"8 3\/8",
+    "description":"8 3\/8"
+  },
+  {
+    "date":"2025-01-07",
+    "lake":"Bde Maka Ska",
+    "lat":"44\u00b056'54.4\"N",
+    "long":"93\u00b018'28.7\"W",
+    "thickness_cm":9,
+    "description":9
+  },
+  {
+    "date":"2025-01-07",
+    "lake":"Bde Maka Ska",
+    "lat":"44\u00b056'51.7\"N",
+    "long":"93\u00b018'30.6\"W",
+    "thickness_cm":"9 1\/2",
+    "description":"9 1\/2"
+  },
+  {
+    "date":"2025-01-07",
+    "lake":"Bde Maka Ska",
+    "lat":"44\u00b056'49.2\"N",
+    "long":"93\u00b018'32.1\"W",
+    "thickness_cm":"9 1\/4",
+    "description":"9 1\/4"
+  },
+  {
+    "date":"2025-01-07",
+    "lake":"Bde Maka Ska",
+    "lat":"44\u00b056'46.1\"N",
+    "long":"93\u00b018'33.9\"W",
+    "thickness_cm":10,
+    "description":10
+  },
+  {
+    "date":"2025-01-07",
+    "lake":"Bde Maka Ska",
+    "lat":"44\u00b056'43.5\"N",
+    "long":"93\u00b018'35.5\"W",
+    "thickness_cm":"9 7\/8",
+    "description":"9 7\/8"
+  },
+  {
+    "date":"2025-01-07",
+    "lake":"Bde Maka Ska",
+    "lat":"44\u00b056'41.7\"N",
+    "long":"93\u00b018'36.6\"W",
+    "thickness_cm":"9 1\/2",
+    "description":"9 1\/2"
+  },
+  {
+    "date":"2025-01-07",
+    "lake":"Bde Maka Ska",
+    "lat":"44\u00b056'39.7\"N",
+    "long":"93\u00b018'38.0\"W",
+    "thickness_cm":"9 3\/4",
+    "description":"9 3\/4"
+  },
+  {
+    "date":"2025-01-07",
+    "lake":"Bde Maka Ska",
+    "lat":"44\u00b056'37.5\"N",
+    "long":"93\u00b018'39.3\"W",
+    "thickness_cm":"9 3\/4",
+    "description":"9 3\/4"
+  },
+  {
+    "date":"2025-01-07",
+    "lake":"Bde Maka Ska",
+    "lat":"44\u00b056'35.5\"N",
+    "long":"93\u00b018'40.4\"W",
+    "thickness_cm":"9 1\/2",
+    "description":"9 1\/2"
+  },
+  {
+    "date":"2025-01-07",
+    "lake":"Bde Maka Ska",
+    "lat":"44\u00b056'33.2\"N",
+    "long":"93\u00b018'41.8\"W",
+    "thickness_cm":"9 5\/8",
+    "description":"9 5\/8"
+  },
+  {
+    "date":"2025-01-07",
+    "lake":"Bde Maka Ska",
+    "lat":"44\u00b056'31.6\"N",
+    "long":"93\u00b018'42.7\"W",
+    "thickness_cm":"9 1\/2",
+    "description":"9 1\/2"
+  },
+  {
+    "date":"2025-01-07",
+    "lake":"Bde Maka Ska",
+    "lat":"44\u00b056'29.9\"N",
+    "long":" 93\u00b018'43.7\"W",
+    "thickness_cm":"9 5\/8",
+    "description":"9 5\/8"
+  },
+  {
+    "date":"2025-01-07",
+    "lake":"Bde Maka Ska",
+    "lat":"44\u00b056'27.4\"N ",
+    "long":"93\u00b018'45.3\"W",
+    "thickness_cm":"9 1\/2",
+    "description":"9 1\/2"
+  },
+  {
+    "date":"2025-01-07",
+    "lake":"Bde Maka Ska",
+    "lat":"44\u00b056'25.4\"N ",
+    "long":"93\u00b018'46.4\"W",
+    "thickness_cm":"9 5\/8",
+    "description":"9 5\/8"
+  },
+  {
+    "date":"2025-01-07",
+    "lake":"Bde Maka Ska",
+    "lat":"44\u00b056'23.9\"N",
+    "long":"93\u00b018'47.5\"W",
+    "thickness_cm":"9 1\/2",
+    "description":"9 1\/2"
+  },
+  {
+    "date":"2025-01-07",
+    "lake":"Bde Maka Ska",
+    "lat":"44\u00b056'22.2\"N",
+    "long":"93\u00b018'48.6\"W",
+    "thickness_cm":"9 1\/2",
+    "description":"9 1\/2"
+  },
+  {
+    "date":"2025-01-07",
+    "lake":"Bde Maka Ska",
+    "lat":"44\u00b056'20.5\"N",
+    "long":"93\u00b018'49.6\"W",
+    "thickness_cm":"9 1\/2",
+    "description":"9 1\/2"
+  },
+  {
+    "date":"2025-01-07",
+    "lake":"Bde Maka Ska",
+    "lat":"44\u00b056'18.8\"N",
+    "long":"93\u00b018'50.6\"W",
+    "thickness_cm":"9 1\/2",
+    "description":"9 1\/2"
+  },
+  {
+    "date":"2025-01-07",
+    "lake":"Bde Maka Ska",
+    "lat":"44\u00b056'16.7\"N",
+    "long":"93\u00b018'51.7\"W",
+    "thickness_cm":"9 3\/8",
+    "description":"9 3\/8"
+  },
+  {
+    "date":"2025-01-07",
+    "lake":"Bde Maka Ska",
+    "lat":"44\u00b056'15.2\"N",
+    "long":"93\u00b018'52.4\"W",
+    "thickness_cm":"9 1\/2",
+    "description":"9 1\/2"
+  },
+  {
+    "date":"2025-01-07",
+    "lake":"Bde Maka Ska",
+    "lat":"44\u00b056'14.0\"N",
+    "long":"93\u00b018'53.3\"W",
+    "thickness_cm":"9 1\/2",
+    "description":"9 1\/2"
+  },
+  {
+    "date":"2025-01-07",
+    "lake":"Bde Maka Ska",
+    "lat":"44\u00b056'12.8\"N",
+    "long":"93\u00b018'53.9\"W",
+    "thickness_cm":10,
+    "description":10
+  },
+  {
+    "date":"2025-01-07",
+    "lake":"Bde Maka Ska",
+    "lat":"44\u00b056'11.7\"N",
+    "long":"93\u00b018'54.5\"W",
+    "thickness_cm":"9 7\/8",
+    "description":"9 7\/8"
+  },
+  {
+    "date":"2025-01-07",
+    "lake":"Bde Maka Ska",
+    "lat":"44\u00b056'10.9\"N ",
+    "long":"93\u00b018'55.2\"W",
+    "thickness_cm":10,
+    "description":10
+  },
+  {
+    "date":"2025-01-07",
+    "lake":"Lake Harriet",
+    "lat":"44\u00b055'36.2\"N",
+    "long":"93\u00b018'23.0\"W",
+    "thickness_cm":"9 5\/8",
+    "description":"9 5\/8"
+  },
+  {
+    "date":"2025-01-07",
+    "lake":"Lake Harriet",
+    "lat":"44\u00b055'37.1\"N",
+    "long":"93\u00b018'23.4\"W",
+    "thickness_cm":9,
+    "description":9
+  },
+  {
+    "date":"2025-01-07",
+    "lake":"Lake Harriet",
+    "lat":"44\u00b055'38.0\"N",
+    "long":"93\u00b018'23.9\"W",
+    "thickness_cm":"9 3\/8",
+    "description":"9 3\/8"
+  },
+  {
+    "date":"2025-01-07",
+    "lake":"Lake Harriet",
+    "lat":"44\u00b055'38.9\"N ",
+    "long":"93\u00b018'24.3\"W",
+    "thickness_cm":"9 1\/2",
+    "description":"9 1\/2"
+  },
+  {
+    "date":"2025-01-07",
+    "lake":"Lake Harriet",
+    "lat":"44\u00b055'39.7\"N",
+    "long":"93\u00b018'24.8\"W",
+    "thickness_cm":"8 7\/8",
+    "description":"8 7\/8"
+  },
+  {
+    "date":"2025-01-07",
+    "lake":"Lake Harriet",
+    "lat":"44\u00b055'40.6\"N",
+    "long":"93\u00b018'24.9\"W",
+    "thickness_cm":"8 3\/4",
+    "description":"8 3\/4"
+  },
+  {
+    "date":"2025-01-07",
+    "lake":"Lake Harriet",
+    "lat":"44\u00b055'41.1\"N",
+    "long":"93\u00b018'25.0\"W",
+    "thickness_cm":9,
+    "description":9
+  },
+  {
+    "date":"2025-01-07",
+    "lake":"Lake Harriet",
+    "lat":"44\u00b055'40.7\"N",
+    "long":"93\u00b018'23.9\"W",
+    "thickness_cm":"?",
+    "description":"Open Water!"
+  },
+  {
+    "date":"2025-01-07",
+    "lake":"Lake Harriet",
+    "lat":"44\u00b055'39.0\"N",
+    "long":"93\u00b018'22.6\"W",
+    "thickness_cm":"?",
+    "description":"Thin Ice!"
+  },
+  {
+    "date":"2025-01-07",
+    "lake":"Lake Harriet",
+    "lat":"44\u00b055'39.7\"N",
+    "long":"93\u00b018'23.0\"W",
+    "thickness_cm":"?",
+    "description":"Open Water!"
+  },
+  {
+    "date":"2025-01-07",
+    "lake":"Lake Harriet",
+    "lat":"44\u00b055'40.6\"N",
+    "long":"93\u00b018'23.5\"W",
+    "thickness_cm":"?",
+    "description":"Open Water!"
+  },
+  {
+    "date":"2025-01-07",
+    "lake":"Lake Harriet",
+    "lat":"44\u00b055'34.4\"N",
+    "long":"93\u00b018'22.2\"W",
+    "thickness_cm":"9 1\/2",
+    "description":"9 1\/2"
+  },
+  {
+    "date":"2025-01-07",
+    "lake":"Lake Harriet",
+    "lat":"44\u00b055'32.6\"N",
+    "long":"93\u00b018'21.5\"W",
+    "thickness_cm":"9 3\/8",
+    "description":"9 3\/8"
+  },
+  {
+    "date":"2025-01-07",
+    "lake":"Lake Harriet",
+    "lat":"44\u00b055'31.1\"N",
+    "long":"93\u00b018'20.7\"W",
+    "thickness_cm":"9 1\/4",
+    "description":"9 1\/4"
+  },
+  {
+    "date":"2025-01-07",
+    "lake":"Lake Harriet",
+    "lat":"44\u00b055'29.5\"N",
+    "long":"93\u00b018'19.9\"W",
+    "thickness_cm":"9 1\/2",
+    "description":"9 1\/2"
+  },
+  {
+    "date":"2025-01-07",
+    "lake":"Lake Harriet",
+    "lat":"44\u00b055'28.2\"N ",
+    "long":"93\u00b018'19.2\"W",
+    "thickness_cm":"9 3\/8",
+    "description":"9 3\/8"
+  },
+  {
+    "date":"2025-01-07",
+    "lake":"Lake Harriet",
+    "lat":"44\u00b055'31.1\"N",
+    "long":"93\u00b018'20.7\"W",
+    "thickness_cm":"9 1\/4",
+    "description":"9 1\/4"
+  },
+  {
+    "date":"2025-01-07",
+    "lake":"Lake Harriet",
+    "lat":"44\u00b055'29.5\"N ",
+    "long":"93\u00b018'19.9\"W",
+    "thickness_cm":"9 1\/2",
+    "description":"9 1\/2"
+  },
+  {
+    "date":"2025-01-07",
+    "lake":"Lake Harriet",
+    "lat":"44\u00b055'28.2\"N",
+    "long":"93\u00b018'19.2\"W",
+    "thickness_cm":"9 3\/8",
+    "description":"9 3\/8"
+  },
+  {
+    "date":"2025-01-07",
+    "lake":"Lake Harriet",
+    "lat":"44\u00b055'26.9\"N",
+    "long":"93\u00b018'18.5\"W",
+    "thickness_cm":"9 1\/2",
+    "description":"9 1\/2"
+  },
+  {
+    "date":"2025-01-07",
+    "lake":"Lake Harriet",
+    "lat":"44\u00b055'25.8\"N",
+    "long":"93\u00b018'17.8\"W",
+    "thickness_cm":"9 1\/2",
+    "description":"9 1\/2"
+  },
+  {
+    "date":"2025-01-07",
+    "lake":"Lake Harriet",
+    "lat":"44\u00b055'24.5\"N",
+    "long":"93\u00b018'17.3\"W",
+    "thickness_cm":"9 1\/2",
+    "description":"9 1\/2"
+  },
+  {
+    "date":"2025-01-07",
+    "lake":"Lake Harriet",
+    "lat":"44\u00b056'16.7\"N",
+    "long":"93\u00b018'51.7\"W",
+    "thickness_cm":"9 3\/8",
+    "description":"9 3\/8"
+  },
+  {
+    "date":"2025-01-07",
+    "lake":"Lake Harriet",
+    "lat":"44\u00b055'23.1\"N",
+    "long":"93\u00b018'16.8\"W",
+    "thickness_cm":"9 7\/8",
+    "description":"9 7\/8"
+  },
+  {
+    "date":"2025-01-07",
+    "lake":"Lake Harriet",
+    "lat":"44\u00b055'22.0\"N",
+    "long":"93\u00b018'16.1\"W",
+    "thickness_cm":"9 5\/8",
+    "description":"9 5\/8"
+  },
+  {
+    "date":"2025-01-07",
+    "lake":"Lake Harriet",
+    "lat":"44\u00b055'20.6\"N ",
+    "long":"93\u00b018'15.0\"W",
+    "thickness_cm":"9 1\/2",
+    "description":"9 1\/2"
+  },
+  {
+    "date":"2025-01-07",
+    "lake":"Lake Harriet",
+    "lat":"44\u00b055'19.3\"N",
+    "long":"93\u00b018'14.6\"W",
+    "thickness_cm":"9 1\/4",
+    "description":"9 1\/4"
+  },
+  {
+    "date":"2025-01-07",
+    "lake":"Lake Harriet",
+    "lat":"44\u00b055'18.0\"N",
+    "long":"93\u00b018'13.8\"W",
+    "thickness_cm":"9 3\/8",
+    "description":"9 3\/8"
+  },
+  {
+    "date":"2025-01-07",
+    "lake":"Lake Harriet",
+    "lat":"44\u00b055'16.9\"N",
+    "long":"93\u00b018'13.3\"W",
+    "thickness_cm":"9 1\/4",
+    "description":"9 1\/4"
+  },
+  {
+    "date":"2025-01-07",
+    "lake":"Lake Harriet",
+    "lat":"44\u00b055'15.4\"N ",
+    "long":"93\u00b018'12.4\"W",
+    "thickness_cm":"9 3\/4",
+    "description":"9 3\/4"
+  },
+  {
+    "date":"2025-01-07",
+    "lake":"Lake Harriet",
+    "lat":"44\u00b055'14.0\"N",
+    "long":"93\u00b018'11.4\"W",
+    "thickness_cm":"9 3\/4",
+    "description":"9 3\/4"
+  },
+  {
+    "date":"2025-01-07",
+    "lake":"Lake Harriet",
+    "lat":"44\u00b055'12.8\"N",
+    "long":"93\u00b018'10.7\"W",
+    "thickness_cm":"9 3\/4",
+    "description":"9 3\/4"
+  },
+  {
+    "date":"2025-01-07",
+    "lake":"Lake Harriet",
+    "lat":"44\u00b055'11.7\"N ",
+    "long":"93\u00b018'09.9\"W",
+    "thickness_cm":"9 3\/8",
+    "description":"9 3\/8"
+  },
+  {
+    "date":"2025-01-07",
+    "lake":"Lake Harriet ",
+    "lat":"44\u00b055'10.4\"N",
+    "long":"93\u00b018'09.1\"W",
+    "thickness_cm":"10 1\/8",
+    "description":"10 1\/8"
+  },
+  {
+    "date":"2025-01-07",
+    "lake":"Lake Harriet",
+    "lat":"44\u00b055'09.4\"N",
+    "long":"93\u00b018'08.5\"W",
+    "thickness_cm":10,
+    "description":10
+  },
+  {
+    "date":"2025-01-07",
+    "lake":"Lake Harriet",
+    "lat":"44\u00b055'08.3\"N ",
+    "long":"93\u00b018'07.8\"W",
+    "thickness_cm":"9 3\/4",
+    "description":"9 3\/4"
+  },
+  {
+    "date":"2025-01-07",
+    "lake":"Lake Harriet",
+    "lat":"44\u00b055'04.9\"N",
+    "long":"93\u00b018'05.6\"W",
+    "thickness_cm":"9 1\/2",
+    "description":"9 1\/2"
+  },
+  {
+    "date":"2025-01-07",
+    "lake":"Lake Harriet",
+    "lat":"44\u00b055'05.7\"N",
+    "long":"93\u00b018'06.2\"W",
+    "thickness_cm":"10 1\/4",
+    "description":"10 1\/4"
+  },
+  {
+    "date":"2025-01-07",
+    "lake":"Lake Harriet",
+    "lat":"44\u00b055'06.5\"N ",
+    "long":"93\u00b018'06.7\"W",
+    "thickness_cm":"9 7\/8",
+    "description":"9 7\/8"
+  },
+  {
+    "date":"2025-01-07",
+    "lake":"Lake Harriet",
+    "lat":"44\u00b055'07.3\"N ",
+    "long":"93\u00b018'07.2\"W",
+    "thickness_cm":"9 3\/4",
+    "description":"9 3\/4"
+  },
+  {
+    "date":"2025-01-07",
+    "lake":"Lake Harriet",
+    "lat":"44\u00b055'02.2\"N",
+    "long":"93\u00b018'02.9\"W",
+    "thickness_cm":15,
+    "description":15
+  },
+  {
+    "date":"2025-01-07",
+    "lake":"Lake Harriet",
+    "lat":"44\u00b055'03.3\"N",
+    "long":"93\u00b018'04.3\"W",
+    "thickness_cm":12,
+    "description":12
+  },
+  {
+    "date":"2025-01-07",
+    "lake":"Lake Harriet",
+    "lat":"44\u00b055'03.7\"N",
+    "long":"93\u00b018'04.7\"W",
+    "thickness_cm":"10 1\/4",
+    "description":"10 1\/4"
+  },
+  {
+    "date":"2025-01-07",
+    "lake":"Lake Harriet",
+    "lat":"44\u00b055'04.1\"N",
+    "long":"93\u00b018'05.0\"W",
+    "thickness_cm":"9 1\/2",
+    "description":"9 1\/2"
+  },
+  {
+    "date":"2024-12-31",
+    "lake":44.9476111111,
+    "lat":-93.3071111111,
+    "long":"3 3\/4!",
+    "thickness_cm":null,
+    "description":null
+  }
+]
