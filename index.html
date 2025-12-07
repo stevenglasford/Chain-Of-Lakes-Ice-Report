@@ -295,6 +295,50 @@
       max-height: 420px;
       overflow: auto;
     }
+    
+        .download-card {
+      border-radius: 1rem;
+      border: 1px solid var(--border-subtle);
+      background: var(--card-bg);
+      padding: 0.9rem 0.95rem 1rem;
+      margin-top: 1.5rem;
+    }
+
+    .download-card h2 {
+      margin: 0 0 0.25rem;
+      font-size: 1rem;
+    }
+
+    .download-card p {
+      margin: 0.15rem 0 0.5rem;
+      font-size: 0.8rem;
+      color: rgba(255,255,255,0.75);
+    }
+
+    .download-card ul {
+      list-style: none;
+      padding-left: 0;
+      margin: 0 0 0.4rem;
+      font-size: 0.85rem;
+    }
+
+    .download-card li + li {
+      margin-top: 0.25rem;
+    }
+
+    .download-card a {
+      color: var(--accent);
+      text-decoration: none;
+    }
+
+    .download-card a:hover {
+      text-decoration: underline;
+    }
+
+    .download-note {
+      font-size: 0.75rem;
+      color: rgba(255,255,255,0.6);
+    }
 
     /* Map & chart cards */
     .map-card,
@@ -311,6 +355,7 @@
       margin: 0 0 0.25rem;
       font-size: 1rem;
     }
+    
 
     .map-note,
     .chart-card p {
@@ -499,6 +544,14 @@
         </table>
       </div>
     </div>
+        <div class="download-card">
+      <h2>Download ice data (Excel)</h2>
+      <p>You can download the original Excel files used to build this site.</p>
+      <ul id="excel-download-list"></ul>
+      <p class="download-note">
+        Tip: right-click a file and choose “Save link as…” if your browser tries to open it instead of downloading.
+      </p>
+    </div>
   </section>
 </main>
 
@@ -567,6 +620,43 @@
     mapLayer: null,
     chart: null
   };
+
+  
+    // List of Excel files available for download.
+  // Paths are relative to index.html. Update this list when you add a new file.
+  const excelFiles = [
+    {
+      file: "Ice2024.xlsx",
+      label: "Ice thickness 2024–25 (Excel)"
+    },
+    // Example if you add more:
+    // { file: "Ice2023.xlsx", label: "Ice thickness 2023–24 (Excel)" },
+    // { file: "Ice2022_chain_of_lakes.xlsx", label: "Ice thickness 2022–23 (Excel)" }
+  ];
+
+    function renderExcelDownloads() {
+    const listEl = document.getElementById("excel-download-list");
+    if (!listEl) return;
+
+    listEl.innerHTML = "";
+
+    if (!excelFiles.length) {
+      const li = document.createElement("li");
+      li.textContent = "No Excel files are currently available.";
+      listEl.appendChild(li);
+      return;
+    }
+
+    excelFiles.forEach(item => {
+      const li = document.createElement("li");
+      const a = document.createElement("a");
+      a.href = item.file;
+      a.download = "";
+      a.textContent = item.label || item.file;
+      li.appendChild(a);
+      listEl.appendChild(li);
+    });
+  }
 
   async function loadData() {
     const resp = await fetch("Ice2024.json");
@@ -1081,6 +1171,7 @@
   document.addEventListener("DOMContentLoaded", () => {
     initTabs();
     initHistorySorting();
+    renderExcelDownloads();
     loadData().catch(err => {
       console.error("Failed to load data:", err);
       const grid = document.getElementById("current-grid");
