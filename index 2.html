@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <title>Minneapolis Chain of Lakes – Ice Report</title>
+  <title>Minneapolis Chain of Lakes – Ice Report 2024–25</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
 
   <!-- Leaflet (map) -->
@@ -34,12 +34,13 @@
     body {
       margin: 0;
       padding: 0;
+      min-height: 0;
       display: flex;
       flex-direction: column;
     }
 
     header {
-      padding: 1.5rem 1.5rem 0.75rem;
+      padding: 1.5rem 1.5rem 0.5rem;
       border-bottom: 1px solid var(--border-subtle);
       background: radial-gradient(circle at top, #102b3f 0, #050b11 60%);
     }
@@ -72,31 +73,6 @@
       max-width: 40rem;
       color: rgba(255,255,255,0.8);
       font-size: 0.95rem;
-    }
-
-    .dataset-switcher {
-      margin-top: 0.75rem;
-      display: flex;
-      flex-wrap: wrap;
-      gap: 0.5rem;
-      align-items: center;
-      font-size: 0.85rem;
-    }
-
-    .dataset-switcher label {
-      text-transform: uppercase;
-      letter-spacing: 0.08em;
-      color: rgba(255,255,255,0.7);
-      font-size: 0.75rem;
-    }
-
-    .dataset-switcher select {
-      border-radius: 999px;
-      border: 1px solid var(--border-subtle);
-      padding: 0.2rem 0.75rem;
-      background: rgba(4,12,20,0.9);
-      color: #f9fbff;
-      font-size: 0.85rem;
     }
 
     main {
@@ -319,10 +295,54 @@
       max-height: 420px;
       overflow: auto;
     }
+    
+        .download-card {
+      border-radius: 1rem;
+      border: 1px solid var(--border-subtle);
+      background: var(--card-bg);
+      padding: 0.9rem 0.95rem 1rem;
+      margin-top: 1.5rem;
+    }
 
+    .download-card h2 {
+      margin: 0 0 0.25rem;
+      font-size: 1rem;
+    }
+
+    .download-card p {
+      margin: 0.15rem 0 0.5rem;
+      font-size: 0.8rem;
+      color: rgba(255,255,255,0.75);
+    }
+
+    .download-card ul {
+      list-style: none;
+      padding-left: 0;
+      margin: 0 0 0.4rem;
+      font-size: 0.85rem;
+    }
+
+    .download-card li + li {
+      margin-top: 0.25rem;
+    }
+
+    .download-card a {
+      color: var(--accent);
+      text-decoration: none;
+    }
+
+    .download-card a:hover {
+      text-decoration: underline;
+    }
+
+    .download-note {
+      font-size: 0.75rem;
+      color: rgba(255,255,255,0.6);
+    }
+
+    /* Map & chart cards */
     .map-card,
-    .chart-card,
-    .download-card {
+    .chart-card {
       border-radius: 1rem;
       border: 1px solid var(--border-subtle);
       background: var(--card-bg);
@@ -331,15 +351,14 @@
     }
 
     .map-card h2,
-    .chart-card h2,
-    .download-card h2 {
+    .chart-card h2 {
       margin: 0 0 0.25rem;
       font-size: 1rem;
     }
+    
 
     .map-note,
-    .chart-card p,
-    .download-card p {
+    .chart-card p {
       margin: 0.15rem 0 0.5rem;
       font-size: 0.8rem;
       color: rgba(255,255,255,0.75);
@@ -372,31 +391,6 @@
       background: rgba(4,12,20,0.9);
       color: #f9fbff;
       font-size: 0.85rem;
-    }
-
-    .download-card ul {
-      list-style: none;
-      padding-left: 0;
-      margin: 0 0 0.4rem;
-      font-size: 0.85rem;
-    }
-
-    .download-card li + li {
-      margin-top: 0.25rem;
-    }
-
-    .download-card a {
-      color: var(--accent);
-      text-decoration: none;
-    }
-
-    .download-card a:hover {
-      text-decoration: underline;
-    }
-
-    .download-note {
-      font-size: 0.75rem;
-      color: rgba(255,255,255,0.6);
     }
 
     footer {
@@ -445,57 +439,26 @@
 <header>
   <div class="title">
     <h1>Minneapolis Chain of Lakes – Ice Report</h1>
-    <span class="badge">Multi-season</span>
+    <span class="badge">2024–25 Season</span>
   </div>
   <p>
     Weekly ice thickness measurements around the Chain of Lakes. This page shows the
     latest readings and lets you explore historical data by lake and date. Always
     double-check conditions in person before going on the ice.
   </p>
-
-  <div class="dataset-switcher">
-    <label for="dataset-select">Dataset:</label>
-    <select id="dataset-select">
-      <option value="ice2025">Main season 2025–26</option>
-      <option value="ice2024">Main season 2024–25</option>
-      <option value="preice2025">Pre-ice-in 2025</option>
-    </select>
-  </div>
 </header>
 
 <main>
   <div class="tabs" role="tablist">
-    <button class="tab-button active" data-tab="currentSeason" type="button">Current season</button>
-    <button class="tab-button" data-tab="current" type="button">Selected dataset status</button>
+    <button class="tab-button active" data-tab="current" type="button">Current status</button>
     <button class="tab-button" data-tab="history" type="button">History &amp; all readings</button>
   </div>
 
-  <!-- Current season (always Ice2025) -->
-  <section id="currentSeason" class="tab-panel" role="tabpanel">
-    <div class="status-bar">
-      <div class="status-pill">
-        <span class="status-dot" id="season-latest-status-dot"></span>
-        <span>Current season (2025–26) latest: <strong id="season-latest-date-label">–</strong></span>
-      </div>
-      <div class="status-pill">
-        Safety legend:
-        <span class="status-dot danger"></span><span>Thin / unsafe</span>
-        <span class="status-dot warn" style="margin-left:0.5rem;"></span><span>Use caution</span>
-        <span class="status-dot safe" style="margin-left:0.5rem;"></span><span>Thicker</span>
-      </div>
-    </div>
-
-    <div class="summary-grid" id="current-season-grid">
-      <!-- Cards injected by JS -->
-    </div>
-  </section>
-
-  <!-- Current status for selected dataset -->
-  <section id="current" class="tab-panel" role="tabpanel" hidden>
+  <section id="current" class="tab-panel" role="tabpanel">
     <div class="status-bar">
       <div class="status-pill" id="latest-date-pill">
         <span class="status-dot" id="latest-status-dot"></span>
-        <span>Latest measurements in selected dataset: <strong id="latest-date-label">–</strong></span>
+        <span>Latest measurements: <strong id="latest-date-label">–</strong></span>
       </div>
       <div class="status-pill">
         Safety legend:
@@ -522,20 +485,21 @@
       <!-- Cards injected by JS -->
     </div>
 
+    <!-- Small map view -->
     <div class="map-card">
-      <h2>Map – latest measurement by lake (selected dataset)</h2>
-      <p class="map-note">Pins show the most recent reading for each lake in the selected dataset. Tap a pin for details.</p>
+      <h2>Map – latest measurement by lake</h2>
+      <p class="map-note">Pins show the most recent reading for each lake. Tap a pin for details.</p>
       <div id="map" class="map-container"></div>
     </div>
   </section>
 
-  <!-- History & all readings -->
   <section id="history" class="tab-panel" role="tabpanel" hidden>
+    <!-- Line chart by lake -->
     <div class="chart-card">
       <div class="chart-header">
         <div class="chart-header-text">
           <h2>Ice growth by lake</h2>
-          <p>Pick a lake to see how ice thickness changed over the season (selected dataset).</p>
+          <p>Pick a lake to see how ice thickness changed over the season.</p>
         </div>
         <select id="chart-lake-select">
           <option value="">Select a lake…</option>
@@ -580,8 +544,7 @@
         </table>
       </div>
     </div>
-
-    <div class="download-card">
+        <div class="download-card">
       <h2>Download ice data (Excel)</h2>
       <p>You can download the original Excel files used to build this site.</p>
       <ul id="excel-download-list"></ul>
@@ -593,7 +556,7 @@
 </main>
 
 <footer>
-  Data collected by hand. This website is for informational and
+  Data collected by hand in winter 2024–25. This website is for informational and
   educational purposes only; always check local conditions and use proper safety
   gear before going on the ice.
 </footer>
@@ -609,41 +572,13 @@
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
 
 <script>
-  // Datasets available on the site
-  const datasetConfigs = {
-    ice2024: {
-      json: "Ice2024.json",
-      labelShort: "2024–25"
-    },
-    ice2025: {
-      json: "Ice2025.json",
-      labelShort: "2025–26"
-    },
-    preice2025: {
-      json: "Pre-ice-in-2025.json",
-      labelShort: "Pre-ice-in 2025"
-    }
-  };
-
-  // Excel files available for download
-  const excelFiles = [
-    { file: "Ice2024.xlsx",       label: "Ice thickness 2024–25 (Excel)" },
-    { file: "Ice2025.xlsx",       label: "Ice thickness 2025–26 (Excel)" },
-    { file: "Pre-ice-in-2025.xlsx", label: "Pre-ice-in 2025 (Excel)" }
-  ];
-
-  function getCurrentDatasetKey() {
-    const params = new URLSearchParams(window.location.search);
-    const key = params.get("dataset") || "ice2025"; // default to current season
-    return datasetConfigs[key] ? key : "ice2025";
-  }
-
-  // Parse "9 1/2", "12", etc. to numeric inches
+  // --- Utility: parse "9 1/2" or "12" or "?" to a numeric thickness (inches-ish).
   function parseThickness(value) {
     if (value === null || value === undefined) return null;
     const raw = String(value).trim();
     if (!raw || raw === "?" || raw.toLowerCase() === "nan") return null;
 
+    // Split by space to capture "9 1/2" style
     const parts = raw.split(/\s+/);
     let total = 0;
     for (const p of parts) {
@@ -681,25 +616,53 @@
     data: [],
     latestDate: null,
     latestRows: [],
-    currentDatasetKey: null,
     map: null,
     mapLayer: null,
-    chart: null,
-    // Current season (always Ice2025)
-    currentSeasonData: [],
-    currentSeasonLatestDate: null,
-    currentSeasonLatestRows: []
+    chart: null
   };
 
-  async function loadData() {
-    const datasetKey = getCurrentDatasetKey();
-    const cfg = datasetConfigs[datasetKey];
-    state.currentDatasetKey = datasetKey;
+  
+    // List of Excel files available for download.
+  // Paths are relative to index.html. Update this list when you add a new file.
+  const excelFiles = [
+    {
+      file: "Ice2024.xlsx",
+      label: "Ice thickness 2024–25 (Excel)"
+    },
+    // Example if you add more:
+    // { file: "Ice2023.xlsx", label: "Ice thickness 2023–24 (Excel)" },
+    // { file: "Ice2022_chain_of_lakes.xlsx", label: "Ice thickness 2022–23 (Excel)" }
+  ];
 
-    // Load selected dataset
-    const resp = await fetch(cfg.json);
+    function renderExcelDownloads() {
+    const listEl = document.getElementById("excel-download-list");
+    if (!listEl) return;
+
+    listEl.innerHTML = "";
+
+    if (!excelFiles.length) {
+      const li = document.createElement("li");
+      li.textContent = "No Excel files are currently available.";
+      listEl.appendChild(li);
+      return;
+    }
+
+    excelFiles.forEach(item => {
+      const li = document.createElement("li");
+      const a = document.createElement("a");
+      a.href = item.file;
+      a.download = "";
+      a.textContent = item.label || item.file;
+      li.appendChild(a);
+      listEl.appendChild(li);
+    });
+  }
+
+  async function loadData() {
+    const resp = await fetch("Ice2024.json");
     const json = await resp.json();
 
+    // Normalize dates and precompute numeric thickness
     const processed = json
       .map(row => {
         const date = row.date;
@@ -710,10 +673,11 @@
           thickness_parsed: tParsed,
         };
       })
-      .filter(row => row.date);
+      .filter(row => row.date); // keep only rows with a date
 
     state.data = processed;
 
+    // Determine latest date
     const dates = processed
       .map(r => new Date(r.date))
       .filter(d => !isNaN(d.getTime()));
@@ -724,54 +688,13 @@
       ? processed.filter(r => new Date(r.date).toDateString() === maxDate.toDateString())
       : [];
 
-    // Load current season (Ice2025) for its dedicated tab
-    await loadCurrentSeasonData();
-
     initFilters(processed);
-    initMap();
-    initChart();
-    renderCurrentSeason();
+    initMap();          // needs data
+    initChart();        // needs data + filters
     renderCurrent();
     renderHistory();
     updateMapMarkers();
     updateChartForSelectedLake();
-  }
-
-  async function loadCurrentSeasonData() {
-    const cfg = datasetConfigs.ice2025;
-    try {
-      const resp = await fetch(cfg.json);
-      const json = await resp.json();
-
-      const processed = json
-        .map(row => {
-          const date = row.date;
-          const tParsed = parseThickness(row.thickness_cm);
-          return {
-            ...row,
-            date,
-            thickness_parsed: tParsed,
-          };
-        })
-        .filter(row => row.date);
-
-      state.currentSeasonData = processed;
-
-      const dates = processed
-        .map(r => new Date(r.date))
-        .filter(d => !isNaN(d.getTime()));
-      const maxDate = dates.length ? new Date(Math.max(...dates)) : null;
-      state.currentSeasonLatestDate = maxDate;
-
-      state.currentSeasonLatestRows = maxDate
-        ? processed.filter(r => new Date(r.date).toDateString() === maxDate.toDateString())
-        : [];
-    } catch (e) {
-      console.error("Failed to load current season data", e);
-      state.currentSeasonData = [];
-      state.currentSeasonLatestDate = null;
-      state.currentSeasonLatestRows = [];
-    }
   }
 
   function initFilters(data) {
@@ -782,10 +705,6 @@
     const currentLakeSelect = document.getElementById("current-lake-filter");
     const historyLakeSelect = document.getElementById("history-lake-filter");
     const chartLakeSelect = document.getElementById("chart-lake-select");
-
-    currentLakeSelect.innerHTML = '<option value="all">All lakes</option>';
-    historyLakeSelect.innerHTML = '<option value="all">All lakes</option>';
-    chartLakeSelect.innerHTML = '<option value="">Select a lake…</option>';
 
     for (const lake of lakes) {
       const opt1 = document.createElement("option");
@@ -804,10 +723,12 @@
       chartLakeSelect.appendChild(opt3);
     }
 
+    // Default chart lake = first lake if exists
     if (lakes.length && !chartLakeSelect.value) {
       chartLakeSelect.value = lakes[0];
     }
 
+    // Date range for history filters
     const validDates = data
       .map(r => new Date(r.date))
       .filter(d => !isNaN(d.getTime()))
@@ -822,6 +743,7 @@
       toInput.value = max.toISOString().slice(0, 10);
     }
 
+    // Wire up filter events
     currentLakeSelect.addEventListener("change", () => {
       renderCurrent();
       updateMapMarkers();
@@ -833,104 +755,6 @@
     document.getElementById("history-date-to").addEventListener("change", renderHistory);
 
     chartLakeSelect.addEventListener("change", updateChartForSelectedLake);
-  }
-
-  function renderCurrentSeason() {
-    const grid = document.getElementById("current-season-grid");
-    grid.innerHTML = "";
-
-    const latestLabel = document.getElementById("season-latest-date-label");
-    const statusDot = document.getElementById("season-latest-status-dot");
-
-    if (!state.currentSeasonLatestDate || !state.currentSeasonLatestRows.length) {
-      latestLabel.textContent = "No data";
-      statusDot.className = "status-dot";
-      grid.innerHTML = "<p>No current season readings available.</p>";
-      return;
-    }
-
-    latestLabel.textContent = formatDate(state.currentSeasonLatestDate.toISOString());
-
-    const maxRisk = state.currentSeasonLatestRows.reduce((acc, r) => {
-      if (r.thickness_parsed === null) return acc;
-      if (r.thickness_parsed < 4) return 3;
-      if (r.thickness_parsed < 8) return Math.max(acc, 2);
-      return Math.max(acc, 1);
-    }, 0);
-
-    statusDot.className = "status-dot " + (maxRisk === 3 ? "danger" : maxRisk === 2 ? "warn" : "safe");
-
-    // Group latest rows by lake
-    const grouped = new Map();
-    for (const r of state.currentSeasonLatestRows) {
-      if (!grouped.has(r.lake)) grouped.set(r.lake, []);
-      grouped.get(r.lake).push(r);
-    }
-
-    const sortedLakes = Array.from(grouped.keys()).sort((a, b) => String(a).localeCompare(String(b)));
-
-    for (const lake of sortedLakes) {
-      const group = grouped.get(lake);
-      const best = group.reduce((a, b) => {
-        const thA = a.thickness_parsed ?? -Infinity;
-        const thB = b.thickness_parsed ?? -Infinity;
-        return thB > thA ? b : a;
-      }, group[0]);
-
-      const card = document.createElement("article");
-      card.className = "lake-card";
-
-      const header = document.createElement("div");
-      header.className = "lake-header";
-
-      const lakeName = document.createElement("div");
-      lakeName.className = "lake-name";
-      lakeName.textContent = lake;
-
-      const dateSpan = document.createElement("div");
-      dateSpan.className = "lake-date";
-      dateSpan.textContent = formatDate(best.date);
-
-      header.appendChild(lakeName);
-      header.appendChild(dateSpan);
-
-      const thicknessDiv = document.createElement("div");
-      thicknessDiv.className = "thickness";
-
-      const thicknessValue = best.thickness_cm || "–";
-      thicknessDiv.textContent = thicknessValue;
-      const unitSpan = document.createElement("span");
-      unitSpan.className = "unit";
-      unitSpan.textContent = thicknessValue === "–" ? "" : "in";
-      thicknessDiv.appendChild(unitSpan);
-
-      const safetyInfo = safetyCategory(best.thickness_parsed);
-      const safety = document.createElement("span");
-      safety.className = "safety-tag " + safetyInfo.className;
-      safety.textContent = safetyInfo.label;
-
-      const meta = document.createElement("div");
-      meta.className = "lake-meta";
-      if (best.lat || best.long) {
-        meta.textContent = [best.lat, best.long].filter(Boolean).join(" · ");
-      }
-
-      const desc = document.createElement("div");
-      desc.className = "description";
-      desc.textContent = best.description || "";
-
-      card.appendChild(header);
-      card.appendChild(thicknessDiv);
-      card.appendChild(safety);
-      if (meta.textContent) card.appendChild(meta);
-      if (desc.textContent) card.appendChild(desc);
-
-      grid.appendChild(card);
-    }
-
-    if (!grid.children.length) {
-      grid.innerHTML = "<p>No readings for the current season.</p>";
-    }
   }
 
   function renderCurrent() {
@@ -946,12 +770,13 @@
     if (!state.latestDate || !state.latestRows.length) {
       latestDateLabel.textContent = "No data";
       latestStatusDot.className = "status-dot";
-      grid.innerHTML = "<p>No current readings available for the selected dataset.</p>";
+      grid.innerHTML = "<p>No current readings available.</p>";
       return;
     }
 
     latestDateLabel.textContent = formatDate(state.latestDate.toISOString());
 
+    // For the overall dot, look at the worst category in the latest day
     const maxRisk = state.latestRows.reduce((acc, r) => {
       if (r.thickness_parsed === null) return acc;
       if (r.thickness_parsed < 4) return 3;
@@ -974,6 +799,7 @@
       });
     }
 
+    // Group by lake (in case there were multiple holes / readings)
     const grouped = new Map();
     for (const r of rows) {
       if (!grouped.has(r.lake)) grouped.set(r.lake, []);
@@ -984,6 +810,7 @@
 
     for (const lake of sortedLakes) {
       const group = grouped.get(lake);
+      // Pick the highest thickness reading (quick summary)
       const best = group.reduce((a, b) => {
         const thA = a.thickness_parsed ?? -Infinity;
         const thB = b.thickness_parsed ?? -Infinity;
@@ -1059,6 +886,7 @@
     const from = fromStr ? new Date(fromStr) : null;
     const to = toStr ? new Date(toStr) : null;
     if (to) {
+      // include the full day
       to.setHours(23, 59, 59, 999);
     }
 
@@ -1152,6 +980,7 @@
         panels.forEach(p => {
           p.hidden = p.id !== tab;
         });
+        // If switching to current tab, fix map sizing
         if (tab === "current" && state.map) {
           setTimeout(() => state.map.invalidateSize(), 0);
         }
@@ -1175,11 +1004,13 @@
     });
   }
 
+  // --- Map (Leaflet) ---
   function initMap() {
     if (state.map) return;
     const mapEl = document.getElementById("map");
     if (!mapEl) return;
 
+    // Default center: rough Minneapolis coords
     state.map = L.map(mapEl).setView([44.96, -93.29], 12);
 
     L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
@@ -1197,6 +1028,7 @@
 
     const lakeFilter = document.getElementById("current-lake-filter").value;
 
+    // Use the "best" (thickest) reading for each lake on latest day
     let rows = state.latestRows.slice();
     if (lakeFilter !== "all") {
       rows = rows.filter(r => r.lake === lakeFilter);
@@ -1222,7 +1054,7 @@
       if (isNaN(lat) || isNaN(lng)) return;
 
       const safety = safetyCategory(best.thickness_parsed);
-      let color = "#4cd964";
+      let color = "#4cd964"; // safe
       if (safety.className === "caution") color = "#ffc857";
       if (safety.className === "unsafe") color = "#ff4f6a";
 
@@ -1244,12 +1076,14 @@
       markers.push(marker);
     });
 
+    // Auto-fit to markers
     if (markers.length) {
       const group = L.featureGroup(markers);
       state.map.fitBounds(group.getBounds().pad(0.2));
     }
   }
 
+  // --- Chart (Chart.js) ---
   function initChart() {
     const ctx = document.getElementById("lake-chart");
     if (!ctx) return;
@@ -1291,7 +1125,9 @@
           }
         },
         plugins: {
-          legend: { display: false },
+          legend: {
+            display: false
+          },
           tooltip: {
             callbacks: {
               label: function(context) {
@@ -1319,6 +1155,7 @@
       return;
     }
 
+    // Filter data for this lake and sort by date
     const rows = state.data
       .filter(r => r.lake === lake && r.thickness_parsed !== null)
       .sort((a, b) => new Date(a.date) - new Date(b.date));
@@ -1331,55 +1168,14 @@
     chart.update();
   }
 
-  function renderExcelDownloads() {
-    const listEl = document.getElementById("excel-download-list");
-    if (!listEl) return;
-
-    listEl.innerHTML = "";
-
-    if (!excelFiles.length) {
-      const li = document.createElement("li");
-      li.textContent = "No Excel files are currently available.";
-      listEl.appendChild(li);
-      return;
-    }
-
-    excelFiles.forEach(item => {
-      const li = document.createElement("li");
-      const a = document.createElement("a");
-      a.href = item.file;
-      a.download = "";
-      a.textContent = item.label || item.file;
-      li.appendChild(a);
-      listEl.appendChild(li);
-    });
-  }
-
   document.addEventListener("DOMContentLoaded", () => {
     initTabs();
     initHistorySorting();
     renderExcelDownloads();
-
-    // Set dataset select to URL param
-    const datasetSelectEl = document.getElementById("dataset-select");
-    if (datasetSelectEl) {
-      const currentKey = getCurrentDatasetKey();
-      datasetSelectEl.value = currentKey;
-
-      datasetSelectEl.addEventListener("change", () => {
-        const key = datasetSelectEl.value;
-        const params = new URLSearchParams(window.location.search);
-        params.set("dataset", key);
-        window.location.search = params.toString();
-      });
-    }
-
     loadData().catch(err => {
       console.error("Failed to load data:", err);
       const grid = document.getElementById("current-grid");
-      if (grid) {
-        grid.innerHTML = "<p>Could not load data JSON. Make sure the JSON files are in the same folder as index.html.</p>";
-      }
+      grid.innerHTML = "<p>Could not load Ice2024.json. Make sure it is in the same folder as index.html.</p>";
     });
   });
 </script>
