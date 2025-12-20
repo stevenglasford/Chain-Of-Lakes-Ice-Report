@@ -99,37 +99,6 @@
       font-size: 0.85rem;
     }
 
-    .header-controls {
-      margin-top: 0.75rem;
-      display: flex;
-      flex-wrap: wrap;
-      gap: 0.75rem;
-      align-items: center;
-      font-size: 0.85rem;
-    }
-
-    .header-controls .control {
-      display: inline-flex;
-      align-items: center;
-      gap: 0.5rem;
-    }
-
-    .header-controls label {
-      text-transform: uppercase;
-      letter-spacing: 0.08em;
-      color: rgba(255,255,255,0.7);
-      font-size: 0.75rem;
-    }
-
-    .header-controls select {
-      border-radius: 999px;
-      border: 1px solid var(--border-subtle);
-      padding: 0.2rem 0.75rem;
-      background: rgba(4,12,20,0.9);
-      color: #f9fbff;
-      font-size: 0.85rem;
-    }
-
     main {
       flex: 1;
       padding: 1.5rem;
@@ -492,29 +461,6 @@
       <option value="preice2025">Pre-ice-in 2025</option>
     </select>
   </div>
-
-  <div class="header-controls">
-    <div class="control">
-      <label for="unit-select" data-i18n="label_units">Units:</label>
-      <select id="unit-select">
-        <option value="cm">cm</option>
-        <option value="in">in</option>
-      </select>
-    </div>
-    <div class="control">
-      <label for="lang-select" data-i18n="label_language">Language:</label>
-      <select id="lang-select">
-        <option value="en">English</option>
-        <option value="es">Español</option>
-        <option value="fr">Français</option>
-        <option value="hmn">Hmoob</option>
-        <option value="so">Soomaali</option>
-        <option value="ar">العربية</option>
-        <option value="arc">ܐܪܡܝܐ (Aramaic)</option>
-      </select>
-    </div>
-  </div>
-
 </header>
 
 <main>
@@ -670,9 +616,7 @@
       labelShort: "2024–25"
     },
     ice2025: {
-      // Live Google Sheets CSV (share sheet: Anyone with the link -> Viewer)
-      csv: "https://docs.google.com/spreadsheets/d/10smiQBJ8mBWax24aOagG9LdzrrnhFmj0tfRESunUJNI/export?format=csv&gid=0",
-      json: "Ice2025.json", // fallback if CSV fetch fails
+      json: "Ice2025.json",
       labelShort: "2025–26"
     },
     preice2025: {
@@ -680,42 +624,6 @@
       labelShort: "Pre-ice-in 2025"
     }
   };
-
-  // --- Google Sheets CSV support ---
-  // Simple CSV parser: good for numeric/text cells without embedded commas.
-  // If you start using commas inside description cells, we can upgrade this to a quote-aware parser.
-  function parseCsvToObjects(text) {
-    const lines = text.trim().split(/\r?\n/);
-    if (!lines.length) return [];
-
-    const headers = lines[0].split(",").map(h => h.trim());
-    const rows = [];
-
-    for (let i = 1; i < lines.length; i++) {
-      const line = lines[i];
-      if (!line.trim()) continue;
-      const cols = line.split(",").map(c => c.trim());
-      const obj = {};
-      headers.forEach((h, idx) => obj[h] = (cols[idx] ?? ""));
-      rows.push(obj);
-    }
-    return rows;
-  }
-
-  async function fetchDataset(cfg) {
-    if (cfg.csv) {
-      try {
-        const resp = await fetch(cfg.csv);
-        const text = await resp.text();
-        return parseCsvToObjects(text);
-      } catch (e) {
-        console.warn("CSV fetch failed, falling back to JSON:", e);
-      }
-    }
-    const resp = await fetch(cfg.json);
-    return await resp.json();
-  }
-
 
   // Excel files available for download
   const excelFiles = [
@@ -730,381 +638,30 @@
     return datasetConfigs[key] ? key : "ice2025";
   }
 
-  // Thickness is stored as centimeters in the data source.
-  function parseThicknessCm(value) {
+  // Parse "9 1/2", "12", etc. to numeric inches
+  function parseThickness(value) {
     if (value === null || value === undefined) return null;
     const raw = String(value).trim();
     if (!raw || raw === "?" || raw.toLowerCase() === "nan") return null;
 
-    // Accept either plain numbers ("14.2") or strings with extra text ("14 cm")
-    const m = raw.match(/-?\d+(?:\.\d+)?/);
-    if (!m) return null;
-    const n = parseFloat(m[0]);
-    return isNaN(n) ? null : n;
-  }
-
-  // Unit + language preferences (persisted)
-  const UNIT_CM_PER_IN = 2.54;
-
-  function getPreferredUnits() {
-    return localStorage.getItem("ice_units") || "cm";
-  }
-  function setPreferredUnits(units) {
-    localStorage.setItem("ice_units", units);
-  }
-
-  function cmToIn(cm) {
-    return cm / UNIT_CM_PER_IN;
-  }
-
-  function formatThickness(cm, units) {
-    if (cm === null || cm === undefined) return "–";
-    const val = units === "in" ? cmToIn(cm) : cm;
-    return val.toFixed(1);
-  }
-
-  function thicknessUnitsLabel(units) {
-    return units === "in" ? "in" : "cm";
-  }
-
-  // ---- i18n (UI text) ----
-  const I18N = {
-    en: {
-      label_units: "Units:",
-      label_language: "Language:",
-      dataset_label: "Dataset:",
-      tab_current_season: "Current season",
-      tab_selected_status: "Selected dataset status",
-      tab_history: "History & all readings",
-      current_season_latest: "Current season (2025–26) latest:",
-      latest_selected: "Latest measurements in selected dataset:",
-      safety_legend: "Safety legend:",
-      safety_thin: "Thin / unsafe",
-      safety_caution: "Use caution",
-      safety_thicker: "Thicker",
-      filter_by_lake: "Filter by lake",
-      search: "Search",
-      map_title: "Map – latest measurement by lake (selected dataset)",
-      map_note: "Pins show the most recent reading for each lake in the selected dataset. Tap a pin for details.",
-      chart_title: "Ice growth by lake",
-      chart_note: "Pick a lake to see how ice thickness changed over the season (selected dataset).",
-      select_lake: "Select a lake…",
-      history_lake: "Lake",
-      from_date: "From date",
-      to_date: "To date",
-      table_date: "Date",
-      table_lake: "Lake",
-      table_lat: "Lat",
-      table_long: "Long",
-      table_thickness: "Thickness",
-      table_notes: "Notes",
-      downloads_title: "Download ice data (Excel)",
-      downloads_note: "You can download the original Excel files used to build this site.",
-      tip: "Tip: right-click a file and choose “Save link as…” if your browser tries to open it instead of downloading.",
-      no_current_season: "No current season readings available.",
-      no_selected_dataset: "No current readings available for the selected dataset.",
-      no_match_filters: "No readings match your filters."
-    },
-    es: {
-      label_units: "Unidades:",
-      label_language: "Idioma:",
-      dataset_label: "Conjunto de datos:",
-      tab_current_season: "Temporada actual",
-      tab_selected_status: "Estado del conjunto seleccionado",
-      tab_history: "Historial y lecturas",
-      current_season_latest: "Última lectura (temporada 2025–26):",
-      latest_selected: "Últimas lecturas del conjunto seleccionado:",
-      safety_legend: "Leyenda de seguridad:",
-      safety_thin: "Delgado / no seguro",
-      safety_caution: "Precaución",
-      safety_thicker: "Más grueso",
-      filter_by_lake: "Filtrar por lago",
-      search: "Buscar",
-      map_title: "Mapa – última medición por lago (conjunto seleccionado)",
-      map_note: "Los marcadores muestran la lectura más reciente de cada lago. Toca un marcador para ver detalles.",
-      chart_title: "Crecimiento del hielo por lago",
-      chart_note: "Elige un lago para ver cómo cambió el grosor del hielo (conjunto seleccionado).",
-      select_lake: "Selecciona un lago…",
-      history_lake: "Lago",
-      from_date: "Desde",
-      to_date: "Hasta",
-      table_date: "Fecha",
-      table_lake: "Lago",
-      table_lat: "Lat",
-      table_long: "Long",
-      table_thickness: "Grosor",
-      table_notes: "Notas",
-      downloads_title: "Descargar datos (Excel)",
-      downloads_note: "Puedes descargar los archivos originales de Excel usados para este sitio.",
-      tip: "Consejo: haz clic derecho y elige “Guardar enlace como…” si tu navegador intenta abrirlo.",
-      no_current_season: "No hay lecturas disponibles para la temporada actual.",
-      no_selected_dataset: "No hay lecturas disponibles para el conjunto seleccionado.",
-      no_match_filters: "No hay lecturas que coincidan con tus filtros."
-    },
-    fr: {
-      label_units: "Unités :",
-      label_language: "Langue :",
-      dataset_label: "Jeu de données :",
-      tab_current_season: "Saison en cours",
-      tab_selected_status: "État (jeu sélectionné)",
-      tab_history: "Historique et mesures",
-      current_season_latest: "Dernière mesure (saison 2025–26) :",
-      latest_selected: "Dernières mesures (jeu sélectionné) :",
-      safety_legend: "Légende de sécurité :",
-      safety_thin: "Mince / dangereux",
-      safety_caution: "Prudence",
-      safety_thicker: "Plus épais",
-      filter_by_lake: "Filtrer par lac",
-      search: "Rechercher",
-      map_title: "Carte – dernière mesure par lac (jeu sélectionné)",
-      map_note: "Les repères indiquent la mesure la plus récente pour chaque lac. Touchez un repère pour les détails.",
-      chart_title: "Évolution de la glace par lac",
-      chart_note: "Choisissez un lac pour voir l'évolution de l'épaisseur (jeu sélectionné).",
-      select_lake: "Choisir un lac…",
-      history_lake: "Lac",
-      from_date: "Du",
-      to_date: "Au",
-      table_date: "Date",
-      table_lake: "Lac",
-      table_lat: "Lat",
-      table_long: "Long",
-      table_thickness: "Épaisseur",
-      table_notes: "Notes",
-      downloads_title: "Télécharger les données (Excel)",
-      downloads_note: "Vous pouvez télécharger les fichiers Excel originaux utilisés pour ce site.",
-      tip: "Astuce : clic droit puis « Enregistrer le lien sous… » si le navigateur tente d’ouvrir le fichier.",
-      no_current_season: "Aucune mesure disponible pour la saison en cours.",
-      no_selected_dataset: "Aucune mesure disponible pour le jeu sélectionné.",
-      no_match_filters: "Aucune mesure ne correspond à vos filtres."
-    },
-    hmn: {
-      label_units: "Chav ntsuas:",
-      label_language: "Lus:",
-      dataset_label: "Cov ntaub ntawv:",
-      tab_current_season: "Lub caij tam sim no",
-      tab_selected_status: "Xwm txheej (xaiv ntaub ntawv)",
-      tab_history: "Keeb kwm & tag nrho",
-      current_season_latest: "Lub caij (2025–26) tshiab tshaj:",
-      latest_selected: "Ntsuas tshiab tshaj (xaiv ntaub ntawv):",
-      safety_legend: "Daim ntawv qhia kev nyab xeeb:",
-      safety_thin: "Nyias / tsis nyab xeeb",
-      safety_caution: "Ceeb toom",
-      safety_thicker: "Tuab dua",
-      filter_by_lake: "Lim raws pas dej",
-      search: "Nrhiav",
-      map_title: "Daim ntawv qhia – ntsuas tshiab tshaj (xaiv ntaub ntawv)",
-      map_note: "Cov cim qhia qhov ntsuas tshiab tshaj rau txhua pas dej. Nias rau cov ntsiab lus.",
-      chart_title: "Kev loj hlob ntawm dej khov raws pas dej",
-      chart_note: "Xaiv pas dej kom pom kev hloov ntawm tuab (xaiv ntaub ntawv).",
-      select_lake: "Xaiv pas dej…",
-      history_lake: "Pas dej",
-      from_date: "Pib hnub",
-      to_date: "Xaus hnub",
-      table_date: "Hnub",
-      table_lake: "Pas dej",
-      table_lat: "Lat",
-      table_long: "Long",
-      table_thickness: "Tuab",
-      table_notes: "Lus piav",
-      downloads_title: "Rub tawm ntaub ntawv (Excel)",
-      downloads_note: "Koj rub tau cov Excel qub uas siv rau lub vev xaib no.",
-      tip: "Tswv yim: nyem right thiab xaiv “Save link as…” yog browser sim qhib.",
-      no_current_season: "Tsis muaj ntaub ntawv rau lub caij tam sim no.",
-      no_selected_dataset: "Tsis muaj ntaub ntawv rau qhov koj xaiv.",
-      no_match_filters: "Tsis pom ntaub ntawv raws li koj lim."
-    },
-    so: {
-      label_units: "Cutubyo:",
-      label_language: "Luuqad:",
-      dataset_label: "Xogta:",
-      tab_current_season: "Xilli hadda",
-      tab_selected_status: "Xaaladda xogta la doortay",
-      tab_history: "Taariikh & dhammaan cabbirrada",
-      current_season_latest: "Cabbirka ugu dambeeya (xilli 2025–26):",
-      latest_selected: "Cabbirradii ugu dambeeyay (xogta la doortay):",
-      safety_legend: "Hagaha badbaadada:",
-      safety_thin: "Khafiif / halis",
-      safety_caution: "Taxaddar",
-      safety_thicker: "Ka sii dhumuc weyn",
-      filter_by_lake: "Ku shaandhee haro",
-      search: "Raadi",
-      map_title: "Khariidad – cabbirka ugu dambeeya haro kasta (xogta la doortay)",
-      map_note: "Calaamadaha waxay muujiyaan cabbirka ugu dambeeya ee haro kasta. Taabo si aad u aragto faahfaahin.",
-      chart_title: "Kobaca barafka haro ahaan",
-      chart_note: "Dooro haro si aad u aragto isbeddelka dhumucda (xogta la doortay).",
-      select_lake: "Dooro haro…",
-      history_lake: "Haro",
-      from_date: "Laga bilaabo",
-      to_date: "Ilaa",
-      table_date: "Taariikh",
-      table_lake: "Haro",
-      table_lat: "Lat",
-      table_long: "Long",
-      table_thickness: "Dhumuc",
-      table_notes: "Qoraal",
-      downloads_title: "Soo dejiso xogta (Excel)",
-      downloads_note: "Waxaad soo dejisan kartaa faylasha Excel ee asalka ah ee lagu dhisay boggan.",
-      tip: "Talo: right‑click oo dooro “Save link as…” haddii browser-ku isku dayo inuu furo.",
-      no_current_season: "Ma jiraan cabbirro xilli hadda ah.",
-      no_selected_dataset: "Ma jiraan cabbirro xogta la doortay.",
-      no_match_filters: "Ma jiraan cabbirro ku habboon shaandhaynta."
-    },
-    ar: {
-      label_units: "الوحدات:",
-      label_language: "اللغة:",
-      dataset_label: "مجموعة البيانات:",
-      tab_current_season: "الموسم الحالي",
-      tab_selected_status: "حالة المجموعة المختارة",
-      tab_history: "السجل وجميع القياسات",
-      current_season_latest: "آخر قياس (موسم 2025–26):",
-      latest_selected: "آخر قياسات المجموعة المختارة:",
-      safety_legend: "دليل السلامة:",
-      safety_thin: "رقيق / غير آمن",
-      safety_caution: "استخدم الحذر",
-      safety_thicker: "أكثر سماكة",
-      filter_by_lake: "تصفية حسب البحيرة",
-      search: "بحث",
-      map_title: "الخريطة – آخر قياس لكل بحيرة (المجموعة المختارة)",
-      map_note: "تُظهر العلامات أحدث قراءة لكل بحيرة. اضغط على العلامة للتفاصيل.",
-      chart_title: "تغيّر سماكة الجليد حسب البحيرة",
-      chart_note: "اختر بحيرة لرؤية تغير السماكة خلال الموسم (المجموعة المختارة).",
-      select_lake: "اختر بحيرة…",
-      history_lake: "البحيرة",
-      from_date: "من تاريخ",
-      to_date: "إلى تاريخ",
-      table_date: "التاريخ",
-      table_lake: "البحيرة",
-      table_lat: "خط العرض",
-      table_long: "خط الطول",
-      table_thickness: "السماكة",
-      table_notes: "ملاحظات",
-      downloads_title: "تنزيل البيانات (Excel)",
-      downloads_note: "يمكنك تنزيل ملفات Excel الأصلية المستخدمة لبناء هذا الموقع.",
-      tip: "نصيحة: انقر بزر الفأرة الأيمن واختر “Save link as…” إذا حاول المتصفح فتح الملف.",
-      no_current_season: "لا توجد قراءات للموسم الحالي.",
-      no_selected_dataset: "لا توجد قراءات للمجموعة المختارة.",
-      no_match_filters: "لا توجد قراءات مطابقة للفلاتر."
-    },
-    arc: {
-      label_units: "Units:",
-      label_language: "Language:",
-      dataset_label: "Dataset:",
-      tab_current_season: "Current season",
-      tab_selected_status: "Selected dataset status",
-      tab_history: "History & all readings",
-      current_season_latest: "Current season (2025–26) latest:",
-      latest_selected: "Latest measurements in selected dataset:",
-      safety_legend: "Safety legend:",
-      safety_thin: "Thin / unsafe",
-      safety_caution: "Use caution",
-      safety_thicker: "Thicker",
-      filter_by_lake: "Filter by lake",
-      search: "Search",
-      map_title: "Map – latest measurement by lake (selected dataset)",
-      map_note: "Pins show the most recent reading for each lake in the selected dataset. Tap a pin for details.",
-      chart_title: "Ice growth by lake",
-      chart_note: "Pick a lake to see how ice thickness changed over the season (selected dataset).",
-      select_lake: "Select a lake…",
-      history_lake: "Lake",
-      from_date: "From date",
-      to_date: "To date",
-      table_date: "Date",
-      table_lake: "Lake",
-      table_lat: "Lat",
-      table_long: "Long",
-      table_thickness: "Thickness",
-      table_notes: "Notes",
-      downloads_title: "Download ice data (Excel)",
-      downloads_note: "You can download the original Excel files used to build this site.",
-      tip: "Tip: right-click a file and choose “Save link as…” if your browser tries to open it instead of downloading.",
-      no_current_season: "No current season readings available.",
-      no_selected_dataset: "No current readings available for the selected dataset.",
-      no_match_filters: "No readings match your filters."
+    const parts = raw.split(/\s+/);
+    let total = 0;
+    for (const p of parts) {
+      if (!p) continue;
+      if (p.includes("/")) {
+        const [num, den] = p.split("/");
+        const n = parseFloat(num);
+        const d = parseFloat(den);
+        if (!isNaN(n) && !isNaN(d) && d !== 0) {
+          total += n / d;
+        }
+      } else {
+        const n = parseFloat(p);
+        if (!isNaN(n)) total += n;
+      }
     }
-  };
-
-  function getPreferredLanguage() {
-    return localStorage.getItem("ice_lang") || "en";
+    return isNaN(total) ? null : total;
   }
-  function setPreferredLanguage(lang) {
-    localStorage.setItem("ice_lang", lang);
-  }
-
-  function t(key) {
-    const lang = state.lang || "en";
-    return (I18N[lang] && I18N[lang][key]) || I18N.en[key] || key;
-  }
-
-  function applyLanguage(lang) {
-    state.lang = lang;
-    document.documentElement.dir = (lang === "ar") ? "rtl" : "ltr";
-
-    const datasetLabel = document.querySelector('label[for="dataset-select"]');
-    if (datasetLabel) datasetLabel.textContent = t("dataset_label");
-
-    const unitLabel = document.querySelector('label[for="unit-select"]');
-    if (unitLabel) unitLabel.textContent = t("label_units");
-
-    const langLabel = document.querySelector('label[for="lang-select"]');
-    if (langLabel) langLabel.textContent = t("label_language");
-
-    document.querySelectorAll(".tab-button").forEach(btn => {
-      const tab = btn.dataset.tab;
-      if (tab === "currentSeason") btn.textContent = t("tab_current_season");
-      if (tab === "current") btn.textContent = t("tab_selected_status");
-      if (tab === "history") btn.textContent = t("tab_history");
-    });
-
-    const mapTitle = document.querySelector(".map-card h2");
-    if (mapTitle) mapTitle.textContent = t("map_title");
-    const mapNote = document.querySelector(".map-card .map-note");
-    if (mapNote) mapNote.textContent = t("map_note");
-
-    const chartTitle = document.querySelector(".chart-card h2");
-    if (chartTitle) chartTitle.textContent = t("chart_title");
-    const chartNote = document.querySelector(".chart-card p");
-    if (chartNote) chartNote.textContent = t("chart_note");
-    const lakeOpt = document.querySelector("#chart-lake-select option[value='']");
-    if (lakeOpt) lakeOpt.textContent = t("select_lake");
-
-    const f1 = document.querySelector('label[for="current-lake-filter"]');
-    if (f1) f1.textContent = t("filter_by_lake");
-    const f2 = document.querySelector('label[for="search-filter"]');
-    if (f2) f2.textContent = t("search");
-    const f3 = document.querySelector('label[for="history-lake-filter"]');
-    if (f3) f3.textContent = t("history_lake");
-    const f4 = document.querySelector('label[for="history-date-from"]');
-    if (f4) f4.textContent = t("from_date");
-    const f5 = document.querySelector('label[for="history-date-to"]');
-    if (f5) f5.textContent = t("to_date");
-
-    const ths = document.querySelectorAll("thead th");
-    if (ths.length >= 6) {
-      ths[0].textContent = t("table_date");
-      ths[1].textContent = t("table_lake");
-      ths[2].textContent = t("table_lat");
-      ths[3].textContent = t("table_long");
-      ths[4].textContent = t("table_thickness");
-      ths[5].textContent = t("table_notes");
-    }
-
-    const dlTitle = document.querySelector(".download-card h2");
-    if (dlTitle) dlTitle.textContent = t("downloads_title");
-    const dlP = document.querySelector(".download-card p");
-    if (dlP) dlP.textContent = t("downloads_note");
-    const dlTip = document.querySelector(".download-note");
-    if (dlTip) dlTip.textContent = t("tip");
-
-    // Re-render to update unit strings
-    renderCurrentSeason();
-    renderCurrent();
-    renderHistory();
-    updateMapMarkers();
-    updateChartForSelectedLake();
-  }
-
-
-
 
   function formatDate(dateStr) {
     if (!dateStr) return "";
@@ -1113,12 +670,11 @@
     return d.toLocaleDateString(undefined, { year: "numeric", month: "short", day: "numeric" });
   }
 
-  function safetyCategory(thicknessCm) {
-    const inches = thicknessCm === null ? null : cmToIn(thicknessCm);
-    if (inches === null) return { label: "Unknown", className: "", dotClass: "" };
-    if (inches < 4) return { label: t("safety_thin"), className: "unsafe", dotClass: "danger" };
-    if (inches < 8) return { label: t("safety_caution"), className: "caution", dotClass: "warn" };
-    return { label: t("safety_thicker") + " (" + t("safety_caution") + ")", className: "safe", dotClass: "safe" };
+  function safetyCategory(thicknessInches) {
+    if (thicknessInches === null) return { label: "Unknown", className: "", dotClass: "" };
+    if (thicknessInches < 4) return { label: "Thin / unsafe", className: "unsafe", dotClass: "danger" };
+    if (thicknessInches < 8) return { label: "Use caution", className: "caution", dotClass: "warn" };
+    return { label: "Thicker (still use caution)", className: "safe", dotClass: "safe" };
   }
 
   const state = {
@@ -1132,9 +688,7 @@
     // Current season (always Ice2025)
     currentSeasonData: [],
     currentSeasonLatestDate: null,
-    currentSeasonLatestRows: [],
-    units: getPreferredUnits(),
-    lang: getPreferredLanguage()
+    currentSeasonLatestRows: []
   };
 
   async function loadData() {
@@ -1143,16 +697,16 @@
     state.currentDatasetKey = datasetKey;
 
     // Load selected dataset
-    const json = await fetchDataset(cfg);
+    const resp = await fetch(cfg.json);
+    const json = await resp.json();
 
     const processed = json
       .map(row => {
         const date = row.date;
-        const tParsed = parseThicknessCm(row.thickness_cm);
+        const tParsed = parseThickness(row.thickness_cm);
         return {
           ...row,
           date,
-          thickness_cm_num: tParsed,
           thickness_parsed: tParsed,
         };
       })
@@ -1186,17 +740,17 @@
   async function loadCurrentSeasonData() {
     const cfg = datasetConfigs.ice2025;
     try {
-      const json = await fetchDataset(cfg);
+      const resp = await fetch(cfg.json);
+      const json = await resp.json();
 
       const processed = json
         .map(row => {
           const date = row.date;
-          const tParsed = parseThicknessCm(row.thickness_cm);
+          const tParsed = parseThickness(row.thickness_cm);
           return {
             ...row,
             date,
-            thickness_cm_num: tParsed,
-          thickness_parsed: tParsed,
+            thickness_parsed: tParsed,
           };
         })
         .filter(row => row.date);
@@ -1298,9 +852,9 @@
     latestLabel.textContent = formatDate(state.currentSeasonLatestDate.toISOString());
 
     const maxRisk = state.currentSeasonLatestRows.reduce((acc, r) => {
-      if (r.thickness_cm_num === null) return acc;
-      if (cmToIn(r.thickness_cm_num) < 4) return 3;
-      if (cmToIn(r.thickness_cm_num) < 8) return Math.max(acc, 2);
+      if (r.thickness_parsed === null) return acc;
+      if (r.thickness_parsed < 4) return 3;
+      if (r.thickness_parsed < 8) return Math.max(acc, 2);
       return Math.max(acc, 1);
     }, 0);
 
@@ -1318,8 +872,8 @@
     for (const lake of sortedLakes) {
       const group = grouped.get(lake);
       const best = group.reduce((a, b) => {
-        const thA = a.thickness_cm_num ?? -Infinity;
-        const thB = b.thickness_cm_num ?? -Infinity;
+        const thA = a.thickness_parsed ?? -Infinity;
+        const thB = b.thickness_parsed ?? -Infinity;
         return thB > thA ? b : a;
       }, group[0]);
 
@@ -1343,15 +897,14 @@
       const thicknessDiv = document.createElement("div");
       thicknessDiv.className = "thickness";
 
-      const units = state.units || "cm";
-      const thicknessValue = best.thickness_cm_num;
-      thicknessDiv.textContent = thicknessValue === null ? "–" : formatThickness(thicknessValue, units);
+      const thicknessValue = best.thickness_cm || "–";
+      thicknessDiv.textContent = thicknessValue;
       const unitSpan = document.createElement("span");
       unitSpan.className = "unit";
-      unitSpan.textContent = thicknessValue === null ? "" : thicknessUnitsLabel(units);
+      unitSpan.textContent = thicknessValue === "–" ? "" : "in";
       thicknessDiv.appendChild(unitSpan);
 
-      const safetyInfo = safetyCategory(best.thickness_cm_num);
+      const safetyInfo = safetyCategory(best.thickness_parsed);
       const safety = document.createElement("span");
       safety.className = "safety-tag " + safetyInfo.className;
       safety.textContent = safetyInfo.label;
@@ -1400,9 +953,9 @@
     latestDateLabel.textContent = formatDate(state.latestDate.toISOString());
 
     const maxRisk = state.latestRows.reduce((acc, r) => {
-      if (r.thickness_cm_num === null) return acc;
-      if (cmToIn(r.thickness_cm_num) < 4) return 3;
-      if (cmToIn(r.thickness_cm_num) < 8) return Math.max(acc, 2);
+      if (r.thickness_parsed === null) return acc;
+      if (r.thickness_parsed < 4) return 3;
+      if (r.thickness_parsed < 8) return Math.max(acc, 2);
       return Math.max(acc, 1);
     }, 0);
 
@@ -1432,8 +985,8 @@
     for (const lake of sortedLakes) {
       const group = grouped.get(lake);
       const best = group.reduce((a, b) => {
-        const thA = a.thickness_cm_num ?? -Infinity;
-        const thB = b.thickness_cm_num ?? -Infinity;
+        const thA = a.thickness_parsed ?? -Infinity;
+        const thB = b.thickness_parsed ?? -Infinity;
         return thB > thA ? b : a;
       }, group[0]);
 
@@ -1457,15 +1010,14 @@
       const thicknessDiv = document.createElement("div");
       thicknessDiv.className = "thickness";
 
-      const units = state.units || "cm";
-      const thicknessValue = best.thickness_cm_num;
-      thicknessDiv.textContent = thicknessValue === null ? "–" : formatThickness(thicknessValue, units);
+      const thicknessValue = best.thickness_cm || "–";
+      thicknessDiv.textContent = thicknessValue;
       const unitSpan = document.createElement("span");
       unitSpan.className = "unit";
-      unitSpan.textContent = thicknessValue === null ? "" : thicknessUnitsLabel(units);
+      unitSpan.textContent = thicknessValue === "–" ? "" : "in";
       thicknessDiv.appendChild(unitSpan);
 
-      const safetyInfo = safetyCategory(best.thickness_cm_num);
+      const safetyInfo = safetyCategory(best.thickness_parsed);
       const safety = document.createElement("span");
       safety.className = "safety-tag " + safetyInfo.className;
       safety.textContent = safetyInfo.label;
@@ -1542,8 +1094,8 @@
         return (da - db) * dir;
       }
       if (key === "thickness_cm") {
-        const ta = a.thickness_cm_num ?? -Infinity;
-        const tb = b.thickness_cm_num ?? -Infinity;
+        const ta = parseThickness(a.thickness_cm) ?? -Infinity;
+        const tb = parseThickness(b.thickness_cm) ?? -Infinity;
         return (ta - tb) * dir;
       }
       return String(va).localeCompare(String(vb)) * dir;
@@ -1569,8 +1121,7 @@
       tr.appendChild(tdLong);
 
       const tdThick = document.createElement("td");
-      const units = state.units || "cm";
-      tdThick.textContent = r.thickness_cm_num === null ? "" : (formatThickness(r.thickness_cm_num, units) + " " + thicknessUnitsLabel(units));
+      tdThick.textContent = r.thickness_cm || "";
       tr.appendChild(tdThick);
 
       const tdDesc = document.createElement("td");
@@ -1661,8 +1212,8 @@
 
     grouped.forEach((group, lake) => {
       const best = group.reduce((a, b) => {
-        const thA = a.thickness_cm_num ?? -Infinity;
-        const thB = b.thickness_cm_num ?? -Infinity;
+        const thA = a.thickness_parsed ?? -Infinity;
+        const thB = b.thickness_parsed ?? -Infinity;
         return thB > thA ? b : a;
       }, group[0]);
 
@@ -1670,7 +1221,7 @@
       const lng = parseFloat(best.long);
       if (isNaN(lat) || isNaN(lng)) return;
 
-      const safety = safetyCategory(best.thickness_cm_num);
+      const safety = safetyCategory(best.thickness_parsed);
       let color = "#4cd964";
       if (safety.className === "caution") color = "#ffc857";
       if (safety.className === "unsafe") color = "#ff4f6a";
@@ -1686,7 +1237,7 @@
       marker.bindPopup(
         `<strong>${lake}</strong><br>` +
         `${formatDate(best.date)}<br>` +
-        (() => { const units = state.units || "cm"; const v = best.thickness_cm_num; return `Thickness: ${v===null ? "–" : formatThickness(v, units)} ${v===null ? "" : thicknessUnitsLabel(units)}<br>`; })() +
+        `Thickness: ${best.thickness_cm || "–"} in<br>` +
         `<small>${safety.label}</small>`
       );
 
@@ -1712,7 +1263,7 @@
         labels: [],
         datasets: [
           {
-            label: "Ice thickness",
+            label: "Ice thickness (inches)",
             data: [],
             tension: 0.25,
             pointRadius: 3,
@@ -1734,7 +1285,7 @@
           y: {
             title: {
               display: true,
-              text: (state.units === "in" ? "Thickness (in)" : "Thickness (cm)")
+              text: "Thickness (inches)"
             },
             beginAtZero: true
           }
@@ -1745,8 +1296,7 @@
             callbacks: {
               label: function(context) {
                 const value = context.parsed.y;
-                const units = state.units || "cm";
-                return ` ${value.toFixed(2)} ${units}`;
+                return ` ${value.toFixed(2)} in`;
               }
             }
           }
@@ -1770,16 +1320,14 @@
     }
 
     const rows = state.data
-      .filter(r => r.lake === lake && r.thickness_cm_num !== null)
+      .filter(r => r.lake === lake && r.thickness_parsed !== null)
       .sort((a, b) => new Date(a.date) - new Date(b.date));
 
     const labels = rows.map(r => formatDate(r.date));
-    const units = state.units || "cm";
-    const values = rows.map(r => units === "in" ? cmToIn(r.thickness_cm_num) : r.thickness_cm_num);
+    const values = rows.map(r => r.thickness_parsed);
 
     chart.data.labels = labels;
     chart.data.datasets[0].data = values;
-    chart.options.scales.y.title.text = (units === "in" ? "Thickness (in)" : "Thickness (cm)");
     chart.update();
   }
 
@@ -1811,36 +1359,6 @@
     initTabs();
     initHistorySorting();
     renderExcelDownloads();
-
-
-    // Units select
-    const unitSelectEl = document.getElementById("unit-select");
-    if (unitSelectEl) {
-      unitSelectEl.value = state.units;
-      unitSelectEl.addEventListener("change", () => {
-        state.units = unitSelectEl.value;
-        setPreferredUnits(state.units);
-        renderCurrentSeason();
-        renderCurrent();
-        renderHistory();
-        updateMapMarkers();
-        updateChartForSelectedLake();
-      });
-    }
-
-    // Language select
-    const langSelectEl = document.getElementById("lang-select");
-    if (langSelectEl) {
-      langSelectEl.value = state.lang;
-      langSelectEl.addEventListener("change", () => {
-        state.lang = langSelectEl.value;
-        setPreferredLanguage(state.lang);
-        applyLanguage(state.lang);
-      });
-    }
-
-    // Apply language at startup
-    applyLanguage(state.lang);
 
     // Set dataset select to URL param
     const datasetSelectEl = document.getElementById("dataset-select");
