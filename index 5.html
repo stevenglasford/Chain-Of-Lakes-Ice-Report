@@ -734,6 +734,8 @@
     }
     return out;
   }
+    return rows;
+  }
 
   function coalesce(obj, keys) {
     for (const k of keys) {
@@ -822,6 +824,10 @@
     const resp = await fetch(cfg.json, { cache: "no-store" });
     const json = await resp.json();
     return json.map(normalizeRow).filter(r => r.date && r.lake);
+  }
+    }
+    const resp = await fetch(cfg.json);
+    return await resp.json();
   }
 
 
@@ -1313,6 +1319,7 @@
     state.currentSeasonLatestRows = [];
   }
 }
+  }
 
   function initFilters(data) {
     const lakes = Array.from(new Set(data.map(r => r.lake))).sort((a, b) =>
