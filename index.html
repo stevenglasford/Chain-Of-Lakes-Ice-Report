@@ -3,551 +3,120 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <title>Ice Report Prototype</title>
+  <title>Ice Report</title>
 
-  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
-        integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin=""/>
-  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
-          integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
+  <link rel="stylesheet" href="styles.css" />
 
-  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
-
-  <style>
-    :root{--bg:#07121f;--panel:#0c1c2e;--text:#eaf2ff;--muted:rgba(234,242,255,.75);--border:rgba(234,242,255,.12);--radius:16px}
-    *{box-sizing:border-box}
-    body{margin:0;font-family:ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial;background:radial-gradient(1000px 500px at 20% -10%, rgba(125,211,252,.22), transparent 60%),radial-gradient(800px 500px at 90% 0%, rgba(34,197,94,.14), transparent 60%),var(--bg);color:var(--text)}
-    header{padding:22px 18px 14px;border-bottom:1px solid var(--border);background:linear-gradient(180deg, rgba(12,28,46,.95), rgba(7,18,31,.75));position:sticky;top:0;z-index:10;backdrop-filter:blur(8px)}
-    .wrap{max-width:1100px;margin:0 auto}
-    h1{margin:0 0 10px;font-size:1.25rem}
-    .sub{margin:0;color:var(--muted);font-size:.95rem}
-    .controls{margin-top:14px;display:flex;flex-wrap:wrap;gap:10px;align-items:flex-end}
-    .ctrl{display:flex;flex-direction:column;gap:6px;min-width:170px}
-    label{font-size:.75rem;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
-    select{appearance:none;background:rgba(4,12,20,.75);color:var(--text);border:1px solid var(--border);padding:8px 12px;border-radius:999px;outline:none}
-    .tabs{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px}
-    .tabbtn{border:1px solid var(--border);background:rgba(4,12,20,.55);color:var(--text);padding:8px 12px;border-radius:999px;cursor:pointer;font-weight:600}
-    .tabbtn[aria-selected="true"]{background:rgba(125,211,252,.18);border-color:rgba(125,211,252,.35)}
-    main{padding:18px}
-    .panel{background:linear-gradient(180deg, rgba(12,28,46,.9), rgba(10,23,38,.88));border:1px solid var(--border);border-radius:var(--radius);padding:14px;margin-bottom:14px}
-    .grid{display:grid;grid-template-columns:1.2fr .8fr;gap:14px}
-    @media (max-width:900px){.grid{grid-template-columns:1fr}}
-    .cards{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
-    @media (max-width:900px){.cards{grid-template-columns:repeat(2,1fr)}}
-    @media (max-width:520px){.cards{grid-template-columns:1fr}}
-    .card{background:rgba(4,12,20,.55);border:1px solid var(--border);border-radius:14px;padding:12px}
-    .k{color:var(--muted);font-size:.8rem}
-    .v{font-size:1.2rem;font-weight:800;margin-top:4px}
-    .tiny{color:var(--muted);font-size:.85rem;margin-top:8px;line-height:1.2}
-    .row{display:flex;gap:12px;flex-wrap:wrap;align-items:center;justify-content:space-between}
-    #map{height:360px;border-radius:14px;border:1px solid var(--border);overflow:hidden}
-    .chartWrap{height:360px}
-    .muted{color:var(--muted)}
-    table{width:100%;border-collapse:collapse;overflow:hidden;border-radius:14px;border:1px solid var(--border)}
-    th,td{text-align:left;padding:10px 10px;border-bottom:1px solid rgba(234,242,255,.08);vertical-align:top;font-size:.92rem}
-    th{color:var(--muted);font-size:.8rem;text-transform:uppercase;letter-spacing:.08em}
-    tr:last-child td{border-bottom:none}
-    .pill{display:inline-block;padding:2px 8px;border-radius:999px;border:1px solid var(--border);font-size:.78rem;color:var(--muted);margin-left:8px}
-    .error{color:#fecaca;background:rgba(251,113,133,.12);border:1px solid rgba(251,113,133,.28);padding:10px 12px;border-radius:14px}
-    .ok{color:#bbf7d0;background:rgba(34,197,94,.10);border:1px solid rgba(34,197,94,.22);padding:10px 12px;border-radius:14px}
-  </style>
+  <!-- Leaflet -->
+  <link
+    rel="stylesheet"
+    href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+    integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
+    crossorigin=""
+  />
 </head>
 <body>
-<header>
-  <div class="wrap">
-    <h1 data-i18n="title">Ice Report</h1>
-    <p class="sub" data-i18n="subtitle">Live prototype: loads data from Google Sheets CSV, shows map + per-lake chart, and supports units + language toggles.</p>
+  <header class="topbar">
+    <div class="brand">
+      <div class="title" id="t_title">Ice Report</div>
+      <div class="subtitle" id="t_subtitle">Live from Google Sheets</div>
+    </div>
 
     <div class="controls">
-      <div class="ctrl">
-        <label for="datasetSelect" data-i18n="dataset_label">Dataset</label>
-        <select id="datasetSelect">
-          <option value="ice2024">2024–2025 (Ice2024)</option>
-          <option value="ice2025">2025–2026 (Current season)</option>
-          <option value="preice2025">Preseason 2025</option>
-        </select>
-      </div>
-
-      <div class="ctrl">
-        <label for="unitSelect" data-i18n="units_label">Units</label>
+      <label class="control">
+        <span id="t_units">Units</span>
         <select id="unitSelect">
-          <option value="cm">cm</option>
-          <option value="in">in</option>
+          <option value="in">Inches</option>
+          <option value="cm">Centimeters</option>
         </select>
-      </div>
+      </label>
 
-      <div class="ctrl">
-        <label for="langSelect" data-i18n="language_label">Language</label>
+      <label class="control">
+        <span id="t_language">Language</span>
         <select id="langSelect">
           <option value="en">English</option>
           <option value="fr">Français</option>
           <option value="es">Español</option>
-          <option value="hmn">Hmoob (Hmong)</option>
+          <option value="hmn">Hmoob</option>
           <option value="so">Soomaali</option>
           <option value="ar">العربية</option>
-          <option value="arc">ܐܪܡܝܐ (Aramaic)</option>
+          <option value="aii">ܐܪܡܝܐ (Aramaic)</option>
         </select>
-      </div>
+      </label>
+
+      <button id="refreshBtn" class="btn">↻ <span id="t_refresh">Refresh</span></button>
     </div>
+  </header>
 
-    <div class="tabs" role="tablist" aria-label="Tabs">
-      <button class="tabbtn" data-tab="currentSeason" aria-selected="true" type="button" data-i18n="tab_current">Current season</button>
-      <button class="tabbtn" data-tab="selected" aria-selected="false" type="button" data-i18n="tab_selected">Selected dataset status</button>
-      <button class="tabbtn" data-tab="history" aria-selected="false" type="button" data-i18n="tab_history">History & all readings</button>
-    </div>
-  </div>
-</header>
-
-<main>
-  <div class="wrap">
-    <div id="statusBox" class="panel"><span class="muted" data-i18n="loading">Loading…</span></div>
-
-    <section id="tab-currentSeason" class="panel">
-      <div class="row">
-        <h2 style="margin:0" data-i18n="h_current">Current season (Ice2025)</h2>
-        <span id="currentDatePill" class="pill"></span>
+  <main class="grid">
+    <section class="card mapCard">
+      <div class="cardHeader">
+        <div class="cardTitle" id="t_map">Map</div>
+        <div class="cardMeta" id="statusLine">—</div>
       </div>
-      <div id="currentCards" class="cards" style="margin-top:12px"></div>
+      <div id="map"></div>
+      <div class="legend" id="legend"></div>
     </section>
 
-    <section id="tab-selected" class="panel" hidden>
-      <div class="row">
-        <h2 style="margin:0" data-i18n="h_selected">Selected dataset status</h2>
-        <span id="selectedDatePill" class="pill"></span>
+    <section class="card summaryCard">
+      <div class="cardHeader">
+        <div class="cardTitle" id="t_latest">Latest per lake</div>
+        <div class="cardMeta" id="t_latest_hint">Most recent entry for each lake</div>
       </div>
-
-      <div class="grid" style="margin-top:12px">
-        <div>
-          <h3 style="margin:0 0 10px" data-i18n="h_map">Map – latest reading by lake</h3>
-          <div id="map"></div>
-          <p class="muted" style="margin:10px 0 0" data-i18n="map_note">Click a marker for details.</p>
-        </div>
-        <div>
-          <h3 style="margin:0 0 10px" data-i18n="h_chart">Ice growth by lake</h3>
-          <p class="muted" style="margin:0 0 10px" data-i18n="chart_note">Choose a lake to plot thickness over time.</p>
-          <select id="lakeSelect" style="width:100%; margin-bottom:10px"></select>
-          <div class="chartWrap">
-            <canvas id="chart"></canvas>
-          </div>
-          <p id="chartMsg" class="muted" style="margin:10px 0 0"></p>
-        </div>
-      </div>
-
-      <div style="margin-top:14px">
-        <h3 style="margin:0 0 10px" data-i18n="h_latest">Latest readings (selected dataset)</h3>
-        <div id="selectedCards" class="cards"></div>
-      </div>
+      <div id="latestList" class="latestList"></div>
     </section>
 
-    <section id="tab-history" class="panel" hidden>
-      <div class="row">
-        <h2 style="margin:0" data-i18n="h_history">History & all readings</h2>
-        <span class="pill" id="historyCountPill"></span>
+    <section class="card tableCard">
+      <div class="cardHeader tableHeader">
+        <div>
+          <div class="cardTitle" id="t_table">Data</div>
+          <div class="cardMeta" id="t_filters">Filters</div>
+        </div>
+
+        <div class="filters">
+          <label class="control">
+            <span id="t_lake">Lake</span>
+            <select id="lakeFilter">
+              <option value="">All</option>
+            </select>
+          </label>
+
+          <label class="control">
+            <span id="t_search">Search</span>
+            <input id="searchInput" placeholder="Info / lake / date…" />
+          </label>
+        </div>
       </div>
 
-      <div style="overflow:auto; margin-top:12px">
-        <table>
+      <div class="tableWrap">
+        <table id="dataTable">
           <thead>
             <tr>
-              <th data-i18n="th_date">Date</th>
-              <th data-i18n="th_lake">Lake</th>
-              <th data-i18n="th_thickness">Thickness</th>
-              <th data-i18n="th_temp">Temp</th>
-              <th data-i18n="th_desc">Notes</th>
+              <th data-key="date" id="th_date">Date</th>
+              <th data-key="lake" id="th_lake">Lake</th>
+              <th data-key="thickness" id="th_thickness">Thickness</th>
+              <th data-key="info" id="th_info">Info</th>
+              <th data-key="coords" id="th_coords">Coordinates</th>
             </tr>
           </thead>
-          <tbody id="historyBody"></tbody>
+          <tbody></tbody>
         </table>
       </div>
+
+      <div class="footerNote">
+        <span id="t_source">Source:</span>
+        <a id="sheetLink" target="_blank" rel="noreferrer">Google Sheet</a>
+      </div>
     </section>
-  </div>
-</main>
+  </main>
 
-<script>
-(() => {
-  "use strict";
+  <script
+    src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+    integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
+    crossorigin=""
+  ></script>
 
-  const datasetConfigs = {
-    ice2024: {
-      label: "Ice2024",
-      csv: "https://docs.google.com/spreadsheets/d/10ll9xieEsBvNVRCbrzX_40V6qi-ZYN76Q6e7ScaiS_k/export?format=csv&gid=0"
-    },
-    ice2025: {
-      label: "Ice2025",
-      csv: "https://docs.google.com/spreadsheets/d/10smiQBJ8mBWax24aOagG9LdzrrnhFmj0tfRESunUJNI/export?format=csv&gid=0"
-    },
-    preice2025: {
-      label: "Pre-ice-in 2025",
-      csv: "https://docs.google.com/spreadsheets/d/1bCuw9eC3rEUfVleZLPOt3sJh7c09SeFPCfxiuuVGuyI/export?format=csv&gid=0"
-    }
-  };
-
-  const state = {
-    selectedDatasetKey: "ice2024",
-    unit: localStorage.getItem("ice_units") || "cm",
-    lang: localStorage.getItem("ice_lang") || "en",
-    dataSelected: [],
-    dataCurrent: [],
-    map: null,
-    markersLayer: null,
-    chart: null
-  };
-
-  const I18N = {
-    en: {
-      title:"Ice Report",
-      subtitle:"Live prototype: loads data from Google Sheets CSV, shows map + per-lake chart, and supports units + language toggles.",
-      dataset_label:"Dataset", units_label:"Units", language_label:"Language",
-      tab_current:"Current season", tab_selected:"Selected dataset status", tab_history:"History & all readings",
-      loading:"Loading…",
-      h_current:"Current season (Ice2025)", h_selected:"Selected dataset status", h_history:"History & all readings",
-      h_map:"Map – latest reading by lake", map_note:"Click a marker for details.",
-      h_chart:"Ice growth by lake", chart_note:"Choose a lake to plot thickness over time.",
-      h_latest:"Latest readings (selected dataset)",
-      th_date:"Date", th_lake:"Lake", th_thickness:"Thickness", th_temp:"Temp", th_desc:"Notes",
-      no_data:"No data loaded. Check the CSV link / gid / header row.",
-      ok_loaded:"Loaded", choose_lake:"Choose a lake…", no_thickness:"No thickness data for this dataset/lake.",
-      latest:"Latest", readings:"readings"
-    },
-    fr: { title:"Rapport de glace", subtitle:"Prototype en direct : charge les données CSV depuis Google Sheets, affiche carte + courbe par lac, avec unités + langue.",
-      dataset_label:"Jeu de données", units_label:"Unités", language_label:"Langue",
-      tab_current:"Saison actuelle", tab_selected:"État du jeu sélectionné", tab_history:"Historique",
-      loading:"Chargement…", h_current:"Saison actuelle (Ice2025)", h_selected:"État du jeu sélectionné", h_history:"Historique & mesures",
-      h_map:"Carte – dernière mesure par lac", map_note:"Cliquez un marqueur pour les détails.",
-      h_chart:"Évolution par lac", chart_note:"Choisissez un lac pour tracer l’épaisseur.",
-      h_latest:"Dernières mesures (jeu sélectionné)", th_date:"Date", th_lake:"Lac", th_thickness:"Épaisseur", th_temp:"Temp", th_desc:"Notes",
-      no_data:"Aucune donnée. Vérifiez le lien CSV / gid / en-têtes.", ok_loaded:"Chargé", choose_lake:"Choisir un lac…", no_thickness:"Pas de données d’épaisseur.",
-      latest:"Dernier", readings:"mesures"
-    },
-    es: { title:"Reporte de hielo", subtitle:"Prototipo en vivo: carga CSV desde Google Sheets, muestra mapa + gráfica por lago, con unidades + idioma.",
-      dataset_label:"Conjunto", units_label:"Unidades", language_label:"Idioma",
-      tab_current:"Temporada actual", tab_selected:"Estado del conjunto", tab_history:"Historial",
-      loading:"Cargando…", h_current:"Temporada actual (Ice2025)", h_selected:"Estado del conjunto", h_history:"Historial y lecturas",
-      h_map:"Mapa – última lectura por lago", map_note:"Haz clic en un marcador para detalles.",
-      h_chart:"Crecimiento por lago", chart_note:"Elige un lago para graficar el grosor.",
-      h_latest:"Lecturas más recientes (conjunto)", th_date:"Fecha", th_lake:"Lago", th_thickness:"Grosor", th_temp:"Temp", th_desc:"Notas",
-      no_data:"No hay datos. Revisa el enlace CSV / gid / encabezados.", ok_loaded:"Cargado", choose_lake:"Elige un lago…", no_thickness:"No hay datos de grosor.",
-      latest:"Último", readings:"lecturas"
-    },
-    hmn: { dataset_label:"Cov ntaub ntawv", units_label:"Chav", language_label:"Lus",
-      tab_current:"Caij no", tab_selected:"Cov ntaub ntawv xaiv", tab_history:"Keeb kwm",
-      loading:"Thauj…", h_current:"Caij no (Ice2025)", h_selected:"Cov ntaub ntawv xaiv", h_history:"Keeb kwm & kev ntsuas",
-      h_map:"Daim ntawv qhia – kev ntsuas tshiab", map_note:"Nias cim kom pom lus.",
-      h_chart:"Kev loj hlob dej khov", chart_note:"Xaiv ib lub pas dej los kos daim kab.",
-      h_latest:"Kev ntsuas tshiab (xaiv)", th_date:"Hnub", th_lake:"Pas dej", th_thickness:"Tuab", th_temp:"Kub", th_desc:"Lus",
-      no_data:"Tsis muaj ntaub ntawv. Xyuas CSV / gid / header.", ok_loaded:"Tau thauj", choose_lake:"Xaiv pas dej…", no_thickness:"Tsis muaj tuab.",
-      latest:"Tshiab", readings:"kev ntsuas"
-    },
-    so: { dataset_label:"Xog", units_label:"Unugyo", language_label:"Luuqad",
-      tab_current:"Xilli‑ciyaareedka hadda", tab_selected:"Xogta la doortay", tab_history:"Taariikh",
-      loading:"Soo dejin…", h_current:"Xilli‑ciyaareedka hadda (Ice2025)", h_selected:"Xogta la doortay", h_history:"Taariikh & cabbirro",
-      h_map:"Khariidad – cabbirkii ugu dambeeyay", map_note:"Guji calaamad si aad u aragto faahfaahin.",
-      h_chart:"Kobaca barafka", chart_note:"Dooro haro si aad u sawirto dhumucda.",
-      h_latest:"Cabbirradii ugu dambeeyay", th_date:"Taariikh", th_lake:"Haro", th_thickness:"Dhumuc", th_temp:"Heerkul", th_desc:"Qoraal",
-      no_data:"Xog ma jiro. Hubi CSV / gid / headers.", ok_loaded:"Wuu shuban yahay", choose_lake:"Dooro haro…", no_thickness:"Ma jiro dhumuc.",
-      latest:"Ugu dambeeyay", readings:"cabbirro"
-    },
-    ar: { dataset_label:"البيانات", units_label:"الوحدات", language_label:"اللغة",
-      tab_current:"الموسم الحالي", tab_selected:"حالة البيانات المختارة", tab_history:"السجل",
-      loading:"جارٍ التحميل…", h_current:"الموسم الحالي (Ice2025)", h_selected:"حالة البيانات المختارة", h_history:"السجل والقياسات",
-      h_map:"الخريطة – أحدث قراءة لكل بحيرة", map_note:"اضغط على العلامة للتفاصيل.",
-      h_chart:"تغيّر السماكة حسب البحيرة", chart_note:"اختر بحيرة لرسم السماكة.",
-      h_latest:"أحدث القراءات (المجموعة المختارة)", th_date:"التاريخ", th_lake:"البحيرة", th_thickness:"السماكة", th_temp:"الحرارة", th_desc:"ملاحظات",
-      no_data:"لا توجد بيانات. تحقّق من رابط CSV / gid / العناوين.", ok_loaded:"تم التحميل", choose_lake:"اختر بحيرة…", no_thickness:"لا توجد بيانات سماكة.",
-      latest:"الأحدث", readings:"قراءات"
-    },
-    arc: { dataset_label:"ܚܙܝܬܐ", units_label:"ܡܕ̈ܘܚܐ", language_label:"ܠܫܢܐ",
-      tab_current:"ܙܒܢܐ ܕܗܫܐ", tab_selected:"ܓܒܝܐ", tab_history:"ܬܫܥܝܬܐ",
-      loading:"ܡܬܛܥܢ…", h_current:"ܙܒܢܐ ܕܗܫܐ (Ice2025)", h_selected:"ܓܒܝܐ", h_history:"ܬܫܥܝܬܐ ܘܡܕ̈ܝܬܐ",
-      h_map:"ܟܪܛܐ – ܚܕܬܐ", map_note:"ܢܩܘܫ ܥܠ ܪܡܙܐ ܠܦܪܛܐ.",
-      h_chart:"ܫܘܚܠܦܐ ܕܥܘܒܝܐ", chart_note:"ܓܒܝ ܝܡܐ ܠܪܫܡܐ.",
-      h_latest:"ܡܕ̈ܝܬܐ ܚܕ̈ܬܐ", th_date:"ܝܘܡܐ", th_lake:"ܝܡܐ", th_thickness:"ܥܘܒܝܐ", th_temp:"ܚܡܝܡܘܬܐ", th_desc:"ܡܠܐ",
-      no_data:"ܠܝܬ ܚܙܝܬܐ. ܒܕܩ CSV / gid / headers.", ok_loaded:"ܐܬܛܥܢ", choose_lake:"ܓܒܝ ܝܡܐ…", no_thickness:"ܠܝܬ ܥܘܒܝܐ.",
-      latest:"ܚܕܬܐ", readings:"ܡܕ̈ܝܬܐ"
-    }
-  };
-
-  function t(key){ const dict = I18N[state.lang] || I18N.en; return dict[key] || I18N.en[key] || key; }
-  function applyI18n(){ document.querySelectorAll("[data-i18n]").forEach(el => { el.textContent = t(el.getAttribute("data-i18n")); }); }
-
-  function cmToIn(cm){ return cm/2.54; }
-  function formatThickness(cmVal){
-    if (cmVal === null || cmVal === undefined || Number.isNaN(cmVal)) return "–";
-    return state.unit === "in" ? (cmToIn(cmVal).toFixed(2) + " in") : (cmVal.toFixed(1) + " cm");
-  }
-
-  function normalizeHeader(h){ return String(h||"").trim().toLowerCase().replace(/\s+/g,"_").replace(/[()]/g,"").replace(/[^a-z0-9_]/g,""); }
-
-  function parseCsv(text){
-    const rows=[]; let row=[]; let field=""; let inQuotes=false;
-    for (let i=0;i<text.length;i++){
-      const c=text[i], n=text[i+1];
-      if (inQuotes){
-        if (c === '"' && n === '"'){ field+='"'; i++; continue; }
-        if (c === '"'){ inQuotes=false; continue; }
-        field += c;
-      } else {
-        if (c === '"'){ inQuotes=true; continue; }
-        if (c === ","){ row.push(field); field=""; continue; }
-        if (c === "\r") continue;
-        if (c === "\n"){ row.push(field); rows.push(row); row=[]; field=""; continue; }
-        field += c;
-      }
-    }
-    row.push(field); rows.push(row);
-    while(rows.length && rows[rows.length-1].every(x => String(x||"").trim()==="")) rows.pop();
-    if (!rows.length) return [];
-    const headers = rows[0].map(normalizeHeader);
-    const out=[];
-    for (let r=1;r<rows.length;r++){
-      const cols=rows[r];
-      if (!cols || cols.every(x => String(x||"").trim()==="")) continue;
-      const obj={};
-      for (let i=0;i<headers.length;i++) obj[headers[i]] = (cols[i] ?? "").trim();
-      out.push(obj);
-    }
-    return out;
-  }
-
-  function coalesce(obj, keys){ for (const k of keys){ const v=obj[k]; if (v!==undefined && v!==null && String(v).trim()!=="") return String(v).trim(); } return ""; }
-
-  function parseCoordinates(coordStr){
-    if (!coordStr) return {lat:null, lon:null};
-    const s=String(coordStr).trim();
-    const simple=s.match(/^\s*([+-]?\d+(?:\.\d+)?)\s*,\s*([+-]?\d+(?:\.\d+)?)\s*$/);
-    if (simple) return {lat:parseFloat(simple[1]), lon:parseFloat(simple[2])};
-    const m=s.match(/([0-9]+(?:\.[0-9]+)?)\s*°?\s*([NS])[^0-9]*([0-9]+(?:\.[0-9]+)?)\s*°?\s*([EW])/i);
-    if (m){
-      let lat=parseFloat(m[1]), lon=parseFloat(m[3]);
-      if (m[2].toUpperCase()==="S") lat=-lat;
-      if (m[4].toUpperCase()==="W") lon=-lon;
-      return {lat, lon};
-    }
-    const nums=s.match(/[-+]?\d+(?:\.\d+)?/g);
-    if (nums && nums.length>=2) return {lat:parseFloat(nums[0]), lon:parseFloat(nums[1])};
-    return {lat:null, lon:null};
-  }
-
-  function normalizeRow(r){
-    const date = coalesce(r, ["date"]);
-    const lake = coalesce(r, ["lake"]);
-    let latStr = coalesce(r, ["lat", "lat_dd"]);
-    let lonStr = coalesce(r, ["long", "long_dd", "lon", "lng"]);
-    if (!latStr || !lonStr){
-      const coord = coalesce(r, ["coordinates"]);
-      const p = parseCoordinates(coord);
-      if (p.lat !== null && !latStr) latStr = String(p.lat);
-      if (p.lon !== null && !lonStr) lonStr = String(p.lon);
-    }
-    const lat = latStr ? parseFloat(latStr) : null;
-    const lon = lonStr ? parseFloat(lonStr) : null;
-
-    let thicknessCmStr = coalesce(r, ["thickness_cm"]);
-    const thicknessInStr = coalesce(r, ["thickness_in", "thickness_inches"]);
-    let thickness_cm_value = null;
-    if (thicknessCmStr){
-      const v = parseFloat(thicknessCmStr.replace(/[^0-9.\-]/g,""));
-      thickness_cm_value = Number.isNaN(v) ? null : v;
-    } else if (thicknessInStr){
-      const v = parseFloat(thicknessInStr.replace(/[^0-9.\-]/g,""));
-      thickness_cm_value = Number.isNaN(v) ? null : (v*2.54);
-    }
-
-    const temp = coalesce(r, ["temp"]);
-    let description = coalesce(r, ["description", "info"]);
-    if (!description && temp) description = `Temp: ${temp}`;
-
-    return {date, lake, lat, lon, thickness_cm_value, temp, description};
-  }
-
-  function parseDateSafe(d){ const dt=new Date(d); return Number.isNaN(dt.getTime())?null:dt; }
-  function sameDay(a,b){ return a.getFullYear()===b.getFullYear() && a.getMonth()===b.getMonth() && a.getDate()===b.getDate(); }
-  function latestDate(rows){
-    const dates = rows.map(r => parseDateSafe(r.date)).filter(Boolean);
-    if (!dates.length) return null;
-    return new Date(Math.max(...dates.map(d=>d.getTime())));
-  }
-
-  async function fetchDataset(key){
-    const url = datasetConfigs[key].csv;
-    const resp = await fetch(url, {cache:"no-store"});
-    const text = await resp.text();
-    const first=text.slice(0,200).toLowerCase();
-    if (!resp.ok || first.includes("<html") || first.includes("<!doctype")) throw new Error(`CSV fetch failed (${resp.status})`);
-    const raw = parseCsv(text);
-    const norm = raw.map(normalizeRow).filter(r => r.date && r.lake);
-    return norm;
-  }
-
-  function escapeHtml(s){ return String(s||"").replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
-  function setStatusOk(msg){ document.getElementById("statusBox").innerHTML = `<div class="ok">${msg}</div>`; }
-  function setStatusErr(msg){ document.getElementById("statusBox").innerHTML = `<div class="error">${msg}</div>`; }
-
-  function renderCards(containerId, rows){
-    const el=document.getElementById(containerId); el.innerHTML="";
-    if (!rows.length){ el.innerHTML = `<div class="muted">${escapeHtml(t("no_data"))}</div>`; return; }
-    rows.slice(0,9).forEach(r=>{
-      const card=document.createElement("div"); card.className="card";
-      card.innerHTML = `<div class="k">${escapeHtml(r.lake)}</div><div class="v">${escapeHtml(formatThickness(r.thickness_cm_value))}</div><div class="tiny">${escapeHtml(r.description||"")}</div>`;
-      el.appendChild(card);
-    });
-  }
-
-  function setPill(id, dateObj){
-    const el=document.getElementById(id);
-    if (!el) return;
-    el.textContent = dateObj ? `${t("latest")}: ${dateObj.toLocaleDateString()}` : "";
-  }
-
-  function initMap(){
-    if (state.map) return;
-    state.map = L.map("map",{scrollWheelZoom:false}).setView([44.9778,-93.2650],11);
-    L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",{maxZoom:19,attribution:"&copy; OpenStreetMap"}).addTo(state.map);
-    state.markersLayer = L.layerGroup().addTo(state.map);
-  }
-
-  function renderMapLatestByLake(rows){
-    initMap(); state.markersLayer.clearLayers();
-    const ld=latestDate(rows); if (!ld) return;
-    const onDay = rows.filter(r => { const d=parseDateSafe(r.date); return d && sameDay(d, ld); });
-    const byLake=new Map();
-    for (const r of onDay){
-      if (r.lat===null || r.lon===null || Number.isNaN(r.lat) || Number.isNaN(r.lon)) continue;
-      const prev=byLake.get(r.lake);
-      if (!prev || (r.thickness_cm_value ?? -1) > (prev.thickness_cm_value ?? -1)) byLake.set(r.lake, r);
-    }
-    const pts=[];
-    for (const r of byLake.values()){
-      pts.push([r.lat,r.lon]);
-      const popup = `<b>${escapeHtml(r.lake)}</b><br/>${escapeHtml(r.date)}<br/>${escapeHtml(formatThickness(r.thickness_cm_value))}<br/>${escapeHtml(r.description||"")}`;
-      L.circleMarker([r.lat,r.lon],{radius:7,weight:1}).bindPopup(popup).addTo(state.markersLayer);
-    }
-    if (pts.length) state.map.fitBounds(L.latLngBounds(pts).pad(0.25));
-  }
-
-  function initChart(){
-    const ctx=document.getElementById("chart");
-    if (state.chart){ state.chart.destroy(); state.chart=null; }
-    state.chart = new Chart(ctx, {
-      type:"line",
-      data:{labels:[],datasets:[{label:"",data:[],tension:0.25}]},
-      options:{
-        responsive:true, maintainAspectRatio:false,
-        scales:{x:{title:{display:true,text:"Date"}}, y:{title:{display:true,text: state.unit==="in" ? "Thickness (in)" : "Thickness (cm)"}}},
-        plugins:{legend:{display:true}}
-      }
-    });
-  }
-
-  function updateLakeSelect(rows){
-    const sel=document.getElementById("lakeSelect");
-    const lakes=Array.from(new Set(rows.map(r=>r.lake))).sort((a,b)=>a.localeCompare(b));
-    sel.innerHTML="";
-    const opt0=document.createElement("option"); opt0.value=""; opt0.textContent=t("choose_lake"); sel.appendChild(opt0);
-    for (const lake of lakes){ const opt=document.createElement("option"); opt.value=lake; opt.textContent=lake; sel.appendChild(opt); }
-  }
-
-  function renderChartForLake(rows, lake){
-    const msg=document.getElementById("chartMsg");
-    if (!lake){ msg.textContent=""; state.chart.data.labels=[]; state.chart.data.datasets[0].data=[]; state.chart.update(); return; }
-    const pts = rows.filter(r => r.lake===lake && r.thickness_cm_value!==null)
-      .map(r => ({d:parseDateSafe(r.date), cm:r.thickness_cm_value}))
-      .filter(p=>p.d).sort((a,b)=>a.d-b.d);
-    if (!pts.length){ msg.textContent=t("no_thickness"); state.chart.data.labels=[]; state.chart.data.datasets[0].data=[]; state.chart.update(); return; }
-    msg.textContent="";
-    state.chart.options.scales.y.title.text = state.unit==="in" ? "Thickness (in)" : "Thickness (cm)";
-    state.chart.data.labels = pts.map(p=>p.d.toLocaleDateString());
-    state.chart.data.datasets[0].label = lake;
-    state.chart.data.datasets[0].data = pts.map(p => state.unit==="in" ? cmToIn(p.cm) : p.cm);
-    state.chart.update();
-  }
-
-  function renderHistory(rows){
-    const body=document.getElementById("historyBody"); body.innerHTML="";
-    const sorted=[...rows].map(r => ({...r,_d:parseDateSafe(r.date)})).sort((a,b)=>(b._d?.getTime()||0)-(a._d?.getTime()||0));
-    document.getElementById("historyCountPill").textContent = `${sorted.length} ${t("readings")}`;
-    for (const r of sorted){
-      const tr=document.createElement("tr");
-      tr.innerHTML = `<td>${escapeHtml(r.date)}</td><td>${escapeHtml(r.lake)}</td><td>${escapeHtml(formatThickness(r.thickness_cm_value))}</td><td>${escapeHtml(r.temp||"")}</td><td>${escapeHtml(r.description||"")}</td>`;
-      body.appendChild(tr);
-    }
-  }
-
-  function switchTab(tabKey){
-    document.querySelectorAll(".tabbtn").forEach(b => b.setAttribute("aria-selected", b.dataset.tab===tabKey ? "true":"false"));
-    document.getElementById("tab-currentSeason").hidden = tabKey!=="currentSeason";
-    document.getElementById("tab-selected").hidden = tabKey!=="selected";
-    document.getElementById("tab-history").hidden = tabKey!=="history";
-    if (tabKey==="selected" && state.map) setTimeout(()=>state.map.invalidateSize(),50);
-  }
-
-  async function refreshAll(){
-    try{
-      document.getElementById("statusBox").innerHTML = `<span class="muted">${escapeHtml(t("loading"))}</span>`;
-      state.dataCurrent = await fetchDataset("ice2025");
-      state.dataSelected = await fetchDataset(state.selectedDatasetKey);
-
-      const dCur=latestDate(state.dataCurrent);
-      const dSel=latestDate(state.dataSelected);
-
-      const curRows = dCur ? state.dataCurrent.filter(r => { const d=parseDateSafe(r.date); return d && sameDay(d,dCur); }) : [];
-      const selRows = dSel ? state.dataSelected.filter(r => { const d=parseDateSafe(r.date); return d && sameDay(d,dSel); }) : [];
-
-      setStatusOk(`${escapeHtml(t("ok_loaded"))}: ${escapeHtml(datasetConfigs[state.selectedDatasetKey].label)} • ${state.dataSelected.length} ${escapeHtml(t("readings"))}`);
-
-      setPill("currentDatePill", dCur);
-      setPill("selectedDatePill", dSel);
-
-      renderCards("currentCards", curRows);
-      renderCards("selectedCards", selRows);
-
-      renderMapLatestByLake(state.dataSelected);
-      initChart();
-      updateLakeSelect(state.dataSelected);
-      renderHistory(state.dataSelected);
-      renderChartForLake(state.dataSelected, "");
-
-    } catch(e){
-      console.error(e);
-      setStatusErr(`${escapeHtml(t("no_data"))}<br/><span class="muted">${escapeHtml(String(e.message||e))}</span>`);
-    }
-  }
-
-  function init(){
-    const ds=document.getElementById("datasetSelect");
-    const unit=document.getElementById("unitSelect");
-    const lang=document.getElementById("langSelect");
-
-    ds.value=state.selectedDatasetKey;
-    unit.value=state.unit;
-    lang.value=state.lang;
-
-    document.documentElement.lang = state.lang==="en" ? "en" : state.lang;
-    document.documentElement.dir = (state.lang==="ar" || state.lang==="arc") ? "rtl" : "ltr";
-
-    ds.addEventListener("change", async () => { state.selectedDatasetKey=ds.value; await refreshAll(); });
-    unit.addEventListener("change", async () => { state.unit=unit.value; localStorage.setItem("ice_units", state.unit); await refreshAll(); });
-    lang.addEventListener("change", async () => {
-      state.lang=lang.value; localStorage.setItem("ice_lang", state.lang);
-      document.documentElement.lang = state.lang==="en" ? "en" : state.lang;
-      document.documentElement.dir = (state.lang==="ar" || state.lang==="arc") ? "rtl" : "ltr";
-      applyI18n();
-      updateLakeSelect(state.dataSelected);
-      document.getElementById("historyCountPill").textContent = `${state.dataSelected.length} ${t("readings")}`;
-    });
-
-    document.querySelectorAll(".tabbtn").forEach(b => b.addEventListener("click", () => switchTab(b.dataset.tab)));
-
-    applyI18n();
-
-    document.getElementById("lakeSelect").addEventListener("change", (e) => {
-      renderChartForLake(state.dataSelected, e.target.value);
-    });
-
-    refreshAll();
-  }
-
-  document.addEventListener("DOMContentLoaded", init);
-})();
-</script>
+  <script src="i18n.js"></script>
+  <script src="app.js"></script>
 </body>
 </html>

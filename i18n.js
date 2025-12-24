@@ -1,0 +1,203 @@
+// Minimal translation dictionary. Add/adjust phrases anytime.
+const I18N = {
+  en: {
+    t_title: "Ice Report",
+    t_subtitle: "Live from Google Sheets",
+    t_units: "Units",
+    t_language: "Language",
+    t_refresh: "Refresh",
+    t_map: "Map",
+    t_latest: "Latest per lake",
+    t_latest_hint: "Most recent entry for each lake",
+    t_table: "Data",
+    t_filters: "Filters",
+    t_lake: "Lake",
+    t_search: "Search",
+    t_source: "Source:",
+    th_date: "Date",
+    th_lake: "Lake",
+    th_thickness: "Thickness",
+    th_info: "Info",
+    th_coords: "Coordinates",
+    status_loading: "Loading…",
+    status_loaded: (n) => `Loaded ${n} rows`,
+    status_error: "Could not load data (check sheet publish settings).",
+    no_coords: "No coordinates",
+    no_thickness: "No thickness"
+  },
+
+  fr: {
+    t_title: "Rapport sur la glace",
+    t_subtitle: "En direct depuis Google Sheets",
+    t_units: "Unités",
+    t_language: "Langue",
+    t_refresh: "Actualiser",
+    t_map: "Carte",
+    t_latest: "Dernières mesures par lac",
+    t_latest_hint: "Entrée la plus récente pour chaque lac",
+    t_table: "Données",
+    t_filters: "Filtres",
+    t_lake: "Lac",
+    t_search: "Rechercher",
+    t_source: "Source :",
+    th_date: "Date",
+    th_lake: "Lac",
+    th_thickness: "Épaisseur",
+    th_info: "Info",
+    th_coords: "Coordonnées",
+    status_loading: "Chargement…",
+    status_loaded: (n) => `${n} lignes chargées`,
+    status_error: "Impossible de charger (vérifie la publication du sheet).",
+    no_coords: "Pas de coordonnées",
+    no_thickness: "Pas d’épaisseur"
+  },
+
+  es: {
+    t_title: "Informe de hielo",
+    t_subtitle: "En vivo desde Google Sheets",
+    t_units: "Unidades",
+    t_language: "Idioma",
+    t_refresh: "Actualizar",
+    t_map: "Mapa",
+    t_latest: "Último por lago",
+    t_latest_hint: "Entrada más reciente por lago",
+    t_table: "Datos",
+    t_filters: "Filtros",
+    t_lake: "Lago",
+    t_search: "Buscar",
+    t_source: "Fuente:",
+    th_date: "Fecha",
+    th_lake: "Lago",
+    th_thickness: "Espesor",
+    th_info: "Info",
+    th_coords: "Coordenadas",
+    status_loading: "Cargando…",
+    status_loaded: (n) => `${n} filas cargadas`,
+    status_error: "No se pudo cargar (revisa publicación del sheet).",
+    no_coords: "Sin coordenadas",
+    no_thickness: "Sin espesor"
+  },
+
+  // These are simple placeholders—feel free to replace with better translations.
+  hmn: {
+    t_title: "Daim Ntawv Tshaj Qhia Dej Khov",
+    t_subtitle: "Nyob ncaj qha ntawm Google Sheets",
+    t_units: "Chav",
+    t_language: "Lus",
+    t_refresh: "Rov tshiab",
+    t_map: "Daim duab qhia",
+    t_latest: "Tshiab tshaj rau txhua lub pas dej",
+    t_latest_hint: "Cov ntaub ntawv tshiab tshaj rau txhua lub pas dej",
+    t_table: "Daim ntawv",
+    t_filters: "Lim",
+    t_lake: "Pas dej",
+    t_search: "Nrhiav",
+    t_source: "Chaw los:",
+    th_date: "Hnub",
+    th_lake: "Pas dej",
+    th_thickness: "Tuab",
+    th_info: "Info",
+    th_coords: "Koordinates",
+    status_loading: "Tab tom thauj…",
+    status_loaded: (n) => `Thauj tau ${n} kab`,
+    status_error: "Thauj tsis tau (xyuas sheet publish).",
+    no_coords: "Tsis muaj koordinates",
+    no_thickness: "Tsis muaj tuab"
+  },
+
+  so: {
+    t_title: "Warbixinta Barafka",
+    t_subtitle: "Si toos ah uga imanaya Google Sheets",
+    t_units: "Unugyo",
+    t_language: "Luuqad",
+    t_refresh: "Cusboonaysii",
+    t_map: "Khariidad",
+    t_latest: "Ugu dambayn halkii haro",
+    t_latest_hint: "Gelinta ugu dambeysa haro kasta",
+    t_table: "Xog",
+    t_filters: "Shaandheyn",
+    t_lake: "Haro",
+    t_search: "Raadi",
+    t_source: "Isha:",
+    th_date: "Taariikh",
+    th_lake: "Haro",
+    th_thickness: "Dhumuc",
+    th_info: "Info",
+    th_coords: "Isuduwaha",
+    status_loading: "Wuu soo dhacayaa…",
+    status_loaded: (n) => `${n} saf ayaa la soo dejiyey`,
+    status_error: "Lama soo dejin karo (hubi publish-ka sheet).",
+    no_coords: "Isuduwaha ma jiro",
+    no_thickness: "Dhumuc ma jiro"
+  },
+
+  ar: {
+    t_title: "تقرير الجليد",
+    t_subtitle: "مباشر من Google Sheets",
+    t_units: "الوحدات",
+    t_language: "اللغة",
+    t_refresh: "تحديث",
+    t_map: "الخريطة",
+    t_latest: "آخر قراءة لكل بحيرة",
+    t_latest_hint: "أحدث إدخال لكل بحيرة",
+    t_table: "البيانات",
+    t_filters: "عوامل التصفية",
+    t_lake: "البحيرة",
+    t_search: "بحث",
+    t_source: "المصدر:",
+    th_date: "التاريخ",
+    th_lake: "البحيرة",
+    th_thickness: "السماكة",
+    th_info: "معلومات",
+    th_coords: "الإحداثيات",
+    status_loading: "جارٍ التحميل…",
+    status_loaded: (n) => `تم تحميل ${n} صف`,
+    status_error: "تعذّر التحميل (تحقق من نشر الجدول).",
+    no_coords: "لا توجد إحداثيات",
+    no_thickness: "لا توجد سماكة"
+  },
+
+  aii: {
+    t_title: "ܕܘܟܬܐ ܕܬܪܝܨܘܬܐ ܕܓܠܝܕܐ",
+    t_subtitle: "ܡܢ Google Sheets ܒܚܝܐ",
+    t_units: "ܡܕܝܢܘܬܐ",
+    t_language: "ܠܫܢܐ",
+    t_refresh: "ܚܕܬ",
+    t_map: "ܟܪܛܐ",
+    t_latest: "ܚܕܬܐ ܠܟܠ ܝܡܐ",
+    t_latest_hint: "ܟܬܒܐ ܚܕܬܐ ܠܟܠ ܝܡܐ",
+    t_table: "ܕܝܬܐ",
+    t_filters: "ܡܣܢܢܐ",
+    t_lake: "ܝܡܐ",
+    t_search: "ܒܨܝ",
+    t_source: "ܡܒܘܥܐ:",
+    th_date: "ܝܘܡܐ",
+    th_lake: "ܝܡܐ",
+    th_thickness: "ܥܒܝܘܬܐ",
+    th_info: "ܡܘܕܥܢܘܬܐ",
+    th_coords: "ܬܘܒܥܐ",
+    status_loading: "ܒܥܒܕܐ ܕܛܥܢܐ…",
+    status_loaded: (n) => `ܛܥܢ ${n} ܣܛܪܐ`,
+    status_error: "ܠܐ ܡܨܐ ܠܛܥܢ (ܚܙܝ publish).",
+    no_coords: "ܠܝܬ ܬܘܒܥܐ",
+    no_thickness: "ܠܝܬ ܥܒܝܘܬܐ"
+  }
+};
+
+function t(lang, key, arg) {
+  const dict = I18N[lang] || I18N.en;
+  const val = dict[key] ?? I18N.en[key] ?? key;
+  return (typeof val === "function") ? val(arg) : val;
+}
+
+function applyTranslations(lang) {
+  document.documentElement.lang = lang;
+  // Arabic is RTL
+  document.documentElement.dir = (lang === "ar") ? "rtl" : "ltr";
+
+  const keys = Object.keys(I18N.en);
+  for (const k of keys) {
+    const el = document.getElementById(k);
+    if (el && typeof I18N.en[k] !== "function") el.textContent = t(lang, k);
+  }
+}
