@@ -193,3 +193,28 @@ tbody tr:hover{ background: rgba(96,165,250,0.08); }
 }
 .footerNote a{ color:var(--accent); text-decoration:none; }
 .footerNote a:hover{ text-decoration:underline; }
+
+.mapHeader{
+  display:flex;
+  align-items:flex-end;
+  justify-content:space-between;
+  gap:12px;
+}
+
+.mapControls{
+  display:flex;
+  gap:10px;
+  align-items:flex-end;
+  flex-wrap:wrap;
+}
+
+.customRangeWrap{
+  display:flex;
+  gap:10px;
+  align-items:flex-end;
+  flex-wrap:wrap;
+}
+
+.customRangeWrap input{
+  min-width: 160px;
+}

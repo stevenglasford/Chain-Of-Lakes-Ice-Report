@@ -27,7 +27,10 @@ const state = {
   sortKey: "date",
   sortDir: "desc",
   lake: "",
-  search: ""
+  search: "",
+  mapRange: localStorage.getItem("mapRange") || "all",
+  mapFrom: localStorage.getItem("mapFrom") || "",
+  mapTo: localStorage.getItem("mapTo") || "",
 };
 
 let map, markersLayer;
@@ -439,6 +442,36 @@ function wireUI() {
     applyTranslations(state.lang);
     rerenderAll();
   });
+  
+    // Map range UI init
+  const mapRangeSelect = document.getElementById("mapRangeSelect");
+  const customWrap = document.getElementById("customRangeWrap");
+  const mapFrom = document.getElementById("mapFrom");
+  const mapTo = document.getElementById("mapTo");
+
+  mapRangeSelect.value = state.mapRange;
+  mapFrom.value = state.mapFrom;
+  mapTo.value = state.mapTo;
+  customWrap.style.display = (state.mapRange === "custom") ? "flex" : "none";
+
+  mapRangeSelect.addEventListener("change", () => {
+    state.mapRange = mapRangeSelect.value;
+    localStorage.setItem("mapRange", state.mapRange);
+    customWrap.style.display = (state.mapRange === "custom") ? "flex" : "none";
+    rerenderAll();
+  });
+
+  mapFrom.addEventListener("change", () => {
+    state.mapFrom = mapFrom.value;
+    localStorage.setItem("mapFrom", state.mapFrom);
+    rerenderAll();
+  });
+
+  mapTo.addEventListener("change", () => {
+    state.mapTo = mapTo.value;
+    localStorage.setItem("mapTo", state.mapTo);
+    rerenderAll();
+  });
 
   document.getElementById("lakeFilter").addEventListener("change", (e) => {
     state.lake = e.target.value;
@@ -472,8 +505,12 @@ function wireUI() {
 function rerenderAll() {
   applyFilters();
   renderTable(state.filtered);
-  renderMap(state.filtered);
-  renderLatestPerLake(state.rows); // latest ignores filter on purpose—easy to change if you want
+
+  // Map uses date range + current table filters (lake/search) by default:
+  const mapRows = filterRowsForMap(state.filtered);
+  renderMap(mapRows);
+
+  renderLatestPerLake(state.rows);
 }
 
 async function loadAndRender() {
@@ -493,3 +530,65 @@ async function loadAndRender() {
   wireUI();
   loadAndRender();
 })();
+
+function toISODateStringUTC(d) {
+  const yyyy = d.getUTCFullYear();
+  const mm = String(d.getUTCMonth() + 1).padStart(2, "0");
+  const dd = String(d.getUTCDate()).padStart(2, "0");
+  return `${yyyy}-${mm}-${dd}`;
+}
+
+function getSeasonStartUTC() {
+  // “This season” = Nov 1 of current season year.
+  // If today is before Nov 1, season started Nov 1 of previous year.
+  const now = new Date();
+  const y = now.getUTCFullYear();
+  const nov1ThisYear = Date.UTC(y, 10, 1); // month 10 = November
+  const seasonYear = (now.getTime() >= nov1ThisYear) ? y : (y - 1);
+  return new Date(Date.UTC(seasonYear, 10, 1));
+}
+
+function getNowUTCDateFloor() {
+  const now = new Date();
+  return new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate()));
+}
+
+function computeMapDateWindow() {
+  const mode = state.mapRange;
+  const now = getNowUTCDateFloor();
+
+  if (mode === "all") return { start: null, end: null };
+
+  if (mode === "season") {
+    const start = getSeasonStartUTC();
+    return { start, end: null };
+  }
+
+  const daysMap = { "7d": 7, "14d": 14, "30d": 30 };
+  if (daysMap[mode]) {
+    const days = daysMap[mode];
+    const start = new Date(now.getTime() - (days * 24 * 60 * 60 * 1000));
+    return { start, end: null };
+  }
+
+  if (mode === "custom") {
+    const start = state.mapFrom ? new Date(state.mapFrom + "T00:00:00Z") : null;
+    const end = state.mapTo ? new Date(state.mapTo + "T23:59:59Z") : null;
+    return { start: start && isFinite(start) ? start : null, end: end && isFinite(end) ? end : null };
+  }
+
+  return { start: null, end: null };
+}
+
+function filterRowsForMap(rows) {
+  const { start, end } = computeMapDateWindow();
+  if (!start && !end) return rows;
+
+  return rows.filter(r => {
+    if (!r.date || !r.date_sort) return false; // no date => don’t show on map
+    const t = r.date_sort;
+    if (start && t < start.getTime()) return false;
+    if (end && t > end.getTime()) return false;
+    return true;
+  });
+}

@@ -23,7 +23,10 @@ const I18N = {
     status_loaded: (n) => `Loaded ${n} rows`,
     status_error: "Could not load data (check sheet publish settings).",
     no_coords: "No coordinates",
-    no_thickness: "No thickness"
+    no_thickness: "No thickness",
+    t_date_range: "Date range",
+    t_from: "From",
+    t_to: "To",
   },
 
   fr: {
@@ -49,7 +52,10 @@ const I18N = {
     status_loaded: (n) => `${n} lignes chargées`,
     status_error: "Impossible de charger (vérifie la publication du sheet).",
     no_coords: "Pas de coordonnées",
-    no_thickness: "Pas d’épaisseur"
+    no_thickness: "Pas d’épaisseur",
+    t_date_range: "Plage de dates",
+    t_from: "Du",
+    t_to: "Au",
   },
 
   es: {
