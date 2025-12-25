@@ -81,7 +81,10 @@ const I18N = {
     status_loaded: (n) => `${n} filas cargadas`,
     status_error: "No se pudo cargar (revisa publicación del sheet).",
     no_coords: "Sin coordenadas",
-    no_thickness: "Sin espesor"
+    no_thickness: "Sin espesor",
+    t_date_range: "Rango de fechas",
+    t_from: "Desde",
+    t_to: "Hasta",
   },
 
   // These are simple placeholders—feel free to replace with better translations.
@@ -108,7 +111,10 @@ const I18N = {
     status_loaded: (n) => `Thauj tau ${n} kab`,
     status_error: "Thauj tsis tau (xyuas sheet publish).",
     no_coords: "Tsis muaj koordinates",
-    no_thickness: "Tsis muaj tuab"
+    no_thickness: "Tsis muaj tuab",
+    t_date_range: "Qhov ntau hnub tim",
+    t_from: "Pib",
+    t_to: "Xaus",
   },
 
   so: {
@@ -134,7 +140,10 @@ const I18N = {
     status_loaded: (n) => `${n} saf ayaa la soo dejiyey`,
     status_error: "Lama soo dejin karo (hubi publish-ka sheet).",
     no_coords: "Isuduwaha ma jiro",
-    no_thickness: "Dhumuc ma jiro"
+    no_thickness: "Dhumuc ma jiro",
+    t_date_range: "Xadka taariikhaha",
+    t_from: "Laga bilaabo",
+    t_to: "Ilaa",
   },
 
   ar: {
@@ -160,7 +169,10 @@ const I18N = {
     status_loaded: (n) => `تم تحميل ${n} صف`,
     status_error: "تعذّر التحميل (تحقق من نشر الجدول).",
     no_coords: "لا توجد إحداثيات",
-    no_thickness: "لا توجد سماكة"
+    no_thickness: "لا توجد سماكة",
+    t_date_range: "نطاق التاريخ",
+    t_from: "من",
+    t_to: "إلى",
   },
 
   aii: {
@@ -186,7 +198,10 @@ const I18N = {
     status_loaded: (n) => `ܛܥܢ ${n} ܣܛܪܐ`,
     status_error: "ܠܐ ܡܨܐ ܠܛܥܢ (ܚܙܝ publish).",
     no_coords: "ܠܝܬ ܬܘܒܥܐ",
-    no_thickness: "ܠܝܬ ܥܒܝܘܬܐ"
+    no_thickness: "ܠܝܬ ܥܒܝܘܬܐ",
+    t_date_range: "ܬܚܘܡܐ ܕܝܘܡܬ̈ܐ",
+    t_from: "ܡܢ",
+    t_to: "ܥܕܡܐ ܠ",
   }
 };
 
