@@ -6,7 +6,7 @@ const SHEET_ID = "10smiQBJ8mBWax24aOagG9LdzrrnhFmj0tfRESunUJNI";
 // Option A (recommended): if you publish to web, use CSV export like below.
 // You must set the gid of your data tab.
 // If you're not sure, open your sheet and look for ".../edit#gid=123456"
-const GID = "AllData";
+const GID = "2029178353";
 
 // If using Publish-to-web CSV, this works well:
 const CSV_URL = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/export?format=csv&gid=${GID}`;
