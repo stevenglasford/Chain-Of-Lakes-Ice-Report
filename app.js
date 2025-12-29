@@ -478,10 +478,20 @@ function wireUI() {
     rerenderAll();
   });
 
-  document.getElementById("searchInput").addEventListener("input", (e) => {
-    state.search = e.target.value;
-    rerenderAll();
-  });
+  const searchInput = document.getElementById("searchInput");
+
+// Set initial value (from URL if present)
+searchInput.value = state.search || "";
+
+// Update filters + URL as user types
+searchInput.addEventListener("input", (e) => {
+  state.search = e.target.value;
+
+  // Put the search into the URL so it’s shareable: ?q=...
+  setQueryParam("q", state.search, { push: false });
+
+  rerenderAll();
+});
 
   document.getElementById("refreshBtn").addEventListener("click", async () => {
     await loadAndRender();
@@ -520,6 +530,9 @@ async function loadAndRender() {
 }
 
 (function init() {
+  // Pull initial search from URL, e.g. ?q=12-23-2025
+  state.search = getQueryParam("q") || "";
+
   // Sheet link
   const sheetLink = document.getElementById("sheetLink");
   sheetLink.href = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/edit`;
@@ -527,8 +540,17 @@ async function loadAndRender() {
 
   applyTranslations(state.lang);
   initMap();
-  wireUI();
+  wireUI();       // wireUI will now set the input value from state.search
   loadAndRender();
+
+  // If the user presses back/forward, sync UI with the URL
+  window.addEventListener("popstate", () => {
+    const q = getQueryParam("q") || "";
+    state.search = q;
+    const input = document.getElementById("searchInput");
+    if (input) input.value = q;
+    rerenderAll();
+  });
 })();
 
 function toISODateStringUTC(d) {
