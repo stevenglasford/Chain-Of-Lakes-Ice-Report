@@ -427,6 +427,8 @@ function renderLatestPerLake(rows) {
 }
 
 function wireUI() {
+  document.getElementById("lakeFilter").value = state.lake;
+  document.getElementById("searchInput").value = state.search;
   document.getElementById("unitSelect").value = state.unit;
   document.getElementById("langSelect").value = state.lang;
 
@@ -521,6 +523,7 @@ function rerenderAll() {
   renderMap(mapRows);
 
   renderLatestPerLake(state.rows);
+  syncStateToURL();
 }
 
 async function loadAndRender() {
@@ -530,6 +533,9 @@ async function loadAndRender() {
 }
 
 (function init() {
+  // Load URL params into state first
+  readStateFromURL();
+
   // Pull initial search from URL, e.g. ?q=12-23-2025
   state.search = getQueryParam("q") || "";
 
@@ -613,4 +619,57 @@ function filterRowsForMap(rows) {
     if (end && t > end.getTime()) return false;
     return true;
   });
+}
+
+function readStateFromURL() {
+  const url = new URL(window.location.href);
+  const p = url.searchParams;
+
+  // Table filters
+  if (p.has("q")) state.search = p.get("q") || "";
+  if (p.has("lake")) state.lake = p.get("lake") || "";
+
+  // Display prefs
+  if (p.has("unit")) state.unit = p.get("unit") || state.unit;
+  if (p.has("lang")) state.lang = p.get("lang") || state.lang;
+
+  // Sorting
+  if (p.has("sort")) state.sortKey = p.get("sort") || state.sortKey;
+  if (p.has("dir")) state.sortDir = p.get("dir") || state.sortDir;
+
+  // Map date range
+  if (p.has("range")) state.mapRange = p.get("range") || state.mapRange;
+  if (p.has("from")) state.mapFrom = p.get("from") || "";
+  if (p.has("to")) state.mapTo = p.get("to") || "";
+}
+
+function syncStateToURL() {
+  const url = new URL(window.location.href);
+  const p = url.searchParams;
+
+  // Always include these so links are “exact view”
+  p.set("unit", state.unit);
+  p.set("lang", state.lang);
+  p.set("sort", state.sortKey);
+  p.set("dir", state.sortDir);
+
+  // Optional filters
+  if (state.search && state.search.trim() !== "") p.set("q", state.search.trim());
+  else p.delete("q");
+
+  if (state.lake && state.lake.trim() !== "") p.set("lake", state.lake.trim());
+  else p.delete("lake");
+
+  // Map range
+  p.set("range", state.mapRange);
+  if (state.mapRange === "custom") {
+    if (state.mapFrom) p.set("from", state.mapFrom); else p.delete("from");
+    if (state.mapTo) p.set("to", state.mapTo); else p.delete("to");
+  } else {
+    p.delete("from");
+    p.delete("to");
+  }
+
+  // Update the URL without reloading
+  window.history.replaceState({}, "", url.toString());
 }
