@@ -33,6 +33,97 @@ const state = {
   mapTo: localStorage.getItem("mapTo") || "",
 };
 
+// ---------------------------
+// Shareable URL state
+// ---------------------------
+function hydrateStateFromURL() {
+  const params = new URLSearchParams(window.location.search);
+
+  const q = params.get("q");
+  if (q !== null) state.search = q;
+
+  const lake = params.get("lake");
+  if (lake !== null) state.selectedLake = lake;
+
+  const unit = params.get("unit");
+  if (unit === "in" || unit === "cm") {
+    state.unit = unit;
+    localStorage.setItem("unit", unit);
+  }
+
+  const lang = params.get("lang");
+  if (lang) {
+    state.lang = lang;
+    localStorage.setItem("lang", lang);
+  }
+
+  const range = params.get("range");
+  if (range) {
+    state.mapRange = range;
+    localStorage.setItem("mapRange", range);
+  }
+
+  const from = params.get("from");
+  if (from !== null) {
+    state.mapFrom = from;
+    localStorage.setItem("mapFrom", from);
+  }
+
+  const to = params.get("to");
+  if (to !== null) {
+    state.mapTo = to;
+    localStorage.setItem("mapTo", to);
+  }
+
+  // Handle Back/Forward
+  if (!window.__icePopStateHooked) {
+    window.__icePopStateHooked = true;
+    window.addEventListener("popstate", () => {
+      hydrateStateFromURL();
+      applyTranslations(state.lang);
+
+      // Re-sync UI widgets to hydrated state
+      const searchInput = document.getElementById("searchInput");
+      if (searchInput) searchInput.value = state.search || "";
+      const lakeSelect = document.getElementById("lakeSelect");
+      if (lakeSelect) lakeSelect.value = state.selectedLake;
+      const unitSelect = document.getElementById("unitSelect");
+      if (unitSelect) unitSelect.value = state.unit;
+      const langSelect = document.getElementById("langSelect");
+      if (langSelect) langSelect.value = state.lang;
+
+      const mapRangeSelect = document.getElementById("mapRangeSelect");
+      if (mapRangeSelect) mapRangeSelect.value = state.mapRange;
+      const mapFromInput = document.getElementById("mapFromInput");
+      if (mapFromInput) mapFromInput.value = state.mapFrom || "";
+      const mapToInput = document.getElementById("mapToInput");
+      if (mapToInput) mapToInput.value = state.mapTo || "";
+
+      rerenderAll();
+    });
+  }
+}
+
+function syncUrlFromState(push = false) {
+  const url = new URL(window.location.href);
+
+  const set = (k, v) => {
+    if (v === undefined || v === null || String(v).trim() === "") url.searchParams.delete(k);
+    else url.searchParams.set(k, String(v).trim());
+  };
+
+  set("q", state.search);
+  set("lake", state.selectedLake && state.selectedLake !== "all" ? state.selectedLake : "");
+  set("unit", state.unit);
+  set("lang", state.lang);
+  set("range", state.mapRange);
+  set("from", state.mapRange === "custom" ? state.mapFrom : "");
+  set("to", state.mapRange === "custom" ? state.mapTo : "");
+
+  if (push) window.history.pushState({}, "", url.toString());
+  else window.history.replaceState({}, "", url.toString());
+}
+
 let map, markersLayer;
 
 function setStatus(msg) {
@@ -524,6 +615,7 @@ function rerenderAll() {
 
   renderLatestPerLake(state.rows);
   syncStateToURL();
+  syncUrlFromState(false);
 }
 
 async function loadAndRender() {
@@ -533,6 +625,7 @@ async function loadAndRender() {
 }
 
 (function init() {
+  hydrateStateFromURL();
   // Load URL params into state first
   readStateFromURL();
 
