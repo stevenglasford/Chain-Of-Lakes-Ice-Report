@@ -143,46 +143,53 @@ function parseCoords(raw) {
   return { lat, lon };
 }
 
-function parseDate(raw) {
-  if (!raw) return null;
+function parseDate(value) {
+  // Accepts:
+  // - Google GViz strings like Date(2025,2,11) (month is 0-based)
+  // - JS Date objects
+  // - M/D/YYYY, M-D-YYYY, YYYY-MM-DD
+  if (!value) return null;
 
-  // 1) If it's already a Date object
-  if (raw instanceof Date && isFinite(raw.getTime())) return raw;
-
-  const s = String(raw).trim();
-
-  // 2) GViz format: Date(2025,2,11)  where month is 0-based
-  // Also tolerate spaces: Date(2025, 2, 11)
-  let m = s.match(/^Date\((\d{4})\s*,\s*(\d{1,2})\s*,\s*(\d{1,2})\)$/i);
-  if (m) {
-    const yyyy = Number(m[1]);
-    const mm0 = Number(m[2]); // 0-based
-    const dd = Number(m[3]);
-    const d = new Date(Date.UTC(yyyy, mm0, dd));
-    return isFinite(d.getTime()) ? d : null;
+  if (value instanceof Date && !Number.isNaN(value.getTime())) {
+    return new Date(value.getFullYear(), value.getMonth(), value.getDate());
   }
 
-  // 3) Your sheet format: M-D-YYYY or MM-DD-YYYY (e.g., 12-23-2025)
-  m = s.match(/^(\d{1,2})-(\d{1,2})-(\d{4})$/);
+  const s = String(value).trim();
+
+  // GViz: Date(YYYY,MM,DD) where MM is 0-based
+  let m = s.match(/^Date\((\d{4}),\s*(\d{1,2}),\s*(\d{1,2})\)$/i);
   if (m) {
-    const mm = Number(m[1]);
-    const dd = Number(m[2]);
-    const yyyy = Number(m[3]);
-    const d = new Date(Date.UTC(yyyy, mm - 1, dd));
-    return isFinite(d.getTime()) ? d : null;
+    const y = Number(m[1]);
+    const mon0 = Number(m[2]);
+    const d = Number(m[3]);
+    return new Date(y, mon0, d);
   }
 
-  // 4) Also accept M/D/YYYY just in case
-  m = s.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/);
+  // ISO-ish: YYYY-MM-DD or YYYY/MM/DD
+  m = s.match(/^(\d{4})[\/-](\d{1,2})[\/-](\d{1,2})$/);
   if (m) {
-    const mm = Number(m[1]);
-    const dd = Number(m[2]);
-    const yyyy = Number(m[3]);
-    const d = new Date(Date.UTC(yyyy, mm - 1, dd));
-    return isFinite(d.getTime()) ? d : null;
+    const y = Number(m[1]);
+    const mon1 = Number(m[2]);
+    const d = Number(m[3]);
+    return new Date(y, mon1 - 1, d);
+  }
+
+  // US: MM-DD-YYYY or MM/DD/YYYY
+  m = s.match(/^(\d{1,2})[\/-](\d{1,2})[\/-](\d{4})$/);
+  if (m) {
+    const mon1 = Number(m[1]);
+    const d = Number(m[2]);
+    const y = Number(m[3]);
+    return new Date(y, mon1 - 1, d);
   }
 
   return null;
+}
+
+function formatDateMDY(value) {
+  const d = parseDate(value);
+  if (!d) return value ? String(value).trim() : "";
+  return `${d.getMonth() + 1}/${d.getDate()}/${d.getFullYear()}`;
 }
 
 function normRow(obj) {
@@ -207,7 +214,7 @@ function normRow(obj) {
     : (thickness_in != null ? inchesToCm(thickness_in) : null);
 
   return {
-    date_raw: dateDisplay,
+    date_raw: formatDateMDY(dateRaw),
     date: dateObj,
     date_sort: dateObj ? dateObj.getTime() : 0,    lake,
     coords_raw: coordsRaw ? String(coordsRaw).trim() : "",
