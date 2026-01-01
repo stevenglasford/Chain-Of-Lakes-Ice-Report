@@ -582,12 +582,12 @@ async function loadAndRender() {
   sheetLink.href = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/edit`;
   sheetLink.textContent = `docs.google.com/spreadsheets/d/${SHEET_ID}`;
 
-  // If the URL includes filters (e.g. ?q=12-23-2025), hydrate state first so UI + data match.
+  // Wire UI first so element refs exist, then hydrate state from URL.
+  wireUI();
   hydrateShareStateFromURL();
 
   applyTranslations(state.lang);
   initMap();
-  wireUI();
   loadAndRender();
 })();
 
