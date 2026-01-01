@@ -8,18 +8,14 @@ const SHEET_ID = "10smiQBJ8mBWax24aOagG9LdzrrnhFmj0tfRESunUJNI";
 // If you're not sure, open your sheet and look for ".../edit#gid=123456"
 const GID = "2029178353";
 
-// Name of the tab that contains the combined dataset
-const DATA_SHEET_NAME = "AllData";
-
 // If using Publish-to-web CSV, this works well:
 const CSV_URL = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/export?format=csv&gid=${GID}`;
 
 // Option B (fallback): Google Visualization JSON endpoint (sometimes blocked).
-const GVIZ_URL = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:json&sheet=${encodeURIComponent(DATA_SHEET_NAME)}`;
+const GVIZ_URL = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:json&gid=${GID}`;
 
 // Choose fetch mode:
-// GViz usually works without needing "Publish to web", so it's the safest default.
-const FETCH_MODE = "gviz"; // "csv" or "gviz"
+const FETCH_MODE = "csv"; // "csv" or "gviz"
 
 // ==========================
 
@@ -36,6 +32,97 @@ const state = {
   mapFrom: localStorage.getItem("mapFrom") || "",
   mapTo: localStorage.getItem("mapTo") || "",
 };
+
+// ---------------------------
+// Shareable URL state
+// ---------------------------
+function hydrateStateFromURL() {
+  const params = new URLSearchParams(window.location.search);
+
+  const q = params.get("q");
+  if (q !== null) state.search = q;
+
+  const lake = params.get("lake");
+  if (lake !== null) state.selectedLake = lake;
+
+  const unit = params.get("unit");
+  if (unit === "in" || unit === "cm") {
+    state.unit = unit;
+    localStorage.setItem("unit", unit);
+  }
+
+  const lang = params.get("lang");
+  if (lang) {
+    state.lang = lang;
+    localStorage.setItem("lang", lang);
+  }
+
+  const range = params.get("range");
+  if (range) {
+    state.mapRange = range;
+    localStorage.setItem("mapRange", range);
+  }
+
+  const from = params.get("from");
+  if (from !== null) {
+    state.mapFrom = from;
+    localStorage.setItem("mapFrom", from);
+  }
+
+  const to = params.get("to");
+  if (to !== null) {
+    state.mapTo = to;
+    localStorage.setItem("mapTo", to);
+  }
+
+  // Handle Back/Forward
+  if (!window.__icePopStateHooked) {
+    window.__icePopStateHooked = true;
+    window.addEventListener("popstate", () => {
+      hydrateStateFromURL();
+      applyTranslations(state.lang);
+
+      // Re-sync UI widgets to hydrated state
+      const searchInput = document.getElementById("searchInput");
+      if (searchInput) searchInput.value = state.search || "";
+      const lakeSelect = document.getElementById("lakeSelect");
+      if (lakeSelect) lakeSelect.value = state.selectedLake;
+      const unitSelect = document.getElementById("unitSelect");
+      if (unitSelect) unitSelect.value = state.unit;
+      const langSelect = document.getElementById("langSelect");
+      if (langSelect) langSelect.value = state.lang;
+
+      const mapRangeSelect = document.getElementById("mapRangeSelect");
+      if (mapRangeSelect) mapRangeSelect.value = state.mapRange;
+      const mapFromInput = document.getElementById("mapFromInput");
+      if (mapFromInput) mapFromInput.value = state.mapFrom || "";
+      const mapToInput = document.getElementById("mapToInput");
+      if (mapToInput) mapToInput.value = state.mapTo || "";
+
+      rerenderAll();
+    });
+  }
+}
+
+function syncUrlFromState(push = false) {
+  const url = new URL(window.location.href);
+
+  const set = (k, v) => {
+    if (v === undefined || v === null || String(v).trim() === "") url.searchParams.delete(k);
+    else url.searchParams.set(k, String(v).trim());
+  };
+
+  set("q", state.search);
+  set("lake", state.selectedLake && state.selectedLake !== "all" ? state.selectedLake : "");
+  set("unit", state.unit);
+  set("lang", state.lang);
+  set("range", state.mapRange);
+  set("from", state.mapRange === "custom" ? state.mapFrom : "");
+  set("to", state.mapRange === "custom" ? state.mapTo : "");
+
+  if (push) window.history.pushState({}, "", url.toString());
+  else window.history.replaceState({}, "", url.toString());
+}
 
 let map, markersLayer;
 
@@ -431,6 +518,8 @@ function renderLatestPerLake(rows) {
 }
 
 function wireUI() {
+  document.getElementById("lakeFilter").value = state.lake;
+  document.getElementById("searchInput").value = state.search;
   document.getElementById("unitSelect").value = state.unit;
   document.getElementById("langSelect").value = state.lang;
 
@@ -482,10 +571,20 @@ function wireUI() {
     rerenderAll();
   });
 
-  document.getElementById("searchInput").addEventListener("input", (e) => {
-    state.search = e.target.value;
-    rerenderAll();
-  });
+  const searchInput = document.getElementById("searchInput");
+
+// Set initial value (from URL if present)
+searchInput.value = state.search || "";
+
+// Update filters + URL as user types
+searchInput.addEventListener("input", (e) => {
+  state.search = e.target.value;
+
+  // Put the search into the URL so it’s shareable: ?q=...
+  setQueryParam("q", state.search, { push: false });
+
+  rerenderAll();
+});
 
   document.getElementById("refreshBtn").addEventListener("click", async () => {
     await loadAndRender();
@@ -515,59 +614,8 @@ function rerenderAll() {
   renderMap(mapRows);
 
   renderLatestPerLake(state.rows);
-
-  // Keep the URL updated so people can share exactly what they're viewing.
-  syncShareURLFromState();
-}
-
-function hydrateShareStateFromURL() {
-  const url = new URL(window.location.href);
-  const p = url.searchParams;
-
-  // Table filters
-  const q = p.get("q");
-  const lake = p.get("lake");
-  if (q !== null) state.search = q;
-  if (lake !== null) state.lake = lake;
-
-  // Map range
-  const mr = p.get("mr");
-  const from = p.get("from");
-  const to = p.get("to");
-  if (mr) state.mapRange = mr;
-  if (from) state.mapFrom = from;
-  if (to) state.mapTo = to;
-
-  // UI prefs
-  const unit = p.get("unit");
-  const lang = p.get("lang");
-  if (unit) state.unit = unit;
-  if (lang) state.lang = lang;
-}
-
-function syncShareURLFromState() {
-  const url = new URL(window.location.href);
-  const p = url.searchParams;
-
-  // Only include non-default values so the URL stays clean.
-  if (state.search) p.set("q", state.search); else p.delete("q");
-  if (state.lake) p.set("lake", state.lake); else p.delete("lake");
-
-  if (state.mapRange && state.mapRange !== "30") p.set("mr", state.mapRange); else p.delete("mr");
-  if (state.mapRange === "custom") {
-    if (state.mapFrom) p.set("from", state.mapFrom); else p.delete("from");
-    if (state.mapTo) p.set("to", state.mapTo); else p.delete("to");
-  } else {
-    p.delete("from");
-    p.delete("to");
-  }
-
-  if (state.unit && state.unit !== "cm") p.set("unit", state.unit); else p.delete("unit");
-  if (state.lang && state.lang !== "en") p.set("lang", state.lang); else p.delete("lang");
-
-  const qs = p.toString();
-  const newUrl = url.pathname + (qs ? `?${qs}` : "") + url.hash;
-  window.history.replaceState({}, "", newUrl);
+  syncStateToURL();
+  syncUrlFromState(false);
 }
 
 async function loadAndRender() {
@@ -577,18 +625,31 @@ async function loadAndRender() {
 }
 
 (function init() {
+  hydrateStateFromURL();
+  // Load URL params into state first
+  readStateFromURL();
+
+  // Pull initial search from URL, e.g. ?q=12-23-2025
+  state.search = getQueryParam("q") || "";
+
   // Sheet link
   const sheetLink = document.getElementById("sheetLink");
   sheetLink.href = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/edit`;
   sheetLink.textContent = `docs.google.com/spreadsheets/d/${SHEET_ID}`;
 
-  // If the URL includes filters (e.g. ?q=12-23-2025), hydrate state first so UI + data match.
-  hydrateShareStateFromURL();
-
   applyTranslations(state.lang);
   initMap();
-  wireUI();
+  wireUI();       // wireUI will now set the input value from state.search
   loadAndRender();
+
+  // If the user presses back/forward, sync UI with the URL
+  window.addEventListener("popstate", () => {
+    const q = getQueryParam("q") || "";
+    state.search = q;
+    const input = document.getElementById("searchInput");
+    if (input) input.value = q;
+    rerenderAll();
+  });
 })();
 
 function toISODateStringUTC(d) {
@@ -653,23 +714,55 @@ function filterRowsForMap(rows) {
   });
 }
 
-function getQueryParam(name) {
+function readStateFromURL() {
   const url = new URL(window.location.href);
-  return url.searchParams.get(name) || "";
+  const p = url.searchParams;
+
+  // Table filters
+  if (p.has("q")) state.search = p.get("q") || "";
+  if (p.has("lake")) state.lake = p.get("lake") || "";
+
+  // Display prefs
+  if (p.has("unit")) state.unit = p.get("unit") || state.unit;
+  if (p.has("lang")) state.lang = p.get("lang") || state.lang;
+
+  // Sorting
+  if (p.has("sort")) state.sortKey = p.get("sort") || state.sortKey;
+  if (p.has("dir")) state.sortDir = p.get("dir") || state.sortDir;
+
+  // Map date range
+  if (p.has("range")) state.mapRange = p.get("range") || state.mapRange;
+  if (p.has("from")) state.mapFrom = p.get("from") || "";
+  if (p.has("to")) state.mapTo = p.get("to") || "";
 }
 
-function setQueryParam(name, value, { push = false } = {}) {
+function syncStateToURL() {
   const url = new URL(window.location.href);
+  const p = url.searchParams;
 
-  if (value && value.trim() !== "") {
-    url.searchParams.set(name, value.trim());
+  // Always include these so links are “exact view”
+  p.set("unit", state.unit);
+  p.set("lang", state.lang);
+  p.set("sort", state.sortKey);
+  p.set("dir", state.sortDir);
+
+  // Optional filters
+  if (state.search && state.search.trim() !== "") p.set("q", state.search.trim());
+  else p.delete("q");
+
+  if (state.lake && state.lake.trim() !== "") p.set("lake", state.lake.trim());
+  else p.delete("lake");
+
+  // Map range
+  p.set("range", state.mapRange);
+  if (state.mapRange === "custom") {
+    if (state.mapFrom) p.set("from", state.mapFrom); else p.delete("from");
+    if (state.mapTo) p.set("to", state.mapTo); else p.delete("to");
   } else {
-    url.searchParams.delete(name);
+    p.delete("from");
+    p.delete("to");
   }
 
-  if (push) {
-    window.history.pushState({}, "", url.toString());
-  } else {
-    window.history.replaceState({}, "", url.toString());
-  }
+  // Update the URL without reloading
+  window.history.replaceState({}, "", url.toString());
 }
