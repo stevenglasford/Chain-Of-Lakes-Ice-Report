@@ -8,14 +8,18 @@ const SHEET_ID = "10smiQBJ8mBWax24aOagG9LdzrrnhFmj0tfRESunUJNI";
 // If you're not sure, open your sheet and look for ".../edit#gid=123456"
 const GID = "2029178353";
 
+// Name of the tab that contains the combined dataset
+const DATA_SHEET_NAME = "AllData";
+
 // If using Publish-to-web CSV, this works well:
 const CSV_URL = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/export?format=csv&gid=${GID}`;
 
 // Option B (fallback): Google Visualization JSON endpoint (sometimes blocked).
-const GVIZ_URL = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:json&gid=${GID}`;
+const GVIZ_URL = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:json&sheet=${encodeURIComponent(DATA_SHEET_NAME)}`;
 
 // Choose fetch mode:
-const FETCH_MODE = "csv"; // "csv" or "gviz"
+// GViz usually works without needing "Publish to web", so it's the safest default.
+const FETCH_MODE = "gviz"; // "csv" or "gviz"
 
 // ==========================
 
@@ -37,6 +41,21 @@ let map, markersLayer;
 
 function setStatus(msg) {
   document.getElementById("statusLine").textContent = msg;
+}
+
+function formatGvizDate(value) {
+  // If already a string like "12-23-2025", return as-is
+  if (typeof value === "string") return value;
+
+  // GViz date object
+  if (value && typeof value === "object" && value.getFullYear) {
+    const m = value.getMonth() + 1; // zero-based
+    const d = value.getDate();
+    const y = value.getFullYear();
+    return `${m}/${d}/${y}`;
+  }
+
+  return "";
 }
 
 function parseMixedFractionToInches(raw) {
@@ -124,69 +143,53 @@ function parseCoords(raw) {
   return { lat, lon };
 }
 
-function parseDate(raw) {
-  if (!raw) return null;
+function parseDate(value) {
+  // Accepts:
+  // - Google GViz strings like Date(2025,2,11) (month is 0-based)
+  // - JS Date objects
+  // - M/D/YYYY, M-D-YYYY, YYYY-MM-DD
+  if (!value) return null;
 
-  // If it's already a Date
-  if (raw instanceof Date && !isNaN(raw.getTime())) return raw;
-
-  const s = String(raw).trim();
-  let m;
-
-  // Google Visualization sometimes serializes as: Date(2025,2,11) (month is 0-based)
-  m = /^Date\((\d{4}),(\d{1,2}),(\d{1,2})\)$/.exec(s);
-  if (m) {
-    const yyyy = Number(m[1]);
-    const mm0 = Number(m[2]);
-    const dd = Number(m[3]);
-    const d = new Date(Date.UTC(yyyy, mm0, dd));
-    return isFinite(d.getTime()) ? d : null;
+  if (value instanceof Date && !Number.isNaN(value.getTime())) {
+    return new Date(value.getFullYear(), value.getMonth(), value.getDate());
   }
 
-  // M-D-YYYY or MM-DD-YYYY (e.g., 12-23-2025)
-  m = s.match(/^(\d{1,2})-(\d{1,2})-(\d{4})$/);
+  const s = String(value).trim();
+
+  // GViz: Date(YYYY,MM,DD) where MM is 0-based
+  let m = s.match(/^Date\((\d{4}),\s*(\d{1,2}),\s*(\d{1,2})\)$/i);
   if (m) {
-    const mm = Number(m[1]);
-    const dd = Number(m[2]);
-    const yyyy = Number(m[3]);
-    const d = new Date(Date.UTC(yyyy, mm - 1, dd));
-    return isFinite(d.getTime()) ? d : null;
+    const y = Number(m[1]);
+    const mon0 = Number(m[2]);
+    const d = Number(m[3]);
+    return new Date(y, mon0, d);
   }
 
-  // MM/DD/YYYY
-  m = s.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/);
+  // ISO-ish: YYYY-MM-DD or YYYY/MM/DD
+  m = s.match(/^(\d{4})[\/-](\d{1,2})[\/-](\d{1,2})$/);
   if (m) {
-    const mm = Number(m[1]);
-    const dd = Number(m[2]);
-    const yyyy = Number(m[3]);
-    const d = new Date(Date.UTC(yyyy, mm - 1, dd));
-    return isFinite(d.getTime()) ? d : null;
+    const y = Number(m[1]);
+    const mon1 = Number(m[2]);
+    const d = Number(m[3]);
+    return new Date(y, mon1 - 1, d);
   }
 
-  // YYYY-MM-DD
-  m = s.match(/^(\d{4})-(\d{1,2})-(\d{1,2})$/);
+  // US: MM-DD-YYYY or MM/DD/YYYY
+  m = s.match(/^(\d{1,2})[\/-](\d{1,2})[\/-](\d{4})$/);
   if (m) {
-    const yyyy = Number(m[1]);
-    const mm = Number(m[2]);
-    const dd = Number(m[3]);
-    const d = new Date(Date.UTC(yyyy, mm - 1, dd));
-    return isFinite(d.getTime()) ? d : null;
+    const mon1 = Number(m[1]);
+    const d = Number(m[2]);
+    const y = Number(m[3]);
+    return new Date(y, mon1 - 1, d);
   }
 
   return null;
 }
 
-function formatDateMMDDYYYY(d) {
-  if (!(d instanceof Date) || isNaN(d.getTime())) return "";
-  const mm = String(d.getUTCMonth() + 1).padStart(2, "0");
-  const dd = String(d.getUTCDate()).padStart(2, "0");
-  const yyyy = d.getUTCFullYear();
-  return `${mm}/${dd}/${yyyy}`;
-}
-
-function displayDate(row) {
-  const d = row?.date || parseDate(row?.date_raw);
-  return d ? formatDateMMDDYYYY(d) : (row?.date_raw || "");
+function formatDateMDY(value) {
+  const d = parseDate(value);
+  if (!d) return value ? String(value).trim() : "";
+  return `${d.getMonth() + 1}/${d.getDate()}/${d.getFullYear()}`;
 }
 
 function normRow(obj) {
@@ -200,6 +203,9 @@ function normRow(obj) {
   const thicknessCmRaw = obj["Thickness (cm)"] ?? obj["Thickness_cm"] ?? obj["Thickness (cm) "] ?? obj["thickness_cm"] ?? "";
 
   const dateObj = parseDate(dateRaw);
+  const dateDisplay = dateObj ? formatGvizDate(dateObj) : (dateRaw ? String(dateRaw).trim() : "");
+
+
   const coords = parseCoords(coordsRaw);
 
   const thickness_in = parseMixedFractionToInches(thicknessInRaw);
@@ -208,10 +214,9 @@ function normRow(obj) {
     : (thickness_in != null ? inchesToCm(thickness_in) : null);
 
   return {
-    date_raw: dateRaw ? String(dateRaw).trim() : "",
+    date_raw: formatDateMDY(dateRaw),
     date: dateObj,
-    date_sort: dateObj ? dateObj.getTime() : 0,
-    lake,
+    date_sort: dateObj ? dateObj.getTime() : 0,    lake,
     coords_raw: coordsRaw ? String(coordsRaw).trim() : "",
     coords,
     info,
@@ -342,7 +347,7 @@ function renderMap(rows) {
     const thicknessLabel = formatThickness(r);
     const popup = `
       <div style="font-weight:800;margin-bottom:4px;">${escapeHtml(r.lake || "—")}</div>
-      <div><b>${escapeHtml(displayDate(r) || "—")}</b></div>
+      <div><b>${escapeHtml(r.date_raw || "—")}</b></div>
       <div>${escapeHtml(thicknessLabel)}</div>
       <div style="color:#94a3b8;margin-top:6px;line-height:1.35;">
         ${escapeHtml(r.info || "")}
@@ -395,7 +400,7 @@ function applyFilters() {
     out = out.filter(r =>
       (r.lake || "").toLowerCase().includes(q) ||
       (r.info || "").toLowerCase().includes(q) ||
-      (displayDate(r) || "").toLowerCase().includes(q)
+      (r.date_raw || "").toLowerCase().includes(q)
     );
   }
 
@@ -437,7 +442,7 @@ function renderTable(rows) {
     const coords = r.coords_raw ? r.coords_raw : t(state.lang, "no_coords");
 
     tr.innerHTML = `
-      <td>${escapeHtml(displayDate(r) || "—")}</td>
+      <td>${escapeHtml(r.date_raw || "—")}</td>
       <td>${escapeHtml(r.lake || "—")}</td>
       <td><span class="badge">${escapeHtml(thickness)}</span></td>
       <td>${escapeHtml(r.info || "")}</td>
@@ -470,7 +475,7 @@ function renderLatestPerLake(rows) {
         <div>${escapeHtml(formatThickness(r))}</div>
       </div>
       <div class="row2">
-        <div><b>${escapeHtml(displayDate(r) || "—")}</b></div>
+        <div><b>${escapeHtml(r.date_raw || "—")}</b></div>
         <div>${escapeHtml(r.info || "")}</div>
       </div>
     `;
@@ -563,6 +568,59 @@ function rerenderAll() {
   renderMap(mapRows);
 
   renderLatestPerLake(state.rows);
+
+  // Keep the URL updated so people can share exactly what they're viewing.
+  syncShareURLFromState();
+}
+
+function hydrateShareStateFromURL() {
+  const url = new URL(window.location.href);
+  const p = url.searchParams;
+
+  // Table filters
+  const q = p.get("q");
+  const lake = p.get("lake");
+  if (q !== null) state.search = q;
+  if (lake !== null) state.lake = lake;
+
+  // Map range
+  const mr = p.get("mr");
+  const from = p.get("from");
+  const to = p.get("to");
+  if (mr) state.mapRange = mr;
+  if (from) state.mapFrom = from;
+  if (to) state.mapTo = to;
+
+  // UI prefs
+  const unit = p.get("unit");
+  const lang = p.get("lang");
+  if (unit) state.unit = unit;
+  if (lang) state.lang = lang;
+}
+
+function syncShareURLFromState() {
+  const url = new URL(window.location.href);
+  const p = url.searchParams;
+
+  // Only include non-default values so the URL stays clean.
+  if (state.search) p.set("q", state.search); else p.delete("q");
+  if (state.lake) p.set("lake", state.lake); else p.delete("lake");
+
+  if (state.mapRange && state.mapRange !== "30") p.set("mr", state.mapRange); else p.delete("mr");
+  if (state.mapRange === "custom") {
+    if (state.mapFrom) p.set("from", state.mapFrom); else p.delete("from");
+    if (state.mapTo) p.set("to", state.mapTo); else p.delete("to");
+  } else {
+    p.delete("from");
+    p.delete("to");
+  }
+
+  if (state.unit && state.unit !== "cm") p.set("unit", state.unit); else p.delete("unit");
+  if (state.lang && state.lang !== "en") p.set("lang", state.lang); else p.delete("lang");
+
+  const qs = p.toString();
+  const newUrl = url.pathname + (qs ? `?${qs}` : "") + url.hash;
+  window.history.replaceState({}, "", newUrl);
 }
 
 async function loadAndRender() {
@@ -577,9 +635,12 @@ async function loadAndRender() {
   sheetLink.href = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/edit`;
   sheetLink.textContent = `docs.google.com/spreadsheets/d/${SHEET_ID}`;
 
+  // Wire UI first so element refs exist, then hydrate state from URL.
+  wireUI();
+  hydrateShareStateFromURL();
+
   applyTranslations(state.lang);
   initMap();
-  wireUI();
   loadAndRender();
 })();
 
