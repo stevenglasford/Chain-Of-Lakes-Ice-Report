@@ -28,7 +28,7 @@ const state = {
   sortDir: "desc",
   lake: "",
   search: "",
-  selectedDates: [],
+  dateFilters: [],
   mapRange: localStorage.getItem("mapRange") || "all",
   mapFrom: localStorage.getItem("mapFrom") || "",
   mapTo: localStorage.getItem("mapTo") || "",
@@ -125,123 +125,81 @@ function parseCoords(raw) {
   return { lat, lon };
 }
 
-function formatDateMMDDYYYY(d) {
-  if (!d) return "";
-  const mm = String(d.getUTCMonth() + 1).padStart(2, "0");
-  const dd = String(d.getUTCDate()).padStart(2, "0");
-  const yyyy = String(d.getUTCFullYear());
-  return `${mm}/${dd}/${yyyy}`;
-}
-
 function parseDate(raw) {
-  // Accept:
-  // - M-D-YYYY / MM-DD-YYYY
-  // - M/D/YYYY / MM/DD/YYYY
-  // - Google gviz literal: Date(YYYY,MM,DD) where MM is 0-based
-  if (!raw) return null;
+  if (raw == null) return null;
+  if (raw instanceof Date && !isNaN(raw.valueOf())) return raw;
+
   const s = String(raw).trim();
   if (!s) return null;
 
-  // gviz: Date(2025,2,11)
-  let m = s.match(/^Date\((\d{4})\s*,\s*(\d{1,2})\s*,\s*(\d{1,2})\)\s*$/i);
-  if (m) {
-    const yyyy = Number(m[1]);
-    const month0 = Number(m[2]); // 0-based
-    const dd = Number(m[3]);
-    const d = new Date(Date.UTC(yyyy, month0, dd));
-    return isFinite(d.getTime()) ? d : null;
+  // Google Visualization sometimes returns "Date(2025,2,11)" (month is 0-based)
+  const gviz = s.match(/^Date\((\d{4}),(\d{1,2}),(\d{1,2})\)$/);
+  if (gviz) {
+    const y = Number(gviz[1]);
+    const m0 = Number(gviz[2]);
+    const d = Number(gviz[3]);
+    if (!Number.isNaN(y) && !Number.isNaN(m0) && !Number.isNaN(d)) return new Date(y, m0, d);
   }
 
-  // 12-23-2025 or 12/23/2025
-  m = s.match(/^(\d{1,2})[\/-](\d{1,2})[\/-](\d{4})$/);
-  if (m) {
-    const mm = Number(m[1]);
-    const dd = Number(m[2]);
-    const yyyy = Number(m[3]);
-    const d = new Date(Date.UTC(yyyy, mm - 1, dd));
-    return isFinite(d.getTime()) ? d : null;
-  }
+  const m = s.match(/^(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{2,4})$/);
+  if (!m) return null;
 
-  return null;
+  const month = parseInt(m[1], 10) - 1;
+  const day = parseInt(m[2], 10);
+  let year = parseInt(m[3], 10);
+  if (m[3].length === 2) year += 2000;
+
+  const dt = new Date(year, month, day);
+  return isNaN(dt.valueOf()) ? null : dt;
 }
 
-function normalizeDateToken(tok) {
-  if (!tok) return "";
-  const t = String(tok).trim();
-  if (!t) return "";
-  const s = t.replace(/-/g, "/");
-  if (!/^\d{1,2}\/\d{1,2}\/\d{4}$/.test(s)) return "";
-  const [m, d, y] = s.split("/");
-  const mm = String(parseInt(m, 10)).padStart(2, "0");
-  const dd = String(parseInt(d, 10)).padStart(2, "0");
-  const yyyy = String(parseInt(y, 10));
-  if (yyyy.length !== 4) return "";
-  return `${mm}/${dd}/${yyyy}`;
+function formatMDY(dt) {
+  const m = String(dt.getMonth() + 1).padStart(2, "0");
+  const d = String(dt.getDate()).padStart(2, "0");
+  const y = String(dt.getFullYear());
+  return `${m}/${d}/${y}`;
 }
 
-function extractDatesFromText(str) {
-  const matches = String(str || "").match(/\b\d{1,2}[\/-]\d{1,2}[\/-]\d{4}\b/g) || [];
-  const out = [];
-  const seen = new Set();
-  for (const m of matches) {
-    const n = normalizeDateToken(m);
-    if (n && !seen.has(n)) {
-      seen.add(n);
-      out.push(n);
-    }
-  }
-  return out;
+function sameYMD(a, b) {
+  if (!(a instanceof Date) || !(b instanceof Date)) return false;
+  return a.getFullYear() === b.getFullYear() && a.getMonth() === b.getMonth() && a.getDate() === b.getDate();
 }
 
-function parseDatesParam(paramValue) {
-  if (!paramValue) return [];
-  const parts = String(paramValue)
-    .split(",")
-    .map((s) => s.trim())
-    .filter(Boolean);
-  const out = [];
-  const seen = new Set();
-  for (const p of parts) {
-    const n = normalizeDateToken(p);
-    if (n && !seen.has(n)) {
-      seen.add(n);
-      out.push(n);
-    }
-  }
-  return out;
+function parseDatesList(text) {
+  const raw = String(text || "").trim();
+  if (!raw) return { dates: [], allValid: false };
+
+  const tokens = raw.split(/[,\s]+/).map(t => t.trim()).filter(Boolean);
+  if (!tokens.length) return { dates: [], allValid: false };
+
+  const dates = tokens.map(parseDate);
+  const allValid = dates.every(d => d instanceof Date && !isNaN(d.valueOf()));
+
+  return { dates: allValid ? dates : [], allValid };
 }
-
-
 
 function normRow(obj) {
-  // Flexible header matching
-  const dateRaw = obj["Date"] ?? obj["date"] ?? obj["DATE"];
-  const lake = (obj["Lake"] ?? obj["lake"] ?? "").toString().trim();
-  const coordsRaw = obj["Coordinates"] ?? obj["coords"] ?? obj["Coordinate"] ?? "";
-  const info = (obj["Info"] ?? obj["info"] ?? "").toString().trim();
-
-  const thicknessInRaw = obj["Thickness (Inches)"] ?? obj["thickness_in"] ?? obj["Thickness"] ?? obj["thickness"] ?? "";
-  const thicknessCmRaw = obj["Thickness (cm)"] ?? obj["Thickness_cm"] ?? obj["Thickness (cm) "] ?? obj["thickness_cm"] ?? "";
+  const dateRaw = (obj.c[0]?.v ?? "").toString().trim();
+  const lake = (obj.c[1]?.v ?? "").toString().trim();
+  const coords = (obj.c[2]?.v ?? "").toString().trim();
+  const thickIn = obj.c[3]?.v;
+  const info = (obj.c[4]?.v ?? "").toString().trim();
+  const thickCm = obj.c[5]?.v;
 
   const dateObj = parseDate(dateRaw);
-  const dateDisp = dateObj ? formatDateMMDDYYYY(dateObj) : (dateRaw ? String(dateRaw).trim() : "");
-  const coords = parseCoords(coordsRaw);
-
-  const thickness_in = parseMixedFractionToInches(thicknessInRaw);
-  const thickness_cm = (thicknessCmRaw !== "" && thicknessCmRaw != null && isFinite(Number(thicknessCmRaw)))
-    ? Number(thicknessCmRaw)
-    : (thickness_in != null ? inchesToCm(thickness_in) : null);
+  const dateDisplay = dateObj ? formatMDY(dateObj) : dateRaw;
 
   return {
-    date_raw: dateDisp,
-    date: dateObj,
-    date_sort: dateObj ? dateObj.getTime() : 0,
+    date_obj: dateObj,
+    date_raw: dateDisplay,
+    date_sort: dateObj ? dateObj.getTime() : -1,
     lake,
-    coords_raw: coordsRaw ? String(coordsRaw).trim() : "",
-    coords,
+    coords_raw: coords,
     info,
-    thickness_in,
-    thickness_cm
+    thickness_in: parseMaybeNum(thickIn),
+    thickness_cm: parseMaybeNum(thickCm),
+    lat: parseLat(coords),
+    lon: parseLon(coords),
   };
 }
 
@@ -416,13 +374,19 @@ function applyFilters() {
 
   if (lake) out = out.filter(r => r.lake === lake);
 
-  if (q) {
-    out = out.filter(r =>
-      (r.lake || "").toLowerCase().includes(q) ||
-      (r.info || "").toLowerCase().includes(q) ||
-      (r.date_raw || "").toLowerCase().includes(q)
-    );
-  }
+  
+if (state.dateFilters && state.dateFilters.length) {
+  out = out.filter(r => {
+    if (!(r.date_obj instanceof Date) || isNaN(r.date_obj.valueOf())) return false;
+    return state.dateFilters.some(d => sameYMD(r.date_obj, d));
+  });
+} else if (q) {
+  out = out.filter(r =>
+    (r.lake || "").toLowerCase().includes(q) ||
+    (r.info || "").toLowerCase().includes(q) ||
+    (r.date_raw || "").toLowerCase().includes(q)
+  );
+}
 
   // sort
   out.sort((a,b) => {
@@ -561,7 +525,44 @@ function wireUI() {
   });
 
   document.getElementById("refreshBtn").addEventListener("click", async () => {
-    await loadAndRender();
+    await function init() {
+  const datesParam = getQueryParam("dates");
+  const qParam = getQueryParam("q");
+
+  state.lake = getQueryParam("lake") || "";
+  state.unit = getQueryParam("unit") || "in";
+  state.lang = getQueryParam("lang") || "en";
+  state.mapRange = getQueryParam("range") || "filtered";
+
+  if (datesParam) {
+    state.search = datesParam;
+    const parsed = parseDatesList(datesParam);
+    state.dateFilters = parsed.allValid ? parsed.dates : [];
+  } else if (qParam) {
+    state.search = qParam;
+    state.dateFilters = [];
+  }
+
+  const searchInput = document.getElementById("searchInput");
+  if (searchInput) searchInput.value = state.search || "";
+
+  const lakeFilter = document.getElementById("lakeFilter");
+  if (lakeFilter) lakeFilter.value = state.lake || "";
+
+  const unitToggle = document.getElementById("unitToggle");
+  if (unitToggle) unitToggle.value = state.unit || "in";
+
+  const langToggle = document.getElementById("langToggle");
+  if (langToggle) langToggle.value = state.lang || "en";
+
+  const mapRange = document.getElementById("mapRange");
+  if (mapRange) mapRange.value = state.mapRange || "filtered";
+
+  loadAndRender();
+}
+
+init();
+
   });
 
   document.querySelectorAll("#dataTable thead th").forEach(th => {
