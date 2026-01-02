@@ -39,6 +39,18 @@ function setStatus(msg) {
   document.getElementById("statusLine").textContent = msg;
 }
 
+function getDatesFromURL() {
+  const params = new URLSearchParams(window.location.search);
+  const raw = params.get("dates");
+  if (!raw) return [];
+  return raw.split(",").map(d => d.trim()).filter(Boolean);
+}
+
+function filterByDates(rows, dates) {
+  if (!dates.length) return rows;
+  return rows.filter(r => dates.includes(r.date_display));
+}
+
 function parseMixedFractionToInches(raw) {
   // Accepts: "5 5/8", "9 1/4", "3/8", "5", "8 7/8)", "9 1/8!!"
   if (!raw) return null;
@@ -386,8 +398,24 @@ function renderLakeOptions(rows) {
 function applyFilters() {
   const lake = state.lake;
   const q = state.search.toLowerCase().trim();
+  const urlDates = getDatesFromURL();
 
   let out = state.rows.slice();
+
+  // 🔹 URL date filter FIRST (shareable)
+  if (urlDates.length) {
+    out = filterByDates(out, urlDates);
+  }
+
+  if (lake) out = out.filter(r => r.lake === lake);
+
+  if (q) {
+    out = out.filter(r =>
+      (r.lake || "").toLowerCase().includes(q) ||
+      (r.info || "").toLowerCase().includes(q) ||
+      (displayDate(r) || "").toLowerCase().includes(q)
+    );
+  }
 
   if (lake) out = out.filter(r => r.lake === lake);
 
@@ -531,7 +559,21 @@ function wireUI() {
   });
 
   document.getElementById("searchInput").addEventListener("input", (e) => {
-    state.search = e.target.value;
+    const val = e.target.value.trim();
+    state.search = val;
+  
+    // 🔹 If the search looks like date(s), sync to URL
+    const dates = val
+      .split(",")
+      .map(s => s.trim())
+      .filter(s => /^\d{1,2}[\/-]\d{1,2}[\/-]\d{4}$/.test(s));
+  
+    if (dates.length) {
+      setQueryParam("dates", dates.join(","));
+    } else {
+      setQueryParam("dates", "");
+    }
+  
     rerenderAll();
   });
 
@@ -580,6 +622,15 @@ async function loadAndRender() {
   applyTranslations(state.lang);
   initMap();
   wireUI();
+
+  // 🔹 Populate search box from URL dates
+  const urlDates = getDatesFromURL();
+  if (urlDates.length) {
+    const input = document.getElementById("searchInput");
+    input.value = urlDates.join(", ");
+    state.search = input.value;
+  }
+  
   loadAndRender();
 })();
 
