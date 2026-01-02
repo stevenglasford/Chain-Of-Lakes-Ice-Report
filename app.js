@@ -28,6 +28,7 @@ const state = {
   sortDir: "desc",
   lake: "",
   search: "",
+  selectedDates: [],
   mapRange: localStorage.getItem("mapRange") || "all",
   mapFrom: localStorage.getItem("mapFrom") || "",
   mapTo: localStorage.getItem("mapTo") || "",
@@ -37,18 +38,6 @@ let map, markersLayer;
 
 function setStatus(msg) {
   document.getElementById("statusLine").textContent = msg;
-}
-
-function getDatesFromURL() {
-  const params = new URLSearchParams(window.location.search);
-  const raw = params.get("dates");
-  if (!raw) return [];
-  return raw.split(",").map(d => d.trim()).filter(Boolean);
-}
-
-function filterByDates(rows, dates) {
-  if (!dates.length) return rows;
-  return rows.filter(r => dates.includes(r.date_display));
 }
 
 function parseMixedFractionToInches(raw) {
@@ -136,51 +125,39 @@ function parseCoords(raw) {
   return { lat, lon };
 }
 
+function formatDateMMDDYYYY(d) {
+  if (!d) return "";
+  const mm = String(d.getUTCMonth() + 1).padStart(2, "0");
+  const dd = String(d.getUTCDate()).padStart(2, "0");
+  const yyyy = String(d.getUTCFullYear());
+  return `${mm}/${dd}/${yyyy}`;
+}
+
 function parseDate(raw) {
+  // Accept:
+  // - M-D-YYYY / MM-DD-YYYY
+  // - M/D/YYYY / MM/DD/YYYY
+  // - Google gviz literal: Date(YYYY,MM,DD) where MM is 0-based
   if (!raw) return null;
-
-  // If it's already a Date
-  if (raw instanceof Date && !isNaN(raw.getTime())) return raw;
-
   const s = String(raw).trim();
-  let m;
+  if (!s) return null;
 
-  // Google Visualization sometimes serializes as: Date(2025,2,11) (month is 0-based)
-  m = /^Date\((\d{4}),(\d{1,2}),(\d{1,2})\)$/.exec(s);
+  // gviz: Date(2025,2,11)
+  let m = s.match(/^Date\((\d{4})\s*,\s*(\d{1,2})\s*,\s*(\d{1,2})\)\s*$/i);
   if (m) {
     const yyyy = Number(m[1]);
-    const mm0 = Number(m[2]);
+    const month0 = Number(m[2]); // 0-based
     const dd = Number(m[3]);
-    const d = new Date(Date.UTC(yyyy, mm0, dd));
+    const d = new Date(Date.UTC(yyyy, month0, dd));
     return isFinite(d.getTime()) ? d : null;
   }
 
-  // M-D-YYYY or MM-DD-YYYY (e.g., 12-23-2025)
-  m = s.match(/^(\d{1,2})-(\d{1,2})-(\d{4})$/);
+  // 12-23-2025 or 12/23/2025
+  m = s.match(/^(\d{1,2})[\/-](\d{1,2})[\/-](\d{4})$/);
   if (m) {
     const mm = Number(m[1]);
     const dd = Number(m[2]);
     const yyyy = Number(m[3]);
-    const d = new Date(Date.UTC(yyyy, mm - 1, dd));
-    return isFinite(d.getTime()) ? d : null;
-  }
-
-  // MM/DD/YYYY
-  m = s.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/);
-  if (m) {
-    const mm = Number(m[1]);
-    const dd = Number(m[2]);
-    const yyyy = Number(m[3]);
-    const d = new Date(Date.UTC(yyyy, mm - 1, dd));
-    return isFinite(d.getTime()) ? d : null;
-  }
-
-  // YYYY-MM-DD
-  m = s.match(/^(\d{4})-(\d{1,2})-(\d{1,2})$/);
-  if (m) {
-    const yyyy = Number(m[1]);
-    const mm = Number(m[2]);
-    const dd = Number(m[3]);
     const d = new Date(Date.UTC(yyyy, mm - 1, dd));
     return isFinite(d.getTime()) ? d : null;
   }
@@ -188,18 +165,53 @@ function parseDate(raw) {
   return null;
 }
 
-function formatDateMMDDYYYY(d) {
-  if (!(d instanceof Date) || isNaN(d.getTime())) return "";
-  const mm = String(d.getUTCMonth() + 1).padStart(2, "0");
-  const dd = String(d.getUTCDate()).padStart(2, "0");
-  const yyyy = d.getUTCFullYear();
+function normalizeDateToken(tok) {
+  if (!tok) return "";
+  const t = String(tok).trim();
+  if (!t) return "";
+  const s = t.replace(/-/g, "/");
+  if (!/^\d{1,2}\/\d{1,2}\/\d{4}$/.test(s)) return "";
+  const [m, d, y] = s.split("/");
+  const mm = String(parseInt(m, 10)).padStart(2, "0");
+  const dd = String(parseInt(d, 10)).padStart(2, "0");
+  const yyyy = String(parseInt(y, 10));
+  if (yyyy.length !== 4) return "";
   return `${mm}/${dd}/${yyyy}`;
 }
 
-function displayDate(row) {
-  const d = row?.date || parseDate(row?.date_raw);
-  return d ? formatDateMMDDYYYY(d) : (row?.date_raw || "");
+function extractDatesFromText(str) {
+  const matches = String(str || "").match(/\b\d{1,2}[\/-]\d{1,2}[\/-]\d{4}\b/g) || [];
+  const out = [];
+  const seen = new Set();
+  for (const m of matches) {
+    const n = normalizeDateToken(m);
+    if (n && !seen.has(n)) {
+      seen.add(n);
+      out.push(n);
+    }
+  }
+  return out;
 }
+
+function parseDatesParam(paramValue) {
+  if (!paramValue) return [];
+  const parts = String(paramValue)
+    .split(",")
+    .map((s) => s.trim())
+    .filter(Boolean);
+  const out = [];
+  const seen = new Set();
+  for (const p of parts) {
+    const n = normalizeDateToken(p);
+    if (n && !seen.has(n)) {
+      seen.add(n);
+      out.push(n);
+    }
+  }
+  return out;
+}
+
+
 
 function normRow(obj) {
   // Flexible header matching
@@ -212,6 +224,7 @@ function normRow(obj) {
   const thicknessCmRaw = obj["Thickness (cm)"] ?? obj["Thickness_cm"] ?? obj["Thickness (cm) "] ?? obj["thickness_cm"] ?? "";
 
   const dateObj = parseDate(dateRaw);
+  const dateDisp = dateObj ? formatDateMMDDYYYY(dateObj) : (dateRaw ? String(dateRaw).trim() : "");
   const coords = parseCoords(coordsRaw);
 
   const thickness_in = parseMixedFractionToInches(thicknessInRaw);
@@ -220,7 +233,7 @@ function normRow(obj) {
     : (thickness_in != null ? inchesToCm(thickness_in) : null);
 
   return {
-    date_raw: dateRaw ? String(dateRaw).trim() : "",
+    date_raw: dateDisp,
     date: dateObj,
     date_sort: dateObj ? dateObj.getTime() : 0,
     lake,
@@ -354,7 +367,7 @@ function renderMap(rows) {
     const thicknessLabel = formatThickness(r);
     const popup = `
       <div style="font-weight:800;margin-bottom:4px;">${escapeHtml(r.lake || "—")}</div>
-      <div><b>${escapeHtml(displayDate(r) || "—")}</b></div>
+      <div><b>${escapeHtml(r.date_raw || "—")}</b></div>
       <div>${escapeHtml(thicknessLabel)}</div>
       <div style="color:#94a3b8;margin-top:6px;line-height:1.35;">
         ${escapeHtml(r.info || "")}
@@ -398,32 +411,16 @@ function renderLakeOptions(rows) {
 function applyFilters() {
   const lake = state.lake;
   const q = state.search.toLowerCase().trim();
-  const urlDates = getDatesFromURL();
 
   let out = state.rows.slice();
 
-  // 🔹 URL date filter FIRST (shareable)
-  if (urlDates.length) {
-    out = filterByDates(out, urlDates);
-  }
-
   if (lake) out = out.filter(r => r.lake === lake);
 
   if (q) {
     out = out.filter(r =>
       (r.lake || "").toLowerCase().includes(q) ||
       (r.info || "").toLowerCase().includes(q) ||
-      (displayDate(r) || "").toLowerCase().includes(q)
-    );
-  }
-
-  if (lake) out = out.filter(r => r.lake === lake);
-
-  if (q) {
-    out = out.filter(r =>
-      (r.lake || "").toLowerCase().includes(q) ||
-      (r.info || "").toLowerCase().includes(q) ||
-      (displayDate(r) || "").toLowerCase().includes(q)
+      (r.date_raw || "").toLowerCase().includes(q)
     );
   }
 
@@ -465,7 +462,7 @@ function renderTable(rows) {
     const coords = r.coords_raw ? r.coords_raw : t(state.lang, "no_coords");
 
     tr.innerHTML = `
-      <td>${escapeHtml(displayDate(r) || "—")}</td>
+      <td>${escapeHtml(r.date_raw || "—")}</td>
       <td>${escapeHtml(r.lake || "—")}</td>
       <td><span class="badge">${escapeHtml(thickness)}</span></td>
       <td>${escapeHtml(r.info || "")}</td>
@@ -498,7 +495,7 @@ function renderLatestPerLake(rows) {
         <div>${escapeHtml(formatThickness(r))}</div>
       </div>
       <div class="row2">
-        <div><b>${escapeHtml(displayDate(r) || "—")}</b></div>
+        <div><b>${escapeHtml(r.date_raw || "—")}</b></div>
         <div>${escapeHtml(r.info || "")}</div>
       </div>
     `;
@@ -559,21 +556,7 @@ function wireUI() {
   });
 
   document.getElementById("searchInput").addEventListener("input", (e) => {
-    const val = e.target.value.trim();
-    state.search = val;
-  
-    // 🔹 If the search looks like date(s), sync to URL
-    const dates = val
-      .split(",")
-      .map(s => s.trim())
-      .filter(s => /^\d{1,2}[\/-]\d{1,2}[\/-]\d{4}$/.test(s));
-  
-    if (dates.length) {
-      setQueryParam("dates", dates.join(","));
-    } else {
-      setQueryParam("dates", "");
-    }
-  
+    state.search = e.target.value;
     rerenderAll();
   });
 
@@ -622,15 +605,6 @@ async function loadAndRender() {
   applyTranslations(state.lang);
   initMap();
   wireUI();
-
-  // 🔹 Populate search box from URL dates
-  const urlDates = getDatesFromURL();
-  if (urlDates.length) {
-    const input = document.getElementById("searchInput");
-    input.value = urlDates.join(", ");
-    state.search = input.value;
-  }
-  
   loadAndRender();
 })();
 
