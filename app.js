@@ -39,7 +39,6 @@ let map, markersLayer;
 function setStatus(msg) {
   document.getElementById("statusLine").textContent = msg;
 }
-
 function parseMixedFractionToInches(raw) {
   // Accepts: "5 5/8", "9 1/4", "3/8", "5", "8 7/8)", "9 1/8!!"
   if (!raw) return null;
