@@ -178,15 +178,19 @@ function parseDatesList(text) {
 }
 
 function normRow(obj) {
-  const dateRaw = (obj.c[0]?.v ?? "").toString().trim();
-  const lake = (obj.c[1]?.v ?? "").toString().trim();
-  const coords = (obj.c[2]?.v ?? "").toString().trim();
-  const thickIn = obj.c[3]?.v;
-  const info = (obj.c[4]?.v ?? "").toString().trim();
-  const thickCm = obj.c[5]?.v;
+  // CSV headers from Ice2025 AllData
+  const dateRaw = (obj["Date"] ?? "").toString().trim();
+  const lake = (obj["Lake"] ?? "").toString().trim();
+  const coords = (obj["Coordinates"] ?? "").toString().trim();
+  const info = (obj["Info"] ?? "").toString().trim();
+
+  const thickIn = obj["Thickness (Inches)"];
+  const thickCm = obj["Thickness (cm)"];
 
   const dateObj = parseDate(dateRaw);
   const dateDisplay = dateObj ? formatMDY(dateObj) : dateRaw;
+
+  const coord = parseCoords(coords);
 
   return {
     date_obj: dateObj,
@@ -197,8 +201,9 @@ function normRow(obj) {
     info,
     thickness_in: parseMaybeNum(thickIn),
     thickness_cm: parseMaybeNum(thickCm),
-    lat: parseLat(coords),
-    lon: parseLon(coords),
+    coords: coord,
+    lat: coord?.lat,
+    lon: coord?.lon
   };
 }
 
@@ -524,44 +529,7 @@ function wireUI() {
   });
 
   document.getElementById("refreshBtn").addEventListener("click", async () => {
-    await function init() {
-  const datesParam = getQueryParam("dates");
-  const qParam = getQueryParam("q");
-
-  state.lake = getQueryParam("lake") || "";
-  state.unit = getQueryParam("unit") || "in";
-  state.lang = getQueryParam("lang") || "en";
-  state.mapRange = getQueryParam("range") || "filtered";
-
-  if (datesParam) {
-    state.search = datesParam;
-    const parsed = parseDatesList(datesParam);
-    state.dateFilters = parsed.allValid ? parsed.dates : [];
-  } else if (qParam) {
-    state.search = qParam;
-    state.dateFilters = [];
-  }
-
-  const searchInput = document.getElementById("searchInput");
-  if (searchInput) searchInput.value = state.search || "";
-
-  const lakeFilter = document.getElementById("lakeFilter");
-  if (lakeFilter) lakeFilter.value = state.lake || "";
-
-  const unitToggle = document.getElementById("unitToggle");
-  if (unitToggle) unitToggle.value = state.unit || "in";
-
-  const langToggle = document.getElementById("langToggle");
-  if (langToggle) langToggle.value = state.lang || "en";
-
-  const mapRange = document.getElementById("mapRange");
-  if (mapRange) mapRange.value = state.mapRange || "filtered";
-
-  loadAndRender();
-}
-
-init();
-
+    await loadAndRender();
   });
 
   document.querySelectorAll("#dataTable thead th").forEach(th => {
@@ -590,6 +558,8 @@ function rerenderAll() {
   renderLatestPerLake(state.rows);
 }
 
+
+
 async function loadAndRender() {
   await fetchData();
   renderLakeOptions(state.rows);
@@ -605,6 +575,15 @@ async function loadAndRender() {
   applyTranslations(state.lang);
   initMap();
   wireUI();
+  const datesParam = getQueryParam("dates");
+  if (datesParam) {
+    const parsed = parseDatesList(datesParam);
+    state.dateFilters = parsed.allValid ? parsed.dates : [];
+    state.search = datesParam;
+  
+    const input = document.getElementById("searchInput");
+    if (input) input.value = datesParam;
+  }
   loadAndRender();
 })();
 
