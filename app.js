@@ -28,10 +28,10 @@ const state = {
   sortDir: "desc",
   lake: "",
   search: "",
-  dateFilters: [],
   mapRange: localStorage.getItem("mapRange") || "all",
   mapFrom: localStorage.getItem("mapFrom") || "",
   mapTo: localStorage.getItem("mapTo") || "",
+  dates: [],
 };
 
 let map, markersLayer;
@@ -39,6 +39,7 @@ let map, markersLayer;
 function setStatus(msg) {
   document.getElementById("statusLine").textContent = msg;
 }
+
 function parseMixedFractionToInches(raw) {
   // Accepts: "5 5/8", "9 1/4", "3/8", "5", "8 7/8)", "9 1/8!!"
   if (!raw) return null;
@@ -125,85 +126,67 @@ function parseCoords(raw) {
 }
 
 function parseDate(raw) {
-  if (raw == null) return null;
-  if (raw instanceof Date && !isNaN(raw.valueOf())) return raw;
-
+  if (!raw) return null;
   const s = String(raw).trim();
-  if (!s) return null;
 
-  // Google Visualization sometimes returns "Date(2025,2,11)" (month is 0-based)
-  const gviz = s.match(/^Date\((\d{4}),(\d{1,2}),(\d{1,2})\)$/);
-  if (gviz) {
-    const y = Number(gviz[1]);
-    const m0 = Number(gviz[2]);
-    const d = Number(gviz[3]);
-    if (!Number.isNaN(y) && !Number.isNaN(m0) && !Number.isNaN(d)) return new Date(y, m0, d);
+  // Google Visualization / Sheets sometimes emits: Date(2025,2,11)
+  const mGviz = s.match(/^Date\((\d{4}),(\d{1,2}),(\d{1,2})\)$/);
+  if (mGviz) {
+    const y = Number(mGviz[1]);
+    const mo = Number(mGviz[2]) + 1; // gviz month is 0-based
+    const d = Number(mGviz[3]);
+    return new Date(y, mo - 1, d);
   }
 
-  const m = s.match(/^(\d{1,2})[\/\-](\d{1,2})[\/\-](\d{2,4})$/);
-  if (!m) return null;
+  // Accept MM/DD/YYYY or MM-DD-YYYY
+  const mMDY = s.match(/^(\d{1,2})[\/-](\d{1,2})[\/-](\d{4})$/);
+  if (mMDY) {
+    const mo = Number(mMDY[1]);
+    const da = Number(mMDY[2]);
+    const y = Number(mMDY[3]);
+    return new Date(y, mo - 1, da);
+  }
 
-  const month = parseInt(m[1], 10) - 1;
-  const day = parseInt(m[2], 10);
-  let year = parseInt(m[3], 10);
-  if (m[3].length === 2) year += 2000;
+  // Accept YYYY-MM-DD or YYYY/MM/DD
+  const mYMD = s.match(/^(\d{4})[\/-](\d{1,2})[\/-](\d{1,2})$/);
+  if (mYMD) {
+    const y = Number(mYMD[1]);
+    const mo = Number(mYMD[2]);
+    const da = Number(mYMD[3]);
+    return new Date(y, mo - 1, da);
+  }
 
-  const dt = new Date(year, month, day);
-  return isNaN(dt.valueOf()) ? null : dt;
-}
-
-function formatMDY(dt) {
-  const m = String(dt.getMonth() + 1).padStart(2, "0");
-  const d = String(dt.getDate()).padStart(2, "0");
-  const y = String(dt.getFullYear());
-  return `${m}/${d}/${y}`;
-}
-
-function sameYMD(a, b) {
-  if (!(a instanceof Date) || !(b instanceof Date)) return false;
-  return a.getFullYear() === b.getFullYear() && a.getMonth() === b.getMonth() && a.getDate() === b.getDate();
-}
-
-function parseDatesList(text) {
-  const raw = String(text || "").trim();
-  if (!raw) return { dates: [], allValid: false };
-
-  const tokens = raw.split(/[,\s]+/).map(t => t.trim()).filter(Boolean);
-  if (!tokens.length) return { dates: [], allValid: false };
-
-  const dates = tokens.map(parseDate);
-  const allValid = dates.every(d => d instanceof Date && !isNaN(d.valueOf()));
-
-  return { dates: allValid ? dates : [], allValid };
+  return null;
 }
 
 function normRow(obj) {
-  // CSV headers from Ice2025 AllData
-  const dateRaw = (obj["Date"] ?? "").toString().trim();
-  const lake = (obj["Lake"] ?? "").toString().trim();
-  const coords = (obj["Coordinates"] ?? "").toString().trim();
-  const info = (obj["Info"] ?? "").toString().trim();
+  // Flexible header matching
+  const dateRaw = obj["Date"] ?? obj["date"] ?? obj["DATE"];
+  const lake = (obj["Lake"] ?? obj["lake"] ?? "").toString().trim();
+  const coordsRaw = obj["Coordinates"] ?? obj["coords"] ?? obj["Coordinate"] ?? "";
+  const info = (obj["Info"] ?? obj["info"] ?? "").toString().trim();
 
-  const thickIn = obj["Thickness (Inches)"];
-  const thickCm = obj["Thickness (cm)"];
+  const thicknessInRaw = obj["Thickness (Inches)"] ?? obj["thickness_in"] ?? obj["Thickness"] ?? obj["thickness"] ?? "";
+  const thicknessCmRaw = obj["Thickness (cm)"] ?? obj["Thickness_cm"] ?? obj["Thickness (cm) "] ?? obj["thickness_cm"] ?? "";
 
   const dateObj = parseDate(dateRaw);
-  const dateDisplay = dateObj ? formatMDY(dateObj) : dateRaw;
+  const coords = parseCoords(coordsRaw);
 
-  const coord = parseCoords(coords);
+  const thickness_in = parseMixedFractionToInches(thicknessInRaw);
+  const thickness_cm = (thicknessCmRaw !== "" && thicknessCmRaw != null && isFinite(Number(thicknessCmRaw)))
+    ? Number(thicknessCmRaw)
+    : (thickness_in != null ? inchesToCm(thickness_in) : null);
 
   return {
-    date_obj: dateObj,
-    date_raw: dateDisplay,
-    date_sort: dateObj ? dateObj.getTime() : -1,
+    date_raw: dateRaw ? String(dateRaw).trim() : "",
+    date: dateObj,
+    date_sort: dateObj ? dateObj.getTime() : 0,
     lake,
-    coords_raw: coords,
+    coords_raw: coordsRaw ? String(coordsRaw).trim() : "",
+    coords,
     info,
-    thickness_in: parseMaybeNum(thickIn),
-    thickness_cm: parseMaybeNum(thickCm),
-    coords: coord,
-    lat: coord?.lat,
-    lon: coord?.lon
+    thickness_in,
+    thickness_cm
   };
 }
 
@@ -252,21 +235,64 @@ async function fetchData() {
 
   try {
     let rawRows = [];
+
+    async function tryFetch(url, label) {
+      const resp = await fetch(url, { cache: "no-store" });
+      const text = await resp.text().catch(() => "");
+      if (!resp.ok) {
+        throw new Error(`${label} fetch failed (${resp.status})`);
+      }
+      // If we somehow got HTML instead of CSV/JSON, treat as failure (common when permissions/publish are off).
+      const head = (text || "").slice(0, 200).toLowerCase();
+      if (head.includes("<!doctype") || head.includes("<html")) {
+        throw new Error(`${label} returned HTML (not data)`);
+      }
+      return text;
+    }
+
     if (FETCH_MODE === "csv") {
-      const resp = await fetch(CSV_URL, { cache: "no-store" });
-      if (!resp.ok) throw new Error("CSV fetch failed");
-      const text = await resp.text();
-      rawRows = csvToObjects(text);
+      // Try a few URL variants to avoid brittle failures.
+      const urls = [
+        `${CSV_URL}&cb=${Date.now()}`,
+        CSV_URL,
+        `${GVIZ_URL}&cb=${Date.now()}`, // fallback
+        GVIZ_URL
+      ];
+
+      let text = null;
+      let lastErr = null;
+      for (const u of urls) {
+        try {
+          text = await tryFetch(u, "Sheet");
+          // If it's GVIZ, it'll include "google.visualization.Query.setResponse", so skip CSV parsing.
+          if (text.includes("google.visualization")) {
+            const json = JSON.parse(text.substring(text.indexOf("{"), text.lastIndexOf("}") + 1));
+            const table = json.table;
+            const headers = table.cols.map(c => c.label);
+            rawRows = (table.rows || []).map(r => {
+              const obj = {};
+              r.c.forEach((cell, i) => (obj[headers[i]] = cell ? (cell.v ?? "") : ""));
+              return obj;
+            });
+          } else {
+            rawRows = csvToObjects(text);
+          }
+          lastErr = null;
+          break;
+        } catch (e) {
+          lastErr = e;
+          continue;
+        }
+      }
+      if (lastErr) throw lastErr;
     } else {
-      const resp = await fetch(GVIZ_URL, { cache: "no-store" });
-      if (!resp.ok) throw new Error("GVIZ fetch failed");
-      const text = await resp.text();
+      const text = await tryFetch(GVIZ_URL, "GVIZ");
       const json = JSON.parse(text.substring(text.indexOf("{"), text.lastIndexOf("}") + 1));
       const table = json.table;
       const headers = table.cols.map(c => c.label);
-      rawRows = table.rows.map(r => {
+      rawRows = (table.rows || []).map(r => {
         const obj = {};
-        r.c.forEach((cell, i) => obj[headers[i]] = cell ? (cell.v ?? "") : "");
+        r.c.forEach((cell, i) => (obj[headers[i]] = cell ? (cell.v ?? "") : ""));
         return obj;
       });
     }
@@ -280,10 +306,9 @@ async function fetchData() {
 
     state.rows = rows;
     setStatus(t(state.lang, "status_loaded", rows.length));
-  } catch (e) {
-    console.error(e);
+  } catch (err) {
+    console.error(err);
     setStatus(t(state.lang, "status_error"));
-    state.rows = [];
   }
 }
 
@@ -371,53 +396,38 @@ function renderLakeOptions(rows) {
 }
 
 function applyFilters() {
-  const lake = state.lake;
-  const q = state.search.toLowerCase().trim();
+  let out = [...state.rows];
 
-  let out = state.rows.slice();
+  if (state.lake) {
+    const lakeNeedle = state.lake.toLowerCase();
+    out = out.filter(r => (r.lake || "").toLowerCase().includes(lakeNeedle));
+  }
 
-  if (lake) out = out.filter(r => r.lake === lake);
+  // Date filter (shareable via ?dates=MM/DD/YYYY,MM/DD/YYYY)
+  if (state.dates && state.dates.length) {
+    const set = new Set(state.dates);
+    out = out.filter(r => set.has(r.date_key));
+  } else if (state.search) {
+    const needle = state.search.toLowerCase();
+    out = out.filter(r =>
+      (r.lake || "").toLowerCase().includes(needle) ||
+      (r.info || "").toLowerCase().includes(needle) ||
+      (r.date_raw || "").toLowerCase().includes(needle)
+    );
+  }
 
-  
-if (state.dateFilters && state.dateFilters.length) {
-  out = out.filter(r => {
-    if (!(r.date_obj instanceof Date) || isNaN(r.date_obj.valueOf())) return false;
-    return state.dateFilters.some(d => sameYMD(r.date_obj, d));
-  });
-} else if (q) {
-  out = out.filter(r =>
-    (r.lake || "").toLowerCase().includes(q) ||
-    (r.info || "").toLowerCase().includes(q) ||
-    (r.date_raw || "").toLowerCase().includes(q)
-  );
-}
-
-  // sort
-  out.sort((a,b) => {
-    let av, bv;
-    switch (state.sortKey) {
-      case "lake": av = a.lake; bv = b.lake; break;
-      case "info": av = a.info; bv = b.info; break;
-      case "coords": av = a.coords_raw; bv = b.coords_raw; break;
-      case "thickness":
-        av = (state.unit === "in") ? (a.thickness_in ?? -1) : (a.thickness_cm ?? -1);
-        bv = (state.unit === "in") ? (b.thickness_in ?? -1) : (b.thickness_cm ?? -1);
-        break;
-      case "date":
-      default:
-        av = a.date_sort; bv = b.date_sort;
-    }
-
-    if (typeof av === "number" && typeof bv === "number") {
-      return state.sortDir === "asc" ? av - bv : bv - av;
-    }
-    av = (av ?? "").toString();
-    bv = (bv ?? "").toString();
-    return state.sortDir === "asc" ? av.localeCompare(bv) : bv.localeCompare(av);
+  // Sort
+  out.sort((a, b) => {
+    const dir = state.sortDir === "asc" ? 1 : -1;
+    if (state.sortKey === "date") return dir * ((a.date || 0) - (b.date || 0));
+    if (state.sortKey === "lake") return dir * (String(a.lake).localeCompare(String(b.lake)));
+    if (state.sortKey === "thickness") return dir * ((a.thickness_in || 0) - (b.thickness_in || 0));
+    return 0;
   });
 
   state.filtered = out;
 }
+
 
 function renderTable(rows) {
   const tbody = document.querySelector("#dataTable tbody");
@@ -520,11 +530,20 @@ function wireUI() {
 
   document.getElementById("lakeFilter").addEventListener("change", (e) => {
     state.lake = e.target.value;
+    if (state.lake) setQueryParam("lake", state.lake);
+    else setQueryParam("lake", null);
     rerenderAll();
   });
 
   document.getElementById("searchInput").addEventListener("input", (e) => {
-    state.search = e.target.value;
+    const raw = String(e.target.value || "").trim();
+    state.search = raw;
+    state.dates = parseDatesList(raw);
+
+    // Keep the URL shareable. (URLSearchParams will encode / as %2F, which is fine.)
+    if (raw) setQueryParam("dates", raw);
+    else setQueryParam("dates", null);
+
     rerenderAll();
   });
 
@@ -558,8 +577,6 @@ function rerenderAll() {
   renderLatestPerLake(state.rows);
 }
 
-
-
 async function loadAndRender() {
   await fetchData();
   renderLakeOptions(state.rows);
@@ -575,15 +592,26 @@ async function loadAndRender() {
   applyTranslations(state.lang);
   initMap();
   wireUI();
-  const datesParam = getQueryParam("dates");
-  if (datesParam) {
-    const parsed = parseDatesList(datesParam);
-    state.dateFilters = parsed.allValid ? parsed.dates : [];
-    state.search = datesParam;
-  
-    const input = document.getElementById("searchInput");
-    if (input) input.value = datesParam;
+
+  // Apply shareable filters from the URL (e.g., ?dates=12/30/2025,12/31/2025&lake=Cedar)
+  const urlDates = getQueryParam("dates");
+  const urlLake = getQueryParam("lake");
+  const searchEl = document.getElementById("searchInput");
+  const lakeEl = document.getElementById("lakeFilter");
+
+  if (urlLake && lakeEl) {
+    state.lake = urlLake;
+    lakeEl.value = urlLake;
   }
+  if (urlDates && searchEl) {
+    state.search = urlDates;
+    state.dates = parseDatesList(urlDates);
+    searchEl.value = urlDates;
+  } else {
+    state.dates = [];
+  }
+
+
   loadAndRender();
 })();
 
@@ -649,6 +677,19 @@ function filterRowsForMap(rows) {
   });
 }
 
+function parseDatesList(raw){
+  if (!raw) return [];
+  const s = String(raw).trim();
+  if (!s) return [];
+  const parts = s.split(/[\s,]+/).map(p=>p.trim()).filter(Boolean);
+  const keys = [];
+  for (const p of parts){
+    const d = parseDate(p);
+    if (d) keys.push(formatDateKey(d));
+  }
+  return [...new Set(keys)];
+}
+
 function getQueryParam(name) {
   const url = new URL(window.location.href);
   return url.searchParams.get(name) || "";
@@ -668,4 +709,10 @@ function setQueryParam(name, value, { push = false } = {}) {
   } else {
     window.history.replaceState({}, "", url.toString());
   }
+function pad2(n){ return String(n).padStart(2,"0"); }
+function formatDateKey(d){
+  if (!d || !(d instanceof Date) || isNaN(d)) return "";
+  return `${pad2(d.getMonth()+1)}/${pad2(d.getDate())}/${d.getFullYear()}`;
+}
+
 }
