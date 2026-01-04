@@ -159,6 +159,15 @@ function formatMDY(dt) {
   return `${m}/${d}/${y}`;
 }
 
+function formatMDYDash(d) {
+  // MM-DD-YYYY (avoids URL encoding issues with slashes)
+  const mm = String(d.getMonth() + 1).padStart(2, "0");
+  const dd = String(d.getDate()).padStart(2, "0");
+  const yyyy = d.getFullYear();
+  return `${mm}-${dd}-${yyyy}`;
+}
+
+
 function sameYMD(a, b) {
   if (!(a instanceof Date) || !(b instanceof Date)) return false;
   return a.getFullYear() === b.getFullYear() && a.getMonth() === b.getMonth() && a.getDate() === b.getDate();
@@ -535,6 +544,7 @@ function wireUI() {
   document.getElementById("unitSelect").addEventListener("change", (e) => {
     state.unit = e.target.value;
     localStorage.setItem("unit", state.unit);
+    syncURLFromState();
     rerenderAll();
   });
 
@@ -542,6 +552,7 @@ function wireUI() {
     state.lang = e.target.value;
     localStorage.setItem("lang", state.lang);
     applyTranslations(state.lang);
+    syncURLFromState();
     rerenderAll();
   });
   
@@ -560,28 +571,39 @@ function wireUI() {
     state.mapRange = mapRangeSelect.value;
     localStorage.setItem("mapRange", state.mapRange);
     customWrap.style.display = (state.mapRange === "custom") ? "flex" : "none";
+    syncURLFromState();
     rerenderAll();
   });
 
   mapFrom.addEventListener("change", () => {
     state.mapFrom = mapFrom.value;
     localStorage.setItem("mapFrom", state.mapFrom);
+    syncURLFromState();
     rerenderAll();
   });
 
   mapTo.addEventListener("change", () => {
     state.mapTo = mapTo.value;
     localStorage.setItem("mapTo", state.mapTo);
+    syncURLFromState();
     rerenderAll();
   });
 
   document.getElementById("lakeFilter").addEventListener("change", (e) => {
     state.lake = e.target.value;
+    syncURLFromState();
     rerenderAll();
   });
 
   document.getElementById("searchInput").addEventListener("input", (e) => {
     state.search = e.target.value;
+
+    // If the user typed ONLY dates (single or comma-separated), treat it as a date filter.
+    // Otherwise, fall back to text search.
+    const dateInfo = extractDatesFromText(state.search);
+    state.dateFilters = dateInfo.isPure ? dateInfo.dates : [];
+
+    syncURLFromState();
     rerenderAll();
   });
 
@@ -599,7 +621,8 @@ function wireUI() {
         state.sortKey = key;
         state.sortDir = (key === "date") ? "desc" : "asc";
       }
-      rerenderAll();
+      syncURLFromState();
+    rerenderAll();
     });
   });
 }
@@ -633,13 +656,26 @@ async function loadAndRender() {
   initMap();
   wireUI();
   const datesParam = getQueryParam("dates");
-  if (datesParam) {
-    const parsed = parseDatesList(datesParam);
-    state.dateFilters = parsed.allValid ? parsed.dates : [];
-    state.search = datesParam;
-  
+  const qParam = getQueryParam("q");
+
+  // Prefer explicit ?dates=..., otherwise fall back to ?q=...
+  const initialSearch = datesParam || qParam || "";
+  if (initialSearch) {
+    if (datesParam) {
+      const parsed = parseDatesList(datesParam);
+      state.dateFilters = parsed.allValid ? parsed.dates : [];
+      // Show human-friendly slashed dates in the box, even if the URL uses dashes.
+      state.search = (parsed.allValid && parsed.dates.length)
+        ? parsed.dates.map(formatMDY).join(", ")
+        : initialSearch;
+    } else {
+      state.search = initialSearch;
+      const dateInfo = extractDatesFromText(state.search);
+      state.dateFilters = dateInfo.isPure ? dateInfo.dates : [];
+    }
+
     const input = document.getElementById("searchInput");
-    if (input) input.value = datesParam;
+    if (input) input.value = state.search;
   }
   loadAndRender();
 })();
