@@ -1,698 +1,892 @@
-/* Ice Report Map - app.js
-   Shareable filters via URL, multiple-date support, robust CSV parsing.
-*/
+// ==========================
+//  CONFIG — EDIT THESE ONLY
+// ==========================
+const SHEET_ID = "10smiQBJ8mBWax24aOagG9LdzrrnhFmj0tfRESunUJNI";
 
-(() => {
-  "use strict";
+// Option A (recommended): if you publish to web, use CSV export like below.
+// You must set the gid of your data tab.
+// If you're not sure, open your sheet and look for ".../edit#gid=123456"
+const GID = "2029178353";
 
-  // -----------------------------
-  // Config
-  // -----------------------------
-  const SHEET_ID = "10smiQBJ8mBWax24aOagG9LdzrrnhFmj0tfRESunUJNI";
-  const GID_ALLDATA = "2029178353"; // AllData tab in Ice2025
-  const CSV_URL = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/export?format=csv&gid=${GID_ALLDATA}`;
+// If using Publish-to-web CSV, this works well:
+const CSV_URL = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/export?format=csv&gid=${GID}`;
 
-  const DEFAULT_CENTER = [44.96, -93.265];
-  const DEFAULT_ZOOM = 12;
+// Option B (fallback): Google Visualization JSON endpoint (sometimes blocked).
+const GVIZ_URL = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:json&gid=${GID}`;
 
-  // -----------------------------
-  // DOM helpers
-  // -----------------------------
-  const $ = (id) => document.getElementById(id);
+// Choose fetch mode:
+const FETCH_MODE = "csv"; // "csv" or "gviz"
 
-  const els = {
-    map: $("map"),
-    status: $("status"),
-    sheetLink: $("sheetLink"),
-    langSelect: $("langSelect"),
-    unitSelect: $("unitSelect"),
-    lakeFilter: $("lakeFilter"),
-    mapRangeSelect: $("mapRangeSelect"),
-    mapFrom: $("mapFrom"),
-    mapTo: $("mapTo"),
-    searchInput: $("searchInput"),
-    refreshBtn: $("refreshBtn"),
-    resultsCount: $("resultsCount"),
-    resultsBody: $("resultsBody"),
+// ==========================
+
+const state = {
+  rows: [],
+  filtered: [],
+  unit: localStorage.getItem("unit") || "in",
+  lang: localStorage.getItem("lang") || "en",
+  sortKey: "date",
+  sortDir: "desc",
+  lake: "",
+  search: "",
+  mapRange: localStorage.getItem("mapRange") || "all",
+  mapFrom: localStorage.getItem("mapFrom") || "",
+  mapTo: localStorage.getItem("mapTo") || "",
+};
+
+// ---------------------------
+// Shareable URL state
+// ---------------------------
+function hydrateStateFromURL() {
+  const params = new URLSearchParams(window.location.search);
+
+  // Support both:
+  // - ?q=free-text
+  // - ?dates=MM-DD-YYYY,MM-DD-YYYY (shareable date filtering)
+  const dates = params.get("dates");
+  const q = params.get("q");
+  if (dates !== null && dates.trim() !== "") {
+    state.search = dates;
+  } else if (q !== null) {
+    state.search = q;
+  }
+
+  const lake = params.get("lake");
+  if (lake !== null) state.lake = lake;
+
+  const unit = params.get("unit");
+  if (unit === "in" || unit === "cm") {
+    state.unit = unit;
+    localStorage.setItem("unit", unit);
+  }
+
+  const lang = params.get("lang");
+  if (lang) {
+    state.lang = lang;
+    localStorage.setItem("lang", lang);
+  }
+
+  const range = params.get("range");
+  if (range) {
+    state.mapRange = range;
+    localStorage.setItem("mapRange", range);
+  }
+
+  const from = params.get("from");
+  if (from !== null) {
+    state.mapFrom = from;
+    localStorage.setItem("mapFrom", from);
+  }
+
+  const to = params.get("to");
+  if (to !== null) {
+    state.mapTo = to;
+    localStorage.setItem("mapTo", to);
+  }
+
+  // Handle Back/Forward
+  if (!window.__icePopStateHooked) {
+    window.__icePopStateHooked = true;
+    window.addEventListener("popstate", () => {
+      hydrateStateFromURL();
+      applyTranslations(state.lang);
+
+      // Re-sync UI widgets to hydrated state
+      const searchInput = document.getElementById("searchInput");
+      if (searchInput) searchInput.value = state.search || "";
+      const lakeSelect = document.getElementById("lakeSelect");
+      if (lakeSelect) lakeSelect.value = state.lake;
+      const unitSelect = document.getElementById("unitSelect");
+      if (unitSelect) unitSelect.value = state.unit;
+      const langSelect = document.getElementById("langSelect");
+      if (langSelect) langSelect.value = state.lang;
+
+      const mapRangeSelect = document.getElementById("mapRangeSelect");
+      if (mapRangeSelect) mapRangeSelect.value = state.mapRange;
+      const mapFromInput = document.getElementById("mapFromInput");
+      if (mapFromInput) mapFromInput.value = state.mapFrom || "";
+      const mapToInput = document.getElementById("mapToInput");
+      if (mapToInput) mapToInput.value = state.mapTo || "";
+
+      rerenderAll();
+    });
+  }
+}
+
+function syncUrlFromState(push = false) {
+  const url = new URL(window.location.href);
+
+  const set = (k, v) => {
+    if (v === undefined || v === null || String(v).trim() === "") url.searchParams.delete(k);
+    else url.searchParams.set(k, String(v).trim());
   };
 
-  // -----------------------------
-  // i18n (expects window.I18N from i18n.js)
-  // -----------------------------
-  function t(key) {
-    const lang = (els.langSelect && els.langSelect.value) || "en";
-    const dict = (window.I18N && window.I18N[lang]) || (window.I18N && window.I18N.en) || {};
-    return dict[key] || key;
+  // Store date-only searches in ?dates=MM-DD-YYYY,... so the URL stays clean.
+  const rawSearch = (state.search || "").trim();
+  const maybeTokens = rawSearch
+    .split(",")
+    .map((t) => t.trim())
+    .filter(Boolean);
+  const dateKeys = maybeTokens
+    .map((t) => {
+      const d = parseDate(t);
+      if (!d) return null;
+      const mm = String(d.getUTCMonth() + 1).padStart(2, "0");
+      const dd = String(d.getUTCDate()).padStart(2, "0");
+      const yyyy = String(d.getUTCFullYear());
+      return `${mm}-${dd}-${yyyy}`;
+    })
+    .filter(Boolean);
+
+  if (dateKeys.length > 0 && dateKeys.length === maybeTokens.length) {
+    set("dates", dateKeys.join(","));
+    set("q", "");
+  } else {
+    set("dates", "");
+    set("q", rawSearch);
   }
 
-  function setStatus(msgKeyOrText, isError = false) {
-    if (!els.status) return;
-    const txt = (window.I18N ? t(msgKeyOrText) : msgKeyOrText) || "";
-    els.status.textContent = txt;
-    els.status.style.color = isError ? "#c62828" : "";
+  set("lake", state.lake && state.lake !== "all" ? state.lake : "");
+  set("unit", state.unit);
+  set("lang", state.lang);
+  set("range", state.mapRange);
+  set("from", state.mapRange === "custom" ? state.mapFrom : "");
+  set("to", state.mapRange === "custom" ? state.mapTo : "");
+
+  if (push) window.history.pushState({}, "", url.toString());
+  else window.history.replaceState({}, "", url.toString());
+}
+
+let map, markersLayer;
+
+function setStatus(msg) {
+  document.getElementById("statusLine").textContent = msg;
+}
+
+function parseMixedFractionToInches(raw) {
+  // Accepts: "5 5/8", "9 1/4", "3/8", "5", "8 7/8)", "9 1/8!!"
+  if (!raw) return null;
+  const s = String(raw).replace(/[^0-9\/\s.]/g, " ").trim(); // remove weird chars
+  if (!s) return null;
+
+  // If it's a plain decimal number:
+  if (/^\d+(\.\d+)?$/.test(s)) return Number(s);
+
+  // Mixed fraction: "A B/C"
+  const parts = s.split(/\s+/).filter(Boolean);
+  let whole = 0;
+  let frac = 0;
+
+  if (parts.length === 1 && parts[0].includes("/")) {
+    const [n, d] = parts[0].split("/");
+    if (d && Number(d) !== 0) frac = Number(n) / Number(d);
+    return isFinite(frac) ? frac : null;
   }
 
-  // -----------------------------
-  // Parsing helpers
-  // -----------------------------
-  function safeTrim(x) {
-    return (x ?? "").toString().trim();
+  if (parts.length >= 1 && /^\d+$/.test(parts[0])) whole = Number(parts[0]);
+
+  const fracPart = parts.find(p => p.includes("/"));
+  if (fracPart) {
+    const [n, d] = fracPart.split("/");
+    if (d && Number(d) !== 0) frac = Number(n) / Number(d);
   }
 
-  // Accepts: "12/31/2025", "12-31-2025", "2025-12-31", "Date(2025,2,11)"
-  // Returns a Date object (local) or null
-  function parseDateLoose(s) {
-    s = safeTrim(s);
-    if (!s) return null;
+  const val = whole + frac;
+  return isFinite(val) ? val : null;
+}
 
-    // Google Visualization style: Date(YYYY,M,DD) where M is 0-based
-    const mG = s.match(/^Date\((\d{4})\s*,\s*(\d{1,2})\s*,\s*(\d{1,2})\)$/i);
-    if (mG) {
-      const y = Number(mG[1]);
-      const mo0 = Number(mG[2]);
-      const d = Number(mG[3]);
-      if (Number.isFinite(y) && Number.isFinite(mo0) && Number.isFinite(d)) {
-        return new Date(y, mo0, d);
-      }
+function inchesToCm(inches) {
+  if (inches == null) return null;
+  return inches * 2.54;
+}
+
+function formatThickness(row) {
+  const inches = row.thickness_in;
+  const cm = row.thickness_cm;
+
+  if (state.unit === "in") {
+    if (inches == null) return t(state.lang, "no_thickness");
+    return `${inches.toFixed(2)} in`;
+  } else {
+    const v = (cm != null) ? cm : (inches != null ? inchesToCm(inches) : null);
+    if (v == null) return t(state.lang, "no_thickness");
+    return `${v.toFixed(2)} cm`;
+  }
+}
+
+function parseCoords(raw) {
+  // "44.96853° N, 93.28444° W"
+  if (!raw) return null;
+  const s = String(raw);
+
+  const mLat = s.match(/(-?\d+(\.\d+)?)[^\d\-]*\s*°?\s*([NS])/i);
+  const mLon = s.match(/(-?\d+(\.\d+)?)[^\d\-]*\s*°?\s*([EW])/i);
+
+  // If it has two numbers but no N/S/E/W, try splitting by comma:
+  if (!mLat || !mLon) {
+    const nums = s.match(/-?\d+(\.\d+)?/g);
+    if (nums && nums.length >= 2) {
+      const lat = Number(nums[0]);
+      const lon = Number(nums[1]);
+      if (isFinite(lat) && isFinite(lon)) return { lat, lon };
     }
-
-    // yyyy-mm-dd
-    const mIso = s.match(/^(\d{4})-(\d{1,2})-(\d{1,2})$/);
-    if (mIso) {
-      const y = Number(mIso[1]);
-      const mo = Number(mIso[2]) - 1;
-      const d = Number(mIso[3]);
-      return new Date(y, mo, d);
-    }
-
-    // mm/dd/yyyy or mm-dd-yyyy
-    const mMdY = s.match(/^(\d{1,2})[\/-](\d{1,2})[\/-](\d{4})$/);
-    if (mMdY) {
-      const mo = Number(mMdY[1]) - 1;
-      const d = Number(mMdY[2]);
-      const y = Number(mMdY[3]);
-      return new Date(y, mo, d);
-    }
-
-    // Fallback: Date.parse (may be locale-dependent)
-    const ts = Date.parse(s);
-    return Number.isFinite(ts) ? new Date(ts) : null;
+    return null;
   }
 
-  function formatMDY(dateObj) {
-    if (!(dateObj instanceof Date) || isNaN(dateObj.getTime())) return "";
-    const mm = String(dateObj.getMonth() + 1).padStart(2, "0");
-    const dd = String(dateObj.getDate()).padStart(2, "0");
-    const yy = String(dateObj.getFullYear());
-    return `${mm}/${dd}/${yy}`;
-  }
-  function thicknessColor(inches) {
-    if (inches === "" || inches == null || isNaN(inches)) return "#999"; // grey
-    if (inches < 4) return "red";
-    if (inches < 8) return "yellow";
-    if (inches < 10) return "green";
-    return "blue";
-  }
+  let lat = Number(mLat[1]);
+  let lon = Number(mLon[1]);
+  const ns = mLat[3].toUpperCase();
+  const ew = mLon[3].toUpperCase();
 
+  if (ns === "S") lat = -Math.abs(lat);
+  if (ns === "N") lat = Math.abs(lat);
 
+  if (ew === "W") lon = -Math.abs(lon);
+  if (ew === "E") lon = Math.abs(lon);
 
-  // normalize any date string to MM/DD/YYYY (or "")
-  function normalizeDateString(s) {
-    const d = parseDateLoose(s);
-    return d ? formatMDY(d) : "";
-  }
+  if (!isFinite(lat) || !isFinite(lon)) return null;
+  return { lat, lon };
+}
 
-  // "44.96857° N, 93.28427° W" or "44.96857, -93.28427"
-  function parseCoordsLoose(s) {
-    s = safeTrim(s);
-    if (!s) return { lat: null, lon: null };
+function parseDate(raw) {
+  // Accepts:
+  // - MM-DD-YYYY
+  // - MM/DD/YYYY
+  // - "Date(2025,2,11)" (Google GViz date literal; month is 0-indexed)
+  if (!raw && raw !== 0) return null;
+  const s0 = String(raw).trim();
 
-    // Try "lat, lon"
-    const m1 = s.match(/(-?\d+(?:\.\d+)?)\s*,\s*(-?\d+(?:\.\d+)?)/);
-    if (m1) return { lat: Number(m1[1]), lon: Number(m1[2]) };
-
-    // Try "44.96857° N, 93.28427° W"
-    const m2 = s.match(/(-?\d+(?:\.\d+)?)\s*°?\s*([NS])\s*,\s*(-?\d+(?:\.\d+)?)\s*°?\s*([EW])/i);
-    if (m2) {
-      let lat = Number(m2[1]);
-      const ns = m2[2].toUpperCase();
-      let lon = Number(m2[3]);
-      const ew = m2[4].toUpperCase();
-      if (ns === "S") lat = -Math.abs(lat);
-      else lat = Math.abs(lat);
-      if (ew === "W") lon = -Math.abs(lon);
-      else lon = Math.abs(lon);
-      return { lat, lon };
-    }
-
-    return { lat: null, lon: null };
+  // GViz date literal: Date(YYYY,MM,DD)
+  const g = s0.match(/^Date\((\d{4})\s*,\s*(\d{1,2})\s*,\s*(\d{1,2})\)\s*$/i);
+  if (g) {
+    const yyyy = Number(g[1]);
+    const mm0 = Number(g[2]);
+    const dd = Number(g[3]);
+    const d = new Date(Date.UTC(yyyy, mm0, dd));
+    return isFinite(d.getTime()) ? d : null;
   }
 
-  function parseMaybeNum(x) {
-    const s = safeTrim(x);
-    if (!s) return null;
-    // allow commas
-    const n = Number(s.replace(/,/g, ""));
-    return Number.isFinite(n) ? n : null;
+  // Common US date formats
+  const s = s0.replace(/\//g, "-");
+  const m = s.match(/^(\d{1,2})-(\d{1,2})-(\d{4})$/);
+  if (!m) return null;
+  const mm = Number(m[1]);
+  const dd = Number(m[2]);
+  const yyyy = Number(m[3]);
+  const d = new Date(Date.UTC(yyyy, mm - 1, dd));
+  return isFinite(d.getTime()) ? d : null;
+}
+
+function toDisplayDate(raw) {
+  // Display as MM/DD/YYYY when possible.
+  const d = parseDate(raw);
+  if (!d) return raw ? String(raw) : "";
+  const mm = String(d.getUTCMonth() + 1).padStart(2, "0");
+  const dd = String(d.getUTCDate()).padStart(2, "0");
+  const yyyy = String(d.getUTCFullYear());
+  return `${mm}/${dd}/${yyyy}`;
+}
+
+function normalizeKeys(obj) {
+  // Creates a lookup with trimmed, lowercased keys for case/space-insensitive access.
+  const out = {};
+  for (const [k, v] of Object.entries(obj || {})) {
+    out[String(k).trim().toLowerCase()] = v;
   }
+  return out;
+}
 
-  // Basic CSV parser that supports quotes and commas
-  function parseCSV(text) {
-    const rows = [];
-    let row = [];
-    let cur = "";
-    let inQuotes = false;
+function pick(obj, ...candidates) {
+  // Case/space-insensitive field fetch.
+  const n = normalizeKeys(obj);
+  for (const c of candidates) {
+    const key = String(c).trim().toLowerCase();
+    if (key in n) return n[key];
+  }
+  return "";
+}
 
-    for (let i = 0; i < text.length; i++) {
-      const ch = text[i];
+function normRow(obj) {
+  // Normalize Ice2024 (lat/lon + description) and Ice2025 (Coordinates + Info)
+  const dateRaw = pick(obj, "Date", "date");
+  const lake = String(pick(obj, "Lake", "lake")).trim();
 
-      if (inQuotes) {
-        if (ch === '"') {
-          const next = text[i + 1];
-          if (next === '"') {
-            cur += '"';
-            i++;
-          } else {
-            inQuotes = false;
-          }
-        } else {
-          cur += ch;
-        }
+  const coordsRaw = pick(obj, "Coordinates", "coords", "coordinate");
+  const latRaw = pick(obj, "lat_dd", "lat", "latitude");
+  const lonRaw = pick(obj, "long_dd", "lon", "lng", "longitude", "long");
+  const coordsFromLatLon = (latRaw !== "" && lonRaw !== "")
+    ? `${Number(latRaw).toFixed(5)}° N, ${Math.abs(Number(lonRaw)).toFixed(5)}° W`
+    : "";
+
+  const info = String(pick(obj, "Info", "info", "description", "Desc", "Notes")).trim();
+
+  const thicknessInRaw = pick(obj, "Thickness (Inches)", "thickness_in", "thickness (inches)", "Thickness", "thickness");
+  const thicknessCmRaw = pick(obj, "Thickness (cm)", "Thickness_cm", "thickness_cm", "thickness (cm)");
+
+  const dateObj = parseDate(dateRaw);
+  const coords = parseCoords(coordsRaw || coordsFromLatLon);
+
+  const thickness_in = parseMixedFractionToInches(thicknessInRaw);
+  const thickness_cm = (thicknessCmRaw !== "" && thicknessCmRaw != null && isFinite(Number(thicknessCmRaw)))
+    ? Number(thicknessCmRaw)
+    : (thickness_in != null ? inchesToCm(thickness_in) : null);
+
+  return {
+    date_raw: dateRaw ? String(dateRaw).trim() : "",
+    date: dateObj,
+    date_key: dateObj
+      ? `${String(dateObj.getUTCMonth() + 1).padStart(2, "0")}-${String(dateObj.getUTCDate()).padStart(2, "0")}-${dateObj.getUTCFullYear()}`
+      : "",
+    date_display: dateObj
+      ? `${String(dateObj.getUTCMonth() + 1).padStart(2, "0")}/${String(dateObj.getUTCDate()).padStart(2, "0")}/${dateObj.getUTCFullYear()}`
+      : "",
+    date_sort: dateObj ? dateObj.getTime() : 0,
+    lake,
+    coords_raw: (coordsRaw || coordsFromLatLon) ? String(coordsRaw || coordsFromLatLon).trim() : "",
+    coords,
+    info,
+    thickness_in,
+    thickness_cm
+  };
+}
+
+function csvToObjects(csvText) {
+  // Simple CSV parser good enough for this sheet.
+  const lines = csvText.replace(/\r/g, "").split("\n").filter(l => l.trim().length);
+  if (!lines.length) return [];
+  const headers = splitCsvLine(lines[0]).map(h => h.trim());
+  const out = [];
+  for (let i = 1; i < lines.length; i++) {
+    const cols = splitCsvLine(lines[i]);
+    const obj = {};
+    headers.forEach((h, idx) => obj[h] = cols[idx] ?? "");
+    out.push(obj);
+  }
+  return out;
+}
+
+function splitCsvLine(line) {
+  const res = [];
+  let cur = "";
+  let inQuotes = false;
+  for (let i = 0; i < line.length; i++) {
+    const ch = line[i];
+    if (ch === '"') {
+      // toggle quotes or escaped quote
+      if (inQuotes && line[i + 1] === '"') {
+        cur += '"';
+        i++;
       } else {
-        if (ch === '"') {
-          inQuotes = true;
-        } else if (ch === ",") {
-          row.push(cur);
-          cur = "";
-        } else if (ch === "\n") {
-          row.push(cur);
-          rows.push(row);
-          row = [];
-          cur = "";
-        } else if (ch === "\r") {
-          // ignore
-        } else {
-          cur += ch;
-        }
+        inQuotes = !inQuotes;
       }
-    }
-    row.push(cur);
-    rows.push(row);
-
-    // trim trailing empty rows
-    while (rows.length && rows[rows.length - 1].every((c) => safeTrim(c) === "")) rows.pop();
-    return rows;
-  }
-
-  // -----------------------------
-  // State / URL handling
-  // -----------------------------
-  function getUrlParams() {
-    const p = new URLSearchParams(window.location.search);
-    return {
-      dates: safeTrim(p.get("dates") || ""), // comma-separated list
-      q: safeTrim(p.get("q") || ""),         // free text search
-      lake: safeTrim(p.get("lake") || ""),
-      range: safeTrim(p.get("range") || ""), // all/7d/14d/30d/season/custom
-      from: safeTrim(p.get("from") || ""),
-      to: safeTrim(p.get("to") || ""),
-      units: safeTrim(p.get("units") || ""),
-      lang: safeTrim(p.get("lang") || ""),
-    };
-  }
-
-  // Accepts "12/30/2025,12-31-2025" -> ["12/30/2025","12/31/2025"]
-  function decodeDatesParam(datesParam) {
-    const raw = safeTrim(datesParam);
-    if (!raw) return [];
-    return raw
-      .split(",")
-      .map((s) => normalizeDateString(decodeURIComponent(s)))
-      .filter((s) => !!s);
-  }
-
-  // Update the URL to match current UI filters (shareable)
-  function syncUrlFromUI({ replace = false } = {}) {
-    const p = new URLSearchParams();
-
-    const q = safeTrim(els.searchInput?.value || "");
-    const lake = safeTrim(els.lakeFilter?.value || "");
-    const range = safeTrim(els.mapRangeSelect?.value || "all");
-    const from = safeTrim(els.mapFrom?.value || "");
-    const to = safeTrim(els.mapTo?.value || "");
-    const units = safeTrim(els.unitSelect?.value || "");
-    const lang = safeTrim(els.langSelect?.value || "");
-
-    // If q looks like one or more dates, prefer dates=
-    const datesFromQ = decodeDatesParam(q);
-    if (datesFromQ.length) {
-      p.set("dates", datesFromQ.join(","));
-    } else if (q) {
-      p.set("q", q);
-    }
-
-    if (lake) p.set("lake", lake);
-    if (range && range !== "all") p.set("range", range);
-    if (range === "custom") {
-      if (from) p.set("from", from);
-      if (to) p.set("to", to);
-    }
-    if (units) p.set("units", units);
-    if (lang && lang !== "en") p.set("lang", lang);
-
-    const newUrl = `${window.location.pathname}${p.toString() ? "?" + p.toString() : ""}${window.location.hash || ""}`;
-    if (replace) history.replaceState(null, "", newUrl);
-    else history.pushState(null, "", newUrl);
-  }
-
-  function applyUrlToUI() {
-    const u = getUrlParams();
-
-    if (u.lang && els.langSelect) els.langSelect.value = u.lang;
-    if (u.units && els.unitSelect) els.unitSelect.value = u.units;
-    if (u.lake && els.lakeFilter) els.lakeFilter.value = u.lake;
-
-    // Prefer dates= over q=
-    const decodedDates = decodeDatesParam(u.dates);
-    if (decodedDates.length) {
-      if (els.searchInput) els.searchInput.value = decodedDates.join(",");
-    } else if (u.q && els.searchInput) {
-      els.searchInput.value = u.q;
-    }
-
-    if (u.range && els.mapRangeSelect) {
-      els.mapRangeSelect.value = u.range;
-    }
-    if (u.from && els.mapFrom) els.mapFrom.value = u.from;
-    if (u.to && els.mapTo) els.mapTo.value = u.to;
-
-    // If dates are present, force range=all (we'll filter by dates explicitly)
-    if (decodedDates.length && els.mapRangeSelect) {
-      els.mapRangeSelect.value = "all";
-      if (els.mapFrom) els.mapFrom.value = "";
-      if (els.mapTo) els.mapTo.value = "";
+    } else if (ch === "," && !inQuotes) {
+      res.push(cur);
+      cur = "";
+    } else {
+      cur += ch;
     }
   }
+  res.push(cur);
+  return res;
+}
 
-  // -----------------------------
-  // Data normalization
-  // -----------------------------
-  // Expected columns:
-  // Date, Lake, Coordinates, Thickness (Inches), Info, Thickness (cm)
-  function normalizeRow(obj) {
-    const dateStr = normalizeDateString(obj["Date"] ?? obj["date"] ?? obj["DATE"]);
-    const dateObj = parseDateLoose(dateStr);
+async function fetchData() {
+  setStatus(t(state.lang, "status_loading"));
 
-    const lake = safeTrim(obj["Lake"] ?? obj["lake"] ?? "");
-    const coordsStr = safeTrim(obj["Coordinates"] ?? obj["coords"] ?? obj["Coordinates "] ?? "");
-    const { lat, lon } = parseCoordsLoose(coordsStr);
-
-    const inStr = safeTrim(obj["Thickness (Inches)"] ?? obj["thickness_in"] ?? obj["Thickness"] ?? "");
-    const cmStr = safeTrim(obj["Thickness (cm)"] ?? obj["Thickness_cm"] ?? obj["Thickness (cm) "] ?? "");
-
-    const inches = parseMaybeNum(inStr);
-    const cm = parseMaybeNum(cmStr);
-
-    const info = safeTrim(obj["Info"] ?? obj["description"] ?? obj["Description"] ?? "");
-
-    return {
-      date: dateStr,
-      date_obj: dateObj,
-      lake,
-      coords: coordsStr,
-      lat: Number.isFinite(lat) ? lat : null,
-      lon: Number.isFinite(lon) ? lon : null,
-      inches,
-      cm,
-      info,
-      raw: obj,
-    };
-  }
-
-  function rowsToObjects(csvRows) {
-    if (!csvRows.length) return [];
-    const header = csvRows[0].map((h) => safeTrim(h));
-    const out = [];
-    for (let i = 1; i < csvRows.length; i++) {
-      const r = csvRows[i];
-      if (!r || r.every((c) => safeTrim(c) === "")) continue;
-      const obj = {};
-      for (let j = 0; j < header.length; j++) obj[header[j]] = r[j] ?? "";
-      out.push(obj);
-    }
-    return out;
-  }
-
-  // -----------------------------
-  // Filtering
-  // -----------------------------
-  function getActiveFilters() {
-    const u = getUrlParams();
-    const datesList = decodeDatesParam(u.dates);
-
-    const q = safeTrim(els.searchInput?.value || "");
-    const lake = safeTrim(els.lakeFilter?.value || "");
-    const range = safeTrim(els.mapRangeSelect?.value || "all");
-    const from = safeTrim(els.mapFrom?.value || "");
-    const to = safeTrim(els.mapTo?.value || "");
-
-    // If the search box contains comma-separated dates, treat it as dates filter
-    const datesFromQ = decodeDatesParam(q);
-
-    return {
-      dates: datesList.length ? datesList : (datesFromQ.length ? datesFromQ : []),
-      qText: datesFromQ.length ? "" : q,
-      lake,
-      range,
-      from: from ? normalizeDateString(from) : "",
-      to: to ? normalizeDateString(to) : "",
-    };
-  }
-
-  function withinRange(d, start, end) {
-    if (!(d instanceof Date) || isNaN(d.getTime())) return false;
-    if (start && (d < start)) return false;
-    if (end && (d > end)) return false;
-    return true;
-  }
-
-  function applyFilters(allRows) {
-    const f = getActiveFilters();
-
-    // date set filter
-    const dateSet = new Set((f.dates || []).map(normalizeDateString));
-
-    // range filter
-    let start = null, end = null;
-    if (f.range === "custom") {
-      start = f.from ? parseDateLoose(f.from) : null;
-      end = f.to ? parseDateLoose(f.to) : null;
-    } else if (f.range === "7d" || f.range === "14d" || f.range === "30d") {
-      const days = Number(f.range.replace("d", ""));
-      const now = new Date();
-      start = new Date(now.getFullYear(), now.getMonth(), now.getDate() - (days - 1));
-      end = null;
-    } else if (f.range === "season") {
-      // "season" = current ice season Aug 1 -> Jul 31, based on today
-      const now = new Date();
-      const y = now.getFullYear();
-      const seasonStart = new Date(now.getMonth() >= 7 ? y : y - 1, 7, 1); // Aug 1
-      start = seasonStart;
-      end = null;
+  try {
+    let rawRows = [];
+    if (FETCH_MODE === "csv") {
+      const resp = await fetch(CSV_URL, { cache: "no-store" });
+      if (!resp.ok) throw new Error("CSV fetch failed");
+      const text = await resp.text();
+      rawRows = csvToObjects(text);
+    } else {
+      const resp = await fetch(GVIZ_URL, { cache: "no-store" });
+      if (!resp.ok) throw new Error("GVIZ fetch failed");
+      const text = await resp.text();
+      const json = JSON.parse(text.substring(text.indexOf("{"), text.lastIndexOf("}") + 1));
+      const table = json.table;
+      const headers = table.cols.map(c => c.label);
+      rawRows = table.rows.map(r => {
+        const obj = {};
+        r.c.forEach((cell, i) => obj[headers[i]] = cell ? (cell.v ?? "") : "");
+        return obj;
+      });
     }
 
-    const q = (f.qText || "").toLowerCase();
+    const rows = rawRows
+      .map(normRow)
+      .filter(r => r.lake || r.date_raw || r.coords_raw || r.info || r.thickness_in != null || r.thickness_cm != null);
 
-    return allRows.filter((r) => {
-      if (f.lake && r.lake !== f.lake) return false;
+    // Sort newest first by default
+    rows.sort((a,b) => b.date_sort - a.date_sort);
 
-      if (dateSet.size) {
-        if (!dateSet.has(normalizeDateString(r.date))) return false;
-      }
-
-      if (start || end) {
-        if (!withinRange(r.date_obj, start, end)) return false;
-      }
-
-      if (q) {
-        const hay = `${r.date} ${r.lake} ${r.coords} ${r.info}`.toLowerCase();
-        if (!hay.includes(q)) return false;
-      }
-
-      return true;
-    });
+    state.rows = rows;
+    setStatus(t(state.lang, "status_loaded", rows.length));
+  } catch (e) {
+    console.error(e);
+    setStatus(t(state.lang, "status_error"));
+    state.rows = [];
   }
+}
 
-  // -----------------------------
-  // Map rendering (Leaflet)
-  // -----------------------------
-  let map = null;
-  let markersLayer = null;
+function lakeColor(thicknessIn) {
+  // Discrete thickness-based colors (requested):
+  //   <= 4"  : red
+  //   <= 8"  : yellow
+  //   <= 10" : green
+  //    > 10" : blue
+  //   null/NaN: grey
+  if (thicknessIn == null || Number.isNaN(Number(thicknessIn))) return "#808080";
+  const v = Number(thicknessIn);
+  if (v > 10) return "#2563eb";      // blue
+  if (v > 8) return "#16a34a";       // green
+  if (v > 4) return "#f59e0b";       // yellow
+  return "#ef4444";                  // red
+}
 
-  function initMap() {
-    if (!window.L || !els.map) return;
-    if (map) return;
+function updateLegend() {
+  const el = document.getElementById("legend");
+  el.innerHTML = `
+    <div>
+      <span style="color:#ef4444;font-weight:700;">●</span> ≤ 4" &nbsp;
+      <span style="color:#f59e0b;font-weight:700;">●</span> 4–8" &nbsp;
+      <span style="color:#16a34a;font-weight:700;">●</span> 8–10" &nbsp;
+      <span style="color:#2563eb;font-weight:700;">●</span> > 10" &nbsp;
+      <span style="color:#94a3b8;font-weight:700;">●</span> unknown
+    </div>
+    <div style="margin-top:6px;">Tip: click markers to see details.</div>
+  `;
+}
 
-    map = L.map(els.map).setView(DEFAULT_CENTER, DEFAULT_ZOOM);
-    L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
-      maxZoom: 19,
-      attribution: "&copy; OpenStreetMap contributors",
-    }).addTo(map);
+function initMap() {
+  map = L.map("map", { preferCanvas: true }).setView([44.96, -93.27], 11);
 
-    markersLayer = L.layerGroup().addTo(map);
-  }
+  L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
+    maxZoom: 19,
+    attribution: '&copy; OpenStreetMap'
+  }).addTo(map);
 
-  function clearMarkers() {
-    if (markersLayer) markersLayer.clearLayers();
-  }
+  markersLayer = L.layerGroup().addTo(map);
+  updateLegend();
+}
 
-  function addMarker(row) {
-    if (!markersLayer) return;
-    if (row.lat == null || row.lon == null) return;
+function renderMap(rows) {
+  markersLayer.clearLayers();
 
-    const units = safeTrim(els.unitSelect?.value || "in");
-    const thicknessVal =
-      units === "cm"
-        ? (row.cm != null ? `${row.cm} cm` : (row.inches != null ? `${(row.inches * 2.54).toFixed(2)} cm` : ""))
-        : (row.inches != null ? `${row.inches} in` : (row.cm != null ? `${(row.cm / 2.54).toFixed(2)} in` : ""));
+  const pts = rows.filter(r => r.coords && isFinite(r.coords.lat) && isFinite(r.coords.lon));
 
+  for (const r of pts) {
+    const color = lakeColor(r.thickness_in);
+    const thicknessLabel = formatThickness(r);
     const popup = `
-      <div style="min-width:200px">
-        <div><b>${row.lake || ""}</b></div>
-        <div>${row.date || ""}</div>
-        <div>${thicknessVal}</div>
-        <div style="opacity:.85">${row.info || ""}</div>
-      </div>`;
+      <div style="font-weight:800;margin-bottom:4px;">${escapeHtml(r.lake || "—")}</div>
+      <div><b>${escapeHtml(r.date_raw || "—")}</b></div>
+      <div>${escapeHtml(thicknessLabel)}</div>
+      <div style="color:#94a3b8;margin-top:6px;line-height:1.35;">
+        ${escapeHtml(r.info || "")}
+      </div>
+      <div style="color:#94a3b8;margin-top:6px;">
+        ${escapeHtml(r.coords_raw || "")}
+      </div>
+    `;
 
-    L.circleMarker([row.lat, row.lon], { radius: 6 }).bindPopup(popup).addTo(markersLayer);
+    const marker = L.circleMarker([r.coords.lat, r.coords.lon], {
+      radius: 7,
+      weight: 2,
+      color: color,
+      fillColor: color,
+      fillOpacity: 0.35
+    }).bindPopup(popup);
+
+    marker.addTo(markersLayer);
   }
 
-  function fitToMarkers() {
-    if (!map || !markersLayer) return;
-    const layers = markersLayer.getLayers();
-    if (!layers.length) return;
-    const group = L.featureGroup(layers);
-    map.fitBounds(group.getBounds().pad(0.15));
+  if (pts.length) {
+    const bounds = L.latLngBounds(pts.map(r => [r.coords.lat, r.coords.lon]));
+    map.fitBounds(bounds.pad(0.18));
   }
+}
 
-  // -----------------------------
-  // Table rendering
-  // -----------------------------
-  function renderTable(rows) {
-    if (!els.resultsBody) return;
-    els.resultsBody.innerHTML = "";
+function escapeHtml(s) {
+  return String(s).replace(/[&<>"']/g, (m) => ({
+    "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"
+  }[m]));
+}
 
-    for (const r of rows) {
-      const tr = document.createElement("tr");
+function renderLakeOptions(rows) {
+  const lakes = Array.from(new Set(rows.map(r => r.lake).filter(Boolean))).sort();
+  const sel = document.getElementById("lakeFilter");
+  const keep = state.lake;
+  sel.innerHTML = `<option value="">All</option>` + lakes.map(l => `<option value="${escapeHtml(l)}">${escapeHtml(l)}</option>`).join("");
+  sel.value = keep;
+}
 
-      const tdDate = document.createElement("td");
-      tdDate.textContent = r.date || "";
-      tr.appendChild(tdDate);
+function applyFilters() {
+  const lake = state.lake;
+  const qRaw = (state.search || "").toLowerCase().trim();
 
-      const tdLake = document.createElement("td");
-      tdLake.textContent = r.lake || "";
-      tr.appendChild(tdLake);
+  let out = state.rows.slice();
 
-      const tdCoords = document.createElement("td");
-      tdCoords.textContent = r.coords || "";
-      tr.appendChild(tdCoords);
+  if (lake) out = out.filter(r => r.lake === lake);
 
-      const units = safeTrim(els.unitSelect?.value || "in");
-      const tdThick = document.createElement("td");
-      if (units === "cm") {
-        const cm = r.cm != null ? r.cm : (r.inches != null ? (r.inches * 2.54) : null);
-        tdThick.textContent = cm != null ? `${cm}` : "";
-      } else {
-        const inches = r.inches != null ? r.inches : (r.cm != null ? (r.cm / 2.54) : null);
-        tdThick.textContent = inches != null ? `${inches}` : "";
-      }
-      tr.appendChild(tdThick);
+  if (qRaw) {
+    // If the search is one or more dates (comma-separated), match on date key.
+    const tokens = qRaw.split(",").map(s => s.trim()).filter(Boolean);
+    const dateKeys = tokens
+      .map(t => {
+        const d = parseDate(t);
+        if (!d) return null;
+        const mm = String(d.getUTCMonth() + 1).padStart(2, "0");
+        const dd = String(d.getUTCDate()).padStart(2, "0");
+        const yyyy = String(d.getUTCFullYear());
+        return `${mm}-${dd}-${yyyy}`;
+      })
+      .filter(Boolean);
 
-      const tdInfo = document.createElement("td");
-      tdInfo.textContent = r.info || "";
-      tr.appendChild(tdInfo);
+    const isDateOnlySearch = dateKeys.length === tokens.length && tokens.length > 0;
 
-      // click row => open popup
-      tr.addEventListener("click", () => {
-        if (map && r.lat != null && r.lon != null) {
-          map.setView([r.lat, r.lon], Math.max(map.getZoom(), 14));
-          // open matching marker popup
-          if (markersLayer) {
-            for (const lyr of markersLayer.getLayers()) {
-              const ll = lyr.getLatLng?.();
-              if (ll && Math.abs(ll.lat - r.lat) < 1e-7 && Math.abs(ll.lng - r.lon) < 1e-7) {
-                lyr.openPopup();
-                break;
-              }
-            }
-          }
-        }
-      });
-
-      els.resultsBody.appendChild(tr);
-    }
-
-    if (els.resultsCount) els.resultsCount.textContent = `${rows.length}`;
-  }
-
-  // -----------------------------
-  // Data loading
-  // -----------------------------
-  let ALL_ROWS = [];
-  let lastFetchOk = false;
-
-  async function fetchCsvText(url) {
-    const res = await fetch(url, { cache: "no-store" });
-    if (!res.ok) throw new Error(`HTTP ${res.status}`);
-    return await res.text();
-  }
-
-  async function loadAllData() {
-    setStatus("status_loading", false);
-    lastFetchOk = false;
-
-    const csvText = await fetchCsvText(CSV_URL);
-    const csvRows = parseCSV(csvText);
-    const objs = rowsToObjects(csvRows);
-    const normalized = objs.map(normalizeRow).filter((r) => r.date && r.lake);
-
-    ALL_ROWS = normalized;
-    lastFetchOk = true;
-    setStatus("", false);
-  }
-
-  function populateLakeFilter(rows) {
-    if (!els.lakeFilter) return;
-    const current = els.lakeFilter.value || "";
-    const lakes = Array.from(new Set(rows.map((r) => r.lake).filter(Boolean))).sort((a, b) => a.localeCompare(b));
-
-    // Preserve first option (All)
-    const firstOpt = els.lakeFilter.querySelector("option[value='']") || els.lakeFilter.options[0];
-    els.lakeFilter.innerHTML = "";
-    if (firstOpt) {
-      const opt = document.createElement("option");
-      opt.value = "";
-      opt.textContent = firstOpt.textContent || "All lakes";
-      els.lakeFilter.appendChild(opt);
-    }
-
-    for (const lake of lakes) {
-      const opt = document.createElement("option");
-      opt.value = lake;
-      opt.textContent = lake;
-      els.lakeFilter.appendChild(opt);
-    }
-
-    if (current && lakes.includes(current)) els.lakeFilter.value = current;
-  }
-
-  function renderAll() {
-    if (!map) initMap();
-    clearMarkers();
-
-    const filtered = applyFilters(ALL_ROWS);
-
-    for (const r of filtered) addMarker(r);
-    renderTable(filtered);
-    fitToMarkers();
-
-    // show sheet link
-    if (els.sheetLink) {
-      els.sheetLink.href = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/edit`;
-      els.sheetLink.textContent = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/edit`;
+    if (isDateOnlySearch) {
+      out = out.filter(r => dateKeys.includes((r.date_key || "").toLowerCase()));
+    } else {
+      out = out.filter(r =>
+        (r.lake || "").toLowerCase().includes(qRaw) ||
+        (r.info || "").toLowerCase().includes(qRaw) ||
+        (r.date_raw || "").toLowerCase().includes(qRaw) ||
+        (r.date_key || "").toLowerCase().includes(qRaw)
+      );
     }
   }
 
-  // -----------------------------
-  // Event wiring
-  // -----------------------------
-  function wireEvents() {
-    if (els.refreshBtn) {
-      els.refreshBtn.addEventListener("click", async () => {
-        await refresh(true);
-      });
+  // sort
+  out.sort((a,b) => {
+    let av, bv;
+    switch (state.sortKey) {
+      case "lake": av = a.lake; bv = b.lake; break;
+      case "info": av = a.info; bv = b.info; break;
+      case "coords": av = a.coords_raw; bv = b.coords_raw; break;
+      case "thickness":
+        av = (state.unit === "in") ? (a.thickness_in ?? -1) : (a.thickness_cm ?? -1);
+        bv = (state.unit === "in") ? (b.thickness_in ?? -1) : (b.thickness_cm ?? -1);
+        break;
+      case "date":
+      default:
+        av = a.date_sort; bv = b.date_sort;
     }
 
-    const onFilterChanged = () => {
-      // reflect to URL and rerender
-      syncUrlFromUI({ replace: true });
-      renderAll();
-    };
-
-    if (els.langSelect) els.langSelect.addEventListener("change", onFilterChanged);
-    if (els.unitSelect) els.unitSelect.addEventListener("change", onFilterChanged);
-    if (els.lakeFilter) els.lakeFilter.addEventListener("change", onFilterChanged);
-    if (els.mapRangeSelect) els.mapRangeSelect.addEventListener("change", () => {
-      // show/hide custom fields
-      const isCustom = els.mapRangeSelect.value === "custom";
-      if (els.mapFrom) els.mapFrom.style.display = isCustom ? "" : "none";
-      if (els.mapTo) els.mapTo.style.display = isCustom ? "" : "none";
-      onFilterChanged();
-    });
-    if (els.mapFrom) els.mapFrom.addEventListener("change", onFilterChanged);
-    if (els.mapTo) els.mapTo.addEventListener("change", onFilterChanged);
-
-    if (els.searchInput) {
-      // update on Enter + debounce typing
-      let tmr = null;
-      els.searchInput.addEventListener("keydown", (e) => {
-        if (e.key === "Enter") {
-          e.preventDefault();
-          onFilterChanged();
-        }
-      });
-      els.searchInput.addEventListener("input", () => {
-        clearTimeout(tmr);
-        tmr = setTimeout(onFilterChanged, 300);
-      });
+    if (typeof av === "number" && typeof bv === "number") {
+      return state.sortDir === "asc" ? av - bv : bv - av;
     }
-
-    window.addEventListener("popstate", async () => {
-      applyUrlToUI();
-      renderAll();
-    });
-  }
-
-  async function refresh(forceRefetch = false) {
-    try {
-      // ensure UI matches URL (on first load, and on refresh)
-      applyUrlToUI();
-
-      if (!lastFetchOk || forceRefetch) {
-        await loadAllData();
-        populateLakeFilter(ALL_ROWS);
-      }
-
-      // show/hide custom date inputs
-      if (els.mapRangeSelect && els.mapFrom && els.mapTo) {
-        const isCustom = els.mapRangeSelect.value === "custom";
-        els.mapFrom.style.display = isCustom ? "" : "none";
-        els.mapTo.style.display = isCustom ? "" : "none";
-      }
-
-      renderAll();
-      syncUrlFromUI({ replace: true });
-    } catch (err) {
-      console.error("Data load error:", err);
-      setStatus("status_error", true);
-    }
-  }
-
-  // -----------------------------
-  // Init
-  // -----------------------------
-  document.addEventListener("DOMContentLoaded", async () => {
-    try {
-      if (els.sheetLink) {
-        els.sheetLink.href = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/edit`;
-      }
-      initMap();
-      wireEvents();
-      await refresh(false);
-    } catch (err) {
-      console.error(err);
-      setStatus("status_error", true);
-    }
+    av = (av ?? "").toString();
+    bv = (bv ?? "").toString();
+    return state.sortDir === "asc" ? av.localeCompare(bv) : bv.localeCompare(av);
   });
 
+  state.filtered = out;
+}
+
+function renderTable(rows) {
+  const tbody = document.querySelector("#dataTable tbody");
+  tbody.innerHTML = "";
+
+  for (const r of rows) {
+    const tr = document.createElement("tr");
+
+    const thickness = formatThickness(r);
+    const coords = r.coords_raw ? r.coords_raw : t(state.lang, "no_coords");
+
+    const col = lakeColor(r.thickness_in);
+    tr.innerHTML = `
+      <td>${escapeHtml(r.date_display || toDisplayDate(r.date_raw || r.date_key || "") || "—")}</td>
+      <td>${escapeHtml(r.lake || "—")}</td>
+      <td>
+        <span style="color:${col};font-weight:700;">●</span>
+        <span class="badge">${escapeHtml(thickness)}</span>
+      </td>
+      <td>${escapeHtml(r.info || "")}</td>
+      <td>${escapeHtml(coords)}</td>
+    `;
+
+    tbody.appendChild(tr);
+  }
+}
+
+function renderLatestPerLake(rows) {
+  // pick latest (max date_sort) per lake
+  const byLake = new Map();
+  for (const r of rows) {
+    if (!r.lake) continue;
+    const prev = byLake.get(r.lake);
+    if (!prev || r.date_sort > prev.date_sort) byLake.set(r.lake, r);
+  }
+
+  const list = Array.from(byLake.values()).sort((a,b) => (b.date_sort - a.date_sort));
+  const el = document.getElementById("latestList");
+  el.innerHTML = "";
+
+  for (const r of list) {
+    const div = document.createElement("div");
+    div.className = "latestItem";
+    const col = lakeColor(r.thickness_in);
+    div.innerHTML = `
+      <div class="row1">
+        <div>${escapeHtml(r.lake)}</div>
+        <div><span style="color:${col};font-weight:700;">●</span> ${escapeHtml(formatThickness(r))}</div>
+      </div>
+      <div class="row2">
+        <div><b>${escapeHtml(r.date_raw || "—")}</b></div>
+        <div>${escapeHtml(r.info || "")}</div>
+      </div>
+    `;
+    el.appendChild(div);
+  }
+}
+
+function wireUI() {
+  document.getElementById("lakeFilter").value = state.lake;
+  document.getElementById("searchInput").value = state.search;
+  document.getElementById("unitSelect").value = state.unit;
+  document.getElementById("langSelect").value = state.lang;
+
+  document.getElementById("unitSelect").addEventListener("change", (e) => {
+    state.unit = e.target.value;
+    localStorage.setItem("unit", state.unit);
+    rerenderAll();
+  });
+
+  document.getElementById("langSelect").addEventListener("change", (e) => {
+    state.lang = e.target.value;
+    localStorage.setItem("lang", state.lang);
+    applyTranslations(state.lang);
+    rerenderAll();
+  });
+  
+    // Map range UI init
+  const mapRangeSelect = document.getElementById("mapRangeSelect");
+  const customWrap = document.getElementById("customRangeWrap");
+  const mapFrom = document.getElementById("mapFrom");
+  const mapTo = document.getElementById("mapTo");
+
+  mapRangeSelect.value = state.mapRange;
+  mapFrom.value = state.mapFrom;
+  mapTo.value = state.mapTo;
+  customWrap.style.display = (state.mapRange === "custom") ? "flex" : "none";
+
+  mapRangeSelect.addEventListener("change", () => {
+    state.mapRange = mapRangeSelect.value;
+    localStorage.setItem("mapRange", state.mapRange);
+    customWrap.style.display = (state.mapRange === "custom") ? "flex" : "none";
+    rerenderAll();
+  });
+
+  mapFrom.addEventListener("change", () => {
+    state.mapFrom = mapFrom.value;
+    localStorage.setItem("mapFrom", state.mapFrom);
+    rerenderAll();
+  });
+
+  mapTo.addEventListener("change", () => {
+    state.mapTo = mapTo.value;
+    localStorage.setItem("mapTo", state.mapTo);
+    rerenderAll();
+  });
+
+  document.getElementById("lakeFilter").addEventListener("change", (e) => {
+    state.lake = e.target.value;
+    rerenderAll();
+  });
+
+  const searchInput = document.getElementById("searchInput");
+
+// Set initial value (from URL if present)
+searchInput.value = state.search || "";
+
+// Update filters + URL as user types
+searchInput.addEventListener("input", (e) => {
+  state.search = e.target.value;
+
+  // Put the search into the URL so it’s shareable: ?q=...
+  setQueryParam("q", state.search, { push: false });
+
+  rerenderAll();
+});
+
+  document.getElementById("refreshBtn").addEventListener("click", async () => {
+    await loadAndRender();
+  });
+
+  document.querySelectorAll("#dataTable thead th").forEach(th => {
+    th.addEventListener("click", () => {
+      const key = th.getAttribute("data-key");
+      if (!key) return;
+      if (state.sortKey === key) {
+        state.sortDir = (state.sortDir === "asc") ? "desc" : "asc";
+      } else {
+        state.sortKey = key;
+        state.sortDir = (key === "date") ? "desc" : "asc";
+      }
+      rerenderAll();
+    });
+  });
+}
+
+function rerenderAll() {
+  applyFilters();
+  renderTable(state.filtered);
+
+  // Map uses date range + current table filters (lake/search) by default:
+  const mapRows = filterRowsForMap(state.filtered);
+  renderMap(mapRows);
+
+  renderLatestPerLake(state.rows);
+  syncStateToURL();
+  syncUrlFromState(false);
+}
+
+async function loadAndRender() {
+  await fetchData();
+  renderLakeOptions(state.rows);
+  rerenderAll();
+}
+
+(function init() {
+  hydrateStateFromURL();
+  // Load URL params into state first
+  readStateFromURL();
+
+  // Pull initial search from URL, e.g. ?q=12-23-2025
+  state.search = getQueryParam("q") || "";
+
+  // Sheet link
+  const sheetLink = document.getElementById("sheetLink");
+  sheetLink.href = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/edit`;
+  sheetLink.textContent = `docs.google.com/spreadsheets/d/${SHEET_ID}`;
+
+  applyTranslations(state.lang);
+  initMap();
+  wireUI();       // wireUI will now set the input value from state.search
+  loadAndRender();
+
+  // If the user presses back/forward, sync UI with the URL
+  window.addEventListener("popstate", () => {
+    const q = getQueryParam("q") || "";
+    state.search = q;
+    const input = document.getElementById("searchInput");
+    if (input) input.value = q;
+    rerenderAll();
+  });
 })();
+
+function toISODateStringUTC(d) {
+  const yyyy = d.getUTCFullYear();
+  const mm = String(d.getUTCMonth() + 1).padStart(2, "0");
+  const dd = String(d.getUTCDate()).padStart(2, "0");
+  return `${yyyy}-${mm}-${dd}`;
+}
+
+function getSeasonStartUTC() {
+  // “This season” = Nov 1 of current season year.
+  // If today is before Nov 1, season started Nov 1 of previous year.
+  const now = new Date();
+  const y = now.getUTCFullYear();
+  const nov1ThisYear = Date.UTC(y, 10, 1); // month 10 = November
+  const seasonYear = (now.getTime() >= nov1ThisYear) ? y : (y - 1);
+  return new Date(Date.UTC(seasonYear, 10, 1));
+}
+
+function getNowUTCDateFloor() {
+  const now = new Date();
+  return new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate()));
+}
+
+function computeMapDateWindow() {
+  const mode = state.mapRange;
+  const now = getNowUTCDateFloor();
+
+  if (mode === "all") return { start: null, end: null };
+
+  if (mode === "season") {
+    const start = getSeasonStartUTC();
+    return { start, end: null };
+  }
+
+  const daysMap = { "7d": 7, "14d": 14, "30d": 30 };
+  if (daysMap[mode]) {
+    const days = daysMap[mode];
+    const start = new Date(now.getTime() - (days * 24 * 60 * 60 * 1000));
+    return { start, end: null };
+  }
+
+  if (mode === "custom") {
+    const start = state.mapFrom ? new Date(state.mapFrom + "T00:00:00Z") : null;
+    const end = state.mapTo ? new Date(state.mapTo + "T23:59:59Z") : null;
+    return { start: start && isFinite(start) ? start : null, end: end && isFinite(end) ? end : null };
+  }
+
+  return { start: null, end: null };
+}
+
+function filterRowsForMap(rows) {
+  const { start, end } = computeMapDateWindow();
+  if (!start && !end) return rows;
+
+  return rows.filter(r => {
+    if (!r.date || !r.date_sort) return false; // no date => don’t show on map
+    const t = r.date_sort;
+    if (start && t < start.getTime()) return false;
+    if (end && t > end.getTime()) return false;
+    return true;
+  });
+}
+
+function readStateFromURL() {
+  const url = new URL(window.location.href);
+  const p = url.searchParams;
+
+  // Table filters
+  if (p.has("q")) state.search = p.get("q") || "";
+  if (p.has("lake")) state.lake = p.get("lake") || "";
+
+  // Display prefs
+  if (p.has("unit")) state.unit = p.get("unit") || state.unit;
+  if (p.has("lang")) state.lang = p.get("lang") || state.lang;
+
+  // Sorting
+  if (p.has("sort")) state.sortKey = p.get("sort") || state.sortKey;
+  if (p.has("dir")) state.sortDir = p.get("dir") || state.sortDir;
+
+  // Map date range
+  if (p.has("range")) state.mapRange = p.get("range") || state.mapRange;
+  if (p.has("from")) state.mapFrom = p.get("from") || "";
+  if (p.has("to")) state.mapTo = p.get("to") || "";
+}
+
+function syncStateToURL() {
+  const url = new URL(window.location.href);
+  const p = url.searchParams;
+
+  // Always include these so links are “exact view”
+  p.set("unit", state.unit);
+  p.set("lang", state.lang);
+  p.set("sort", state.sortKey);
+  p.set("dir", state.sortDir);
+
+  // Optional filters
+  if (state.search && state.search.trim() !== "") p.set("q", state.search.trim());
+  else p.delete("q");
+
+  if (state.lake && state.lake.trim() !== "") p.set("lake", state.lake.trim());
+  else p.delete("lake");
+
+  // Map range
+  p.set("range", state.mapRange);
+  if (state.mapRange === "custom") {
+    if (state.mapFrom) p.set("from", state.mapFrom); else p.delete("from");
+    if (state.mapTo) p.set("to", state.mapTo); else p.delete("to");
+  } else {
+    p.delete("from");
+    p.delete("to");
+  }
+
+  // Update the URL without reloading
+  window.history.replaceState({}, "", url.toString());
+}
