@@ -106,6 +106,15 @@
     const yy = String(dateObj.getFullYear());
     return `${mm}/${dd}/${yy}`;
   }
+  function thicknessColor(inches) {
+    if (inches === "" || inches == null || isNaN(inches)) return "#999"; // grey
+    if (inches < 4) return "red";
+    if (inches < 8) return "yellow";
+    if (inches < 10) return "green";
+    return "blue";
+  }
+
+
 
   // normalize any date string to MM/DD/YYYY (or "")
   function normalizeDateString(s) {
