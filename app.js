@@ -39,19 +39,11 @@ const state = {
 function hydrateStateFromURL() {
   const params = new URLSearchParams(window.location.search);
 
-  // Support both:
-  // - ?q=free-text
-  // - ?dates=MM-DD-YYYY,MM-DD-YYYY (shareable date filtering)
-  const dates = params.get("dates");
   const q = params.get("q");
-  if (dates !== null && dates.trim() !== "") {
-    state.search = dates;
-  } else if (q !== null) {
-    state.search = q;
-  }
+  if (q !== null) state.search = q;
 
   const lake = params.get("lake");
-  if (lake !== null) state.lake = lake;
+  if (lake !== null) state.selectedLake = lake;
 
   const unit = params.get("unit");
   if (unit === "in" || unit === "cm") {
@@ -94,7 +86,7 @@ function hydrateStateFromURL() {
       const searchInput = document.getElementById("searchInput");
       if (searchInput) searchInput.value = state.search || "";
       const lakeSelect = document.getElementById("lakeSelect");
-      if (lakeSelect) lakeSelect.value = state.lake;
+      if (lakeSelect) lakeSelect.value = state.selectedLake;
       const unitSelect = document.getElementById("unitSelect");
       if (unitSelect) unitSelect.value = state.unit;
       const langSelect = document.getElementById("langSelect");
@@ -120,32 +112,8 @@ function syncUrlFromState(push = false) {
     else url.searchParams.set(k, String(v).trim());
   };
 
-  // Store date-only searches in ?dates=MM-DD-YYYY,... so the URL stays clean.
-  const rawSearch = (state.search || "").trim();
-  const maybeTokens = rawSearch
-    .split(",")
-    .map((t) => t.trim())
-    .filter(Boolean);
-  const dateKeys = maybeTokens
-    .map((t) => {
-      const d = parseDate(t);
-      if (!d) return null;
-      const mm = String(d.getUTCMonth() + 1).padStart(2, "0");
-      const dd = String(d.getUTCDate()).padStart(2, "0");
-      const yyyy = String(d.getUTCFullYear());
-      return `${mm}-${dd}-${yyyy}`;
-    })
-    .filter(Boolean);
-
-  if (dateKeys.length > 0 && dateKeys.length === maybeTokens.length) {
-    set("dates", dateKeys.join(","));
-    set("q", "");
-  } else {
-    set("dates", "");
-    set("q", rawSearch);
-  }
-
-  set("lake", state.lake && state.lake !== "all" ? state.lake : "");
+  set("q", state.search);
+  set("lake", state.selectedLake && state.selectedLake !== "all" ? state.selectedLake : "");
   set("unit", state.unit);
   set("lang", state.lang);
   set("range", state.mapRange);
@@ -248,25 +216,9 @@ function parseCoords(raw) {
 }
 
 function parseDate(raw) {
-  // Accepts:
-  // - MM-DD-YYYY
-  // - MM/DD/YYYY
-  // - "Date(2025,2,11)" (Google GViz date literal; month is 0-indexed)
-  if (!raw && raw !== 0) return null;
-  const s0 = String(raw).trim();
-
-  // GViz date literal: Date(YYYY,MM,DD)
-  const g = s0.match(/^Date\((\d{4})\s*,\s*(\d{1,2})\s*,\s*(\d{1,2})\)\s*$/i);
-  if (g) {
-    const yyyy = Number(g[1]);
-    const mm0 = Number(g[2]);
-    const dd = Number(g[3]);
-    const d = new Date(Date.UTC(yyyy, mm0, dd));
-    return isFinite(d.getTime()) ? d : null;
-  }
-
-  // Common US date formats
-  const s = s0.replace(/\//g, "-");
+  // Your format is M-D-YYYY or MM-DD-YYYY (e.g., 12-23-2025)
+  if (!raw) return null;
+  const s = String(raw).trim();
   const m = s.match(/^(\d{1,2})-(\d{1,2})-(\d{4})$/);
   if (!m) return null;
   const mm = Number(m[1]);
@@ -276,54 +228,18 @@ function parseDate(raw) {
   return isFinite(d.getTime()) ? d : null;
 }
 
-function toDisplayDate(raw) {
-  // Display as MM/DD/YYYY when possible.
-  const d = parseDate(raw);
-  if (!d) return raw ? String(raw) : "";
-  const mm = String(d.getUTCMonth() + 1).padStart(2, "0");
-  const dd = String(d.getUTCDate()).padStart(2, "0");
-  const yyyy = String(d.getUTCFullYear());
-  return `${mm}/${dd}/${yyyy}`;
-}
-
-function normalizeKeys(obj) {
-  // Creates a lookup with trimmed, lowercased keys for case/space-insensitive access.
-  const out = {};
-  for (const [k, v] of Object.entries(obj || {})) {
-    out[String(k).trim().toLowerCase()] = v;
-  }
-  return out;
-}
-
-function pick(obj, ...candidates) {
-  // Case/space-insensitive field fetch.
-  const n = normalizeKeys(obj);
-  for (const c of candidates) {
-    const key = String(c).trim().toLowerCase();
-    if (key in n) return n[key];
-  }
-  return "";
-}
-
 function normRow(obj) {
-  // Normalize Ice2024 (lat/lon + description) and Ice2025 (Coordinates + Info)
-  const dateRaw = pick(obj, "Date", "date");
-  const lake = String(pick(obj, "Lake", "lake")).trim();
+  // Flexible header matching
+  const dateRaw = obj["Date"] ?? obj["date"] ?? obj["DATE"];
+  const lake = (obj["Lake"] ?? obj["lake"] ?? "").toString().trim();
+  const coordsRaw = obj["Coordinates"] ?? obj["coords"] ?? obj["Coordinate"] ?? "";
+  const info = (obj["Info"] ?? obj["info"] ?? "").toString().trim();
 
-  const coordsRaw = pick(obj, "Coordinates", "coords", "coordinate");
-  const latRaw = pick(obj, "lat_dd", "lat", "latitude");
-  const lonRaw = pick(obj, "long_dd", "lon", "lng", "longitude", "long");
-  const coordsFromLatLon = (latRaw !== "" && lonRaw !== "")
-    ? `${Number(latRaw).toFixed(5)}° N, ${Math.abs(Number(lonRaw)).toFixed(5)}° W`
-    : "";
-
-  const info = String(pick(obj, "Info", "info", "description", "Desc", "Notes")).trim();
-
-  const thicknessInRaw = pick(obj, "Thickness (Inches)", "thickness_in", "thickness (inches)", "Thickness", "thickness");
-  const thicknessCmRaw = pick(obj, "Thickness (cm)", "Thickness_cm", "thickness_cm", "thickness (cm)");
+  const thicknessInRaw = obj["Thickness (Inches)"] ?? obj["thickness_in"] ?? obj["Thickness"] ?? obj["thickness"] ?? "";
+  const thicknessCmRaw = obj["Thickness (cm)"] ?? obj["Thickness_cm"] ?? obj["Thickness (cm) "] ?? obj["thickness_cm"] ?? "";
 
   const dateObj = parseDate(dateRaw);
-  const coords = parseCoords(coordsRaw || coordsFromLatLon);
+  const coords = parseCoords(coordsRaw);
 
   const thickness_in = parseMixedFractionToInches(thicknessInRaw);
   const thickness_cm = (thicknessCmRaw !== "" && thicknessCmRaw != null && isFinite(Number(thicknessCmRaw)))
@@ -333,15 +249,9 @@ function normRow(obj) {
   return {
     date_raw: dateRaw ? String(dateRaw).trim() : "",
     date: dateObj,
-    date_key: dateObj
-      ? `${String(dateObj.getUTCMonth() + 1).padStart(2, "0")}-${String(dateObj.getUTCDate()).padStart(2, "0")}-${dateObj.getUTCFullYear()}`
-      : "",
-    date_display: dateObj
-      ? `${String(dateObj.getUTCMonth() + 1).padStart(2, "0")}/${String(dateObj.getUTCDate()).padStart(2, "0")}/${dateObj.getUTCFullYear()}`
-      : "",
     date_sort: dateObj ? dateObj.getTime() : 0,
     lake,
-    coords_raw: (coordsRaw || coordsFromLatLon) ? String(coordsRaw || coordsFromLatLon).trim() : "",
+    coords_raw: coordsRaw ? String(coordsRaw).trim() : "",
     coords,
     info,
     thickness_in,
@@ -430,30 +340,25 @@ async function fetchData() {
 }
 
 function lakeColor(thicknessIn) {
-  // Discrete thickness-based colors (requested):
-  //   <= 4"  : red
-  //   <= 8"  : yellow
-  //   <= 10" : green
-  //    > 10" : blue
-  //   null/NaN: grey
-  if (thicknessIn == null || Number.isNaN(Number(thicknessIn))) return "#808080";
-  const v = Number(thicknessIn);
-  if (v > 10) return "#2563eb";      // blue
-  if (v > 8) return "#16a34a";       // green
-  if (v > 4) return "#f59e0b";       // yellow
-  return "#ef4444";                  // red
+  // Discrete colors for clarity:
+  //  - unknown/invalid: grey
+  //  - <4 in: red
+  //  - 4–<8 in: yellow
+  //  - 8–<=10 in: green
+  //  - >10 in: blue
+  if (thicknessIn == null || !isFinite(thicknessIn)) return "#9aa0a6"; // grey
+
+  if (thicknessIn > 10) return "#1e90ff";      // blue
+  if (thicknessIn >= 8) return "#2e7d32";      // green
+  if (thicknessIn >= 4) return "#f9a825";      // yellow
+  return "#d32f2f";                             // red
 }
+
 
 function updateLegend() {
   const el = document.getElementById("legend");
   el.innerHTML = `
-    <div>
-      <span style="color:#ef4444;font-weight:700;">●</span> ≤ 4" &nbsp;
-      <span style="color:#f59e0b;font-weight:700;">●</span> 4–8" &nbsp;
-      <span style="color:#16a34a;font-weight:700;">●</span> 8–10" &nbsp;
-      <span style="color:#2563eb;font-weight:700;">●</span> > 10" &nbsp;
-      <span style="color:#94a3b8;font-weight:700;">●</span> unknown
-    </div>
+    <div><span class="badge">●</span> Marker color roughly follows thickness (thin = red, thick = green).</div>
     <div style="margin-top:6px;">Tip: click markers to see details.</div>
   `;
 }
@@ -523,38 +428,18 @@ function renderLakeOptions(rows) {
 
 function applyFilters() {
   const lake = state.lake;
-  const qRaw = (state.search || "").toLowerCase().trim();
+  const q = state.search.toLowerCase().trim();
 
   let out = state.rows.slice();
 
   if (lake) out = out.filter(r => r.lake === lake);
 
-  if (qRaw) {
-    // If the search is one or more dates (comma-separated), match on date key.
-    const tokens = qRaw.split(",").map(s => s.trim()).filter(Boolean);
-    const dateKeys = tokens
-      .map(t => {
-        const d = parseDate(t);
-        if (!d) return null;
-        const mm = String(d.getUTCMonth() + 1).padStart(2, "0");
-        const dd = String(d.getUTCDate()).padStart(2, "0");
-        const yyyy = String(d.getUTCFullYear());
-        return `${mm}-${dd}-${yyyy}`;
-      })
-      .filter(Boolean);
-
-    const isDateOnlySearch = dateKeys.length === tokens.length && tokens.length > 0;
-
-    if (isDateOnlySearch) {
-      out = out.filter(r => dateKeys.includes((r.date_key || "").toLowerCase()));
-    } else {
-      out = out.filter(r =>
-        (r.lake || "").toLowerCase().includes(qRaw) ||
-        (r.info || "").toLowerCase().includes(qRaw) ||
-        (r.date_raw || "").toLowerCase().includes(qRaw) ||
-        (r.date_key || "").toLowerCase().includes(qRaw)
-      );
-    }
+  if (q) {
+    out = out.filter(r =>
+      (r.lake || "").toLowerCase().includes(q) ||
+      (r.info || "").toLowerCase().includes(q) ||
+      (r.date_raw || "").toLowerCase().includes(q)
+    );
   }
 
   // sort
@@ -594,14 +479,10 @@ function renderTable(rows) {
     const thickness = formatThickness(r);
     const coords = r.coords_raw ? r.coords_raw : t(state.lang, "no_coords");
 
-    const col = lakeColor(r.thickness_in);
     tr.innerHTML = `
-      <td>${escapeHtml(r.date_display || toDisplayDate(r.date_raw || r.date_key || "") || "—")}</td>
+      <td>${escapeHtml(r.date_raw || "—")}</td>
       <td>${escapeHtml(r.lake || "—")}</td>
-      <td>
-        <span style="color:${col};font-weight:700;">●</span>
-        <span class="badge">${escapeHtml(thickness)}</span>
-      </td>
+      <td><span class="dot" style="background:${lakeColor(r.thickness_in)};display:inline-block;width:10px;height:10px;border-radius:50%;margin-right:6px;border:1px solid #0003;vertical-align:middle;"></span><span class="badge">${escapeHtml(thickness)}</span></td>
       <td>${escapeHtml(r.info || "")}</td>
       <td>${escapeHtml(coords)}</td>
     `;
@@ -626,11 +507,10 @@ function renderLatestPerLake(rows) {
   for (const r of list) {
     const div = document.createElement("div");
     div.className = "latestItem";
-    const col = lakeColor(r.thickness_in);
     div.innerHTML = `
       <div class="row1">
         <div>${escapeHtml(r.lake)}</div>
-        <div><span style="color:${col};font-weight:700;">●</span> ${escapeHtml(formatThickness(r))}</div>
+        <div>${escapeHtml(formatThickness(r))}</div>
       </div>
       <div class="row2">
         <div><b>${escapeHtml(r.date_raw || "—")}</b></div>
