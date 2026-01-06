@@ -33,7 +33,7 @@
     searchInput: $("searchInput"),
     refreshBtn: $("refreshBtn"),
     resultsCount: $("resultsCount"),
-    resultsBody: $("resultsBody"),
+    resultsBody: (document.querySelector("#dataTable tbody") || $("resultsBody")),
   };
 
   // -----------------------------
@@ -464,7 +464,7 @@
         <div style="opacity:.85">${row.info || ""}</div>
       </div>`;
 
-    L.circleMarker([row.lat, row.lon], { radius: 6 }).bindPopup(popup).addTo(markersLayer);
+    L.circleMarker([row.lat, row.lon], { radius: 6, color: color, fillColor: color, fillOpacity: 0.9, weight: 1 }).bindPopup(popup).addTo(markersLayer);
   }
 
   function fitToMarkers() {
