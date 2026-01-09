@@ -163,6 +163,34 @@ function parseDateTokensFromSearch(s) {
     .filter(x => /^\d{1,2}-\d{1,2}-\d{4}$/.test(x));
 }
 
+
+function buildDateRegexFromSearch(s) {
+  // Build a regex that matches ANY date found in the search text.
+  // Accepts dates like 12-31-2025 or 12/31/2025 (also allows single-digit M/D).
+  // If no date-like tokens are found, returns null.
+  if (!s) return null;
+  const text = String(s);
+
+  const matches = [];
+  const re = /(\d{1,2})[\/-](\d{1,2})[\/-](\d{4})/g;
+  let m;
+  while ((m = re.exec(text)) !== null) {
+    const mm = Number(m[1]);
+    const dd = Number(m[2]);
+    const yyyy = m[3];
+    if (!Number.isFinite(mm) || !Number.isFinite(dd)) continue;
+    // Allow optional leading zeros and either "-" or "/"
+    const mmPat = mm < 10 ? `0?${mm}` : `${mm}`;
+    const ddPat = dd < 10 ? `0?${dd}` : `${dd}`;
+    // Match the whole date cell, trimming whitespace
+    matches.push(`\\s*${mmPat}[\\/-]${ddPat}[\\/-]${yyyy}\\s*`);
+  }
+
+  if (!matches.length) return null;
+  // OR all date patterns together; anchored to full field
+  return new RegExp(`^(?:${matches.join("|")})$`, "i");
+}
+
 function normRow(obj) {
   // Flexible header matching
   const dateRaw = obj["Date"] ?? obj["date"] ?? obj["DATE"];
@@ -367,10 +395,13 @@ function applyFilters() {
   if (lake) out = out.filter(r => r.lake === lake);
 
   if (q) {
-    if (dateTokens.length) {
-      // If q contains one or more dash-dates (optionally comma-separated), match ANY of them.
-      const set = new Set(dateTokens.map(normalizeDashDate));
-      out = out.filter(r => set.has(normalizeDashDate(r.date_raw || "")));
+    const dateRe = buildDateRegexFromSearch(state.search);
+    const hasComma = state.search.includes(",");
+    const tokenCount = parseDateTokensFromSearch(state.search).length;
+
+    if (dateRe && (hasComma || tokenCount >= 2)) {
+      // Regex-based multi-date match against the date field (accepts "-" or "/")
+      out = out.filter(r => dateRe.test(String(r.date_raw || "")));
     } else {
       out = out.filter(r =>
         (r.lake || "").toLowerCase().includes(q) ||
