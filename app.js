@@ -141,6 +141,28 @@ function parseDate(raw) {
   return isFinite(d.getTime()) ? d : null;
 }
 
+function normalizeDashDate(s) {
+  // Normalize "MM-DD-YYYY" or "M-D-YYYY" to "M-D-YYYY"
+  if (!s) return "";
+  const m = String(s).trim().match(/^(\d{1,2})-(\d{1,2})-(\d{4})$/);
+  if (!m) return String(s).trim();
+  const mm = String(Number(m[1]));
+  const dd = String(Number(m[2]));
+  const yyyy = m[3];
+  return `${mm}-${dd}-${yyyy}`;
+}
+
+function parseDateTokensFromSearch(s) {
+  // If s is "12-31-2025,12-30-2025" -> ["12-31-2025","12-30-2025"]
+  // Only returns tokens that look like dash dates.
+  if (!s) return [];
+  return String(s)
+    .split(",")
+    .map(x => normalizeDashDate(x))
+    .map(x => x.trim())
+    .filter(x => /^\d{1,2}-\d{1,2}-\d{4}$/.test(x));
+}
+
 function normRow(obj) {
   // Flexible header matching
   const dateRaw = obj["Date"] ?? obj["date"] ?? obj["DATE"];
@@ -337,6 +359,7 @@ function renderLakeOptions(rows) {
 
 function applyFilters() {
   const lake = state.lake;
+  const dateTokens = parseDateTokensFromSearch(state.search);
   const q = state.search.toLowerCase().trim();
 
   let out = state.rows.slice();
@@ -344,11 +367,17 @@ function applyFilters() {
   if (lake) out = out.filter(r => r.lake === lake);
 
   if (q) {
-    out = out.filter(r =>
-      (r.lake || "").toLowerCase().includes(q) ||
-      (r.info || "").toLowerCase().includes(q) ||
-      (r.date_raw || "").toLowerCase().includes(q)
-    );
+    if (dateTokens.length) {
+      // If q contains one or more dash-dates (optionally comma-separated), match ANY of them.
+      const set = new Set(dateTokens.map(normalizeDashDate));
+      out = out.filter(r => set.has(normalizeDashDate(r.date_raw || "")));
+    } else {
+      out = out.filter(r =>
+        (r.lake || "").toLowerCase().includes(q) ||
+        (r.info || "").toLowerCase().includes(q) ||
+        (r.date_raw || "").toLowerCase().includes(q)
+      );
+    }
   }
 
   // sort
@@ -525,9 +554,12 @@ function hydrateShareStateFromURL() {
   const p = url.searchParams;
 
   // Table filters
+  const dates = p.get("dates");
   const q = p.get("q");
   const lake = p.get("lake");
-  if (q !== null) state.search = q;
+  // Prefer dates= over q= if present
+  if (dates !== null) state.search = dates;
+  else if (q !== null) state.search = q;
   if (lake !== null) state.lake = lake;
 
   // Map range
@@ -550,7 +582,14 @@ function syncShareURLFromState() {
   const p = url.searchParams;
 
   // Only include non-default values so the URL stays clean.
-  if (state.search) p.set("q", state.search); else p.delete("q");
+  const dateTokens = parseDateTokensFromSearch(state.search);
+  if (dateTokens.length >= 2) {
+    p.set("dates", dateTokens.join(","));
+    p.delete("q");
+  } else {
+    p.delete("dates");
+    if (state.search) p.set("q", state.search); else p.delete("q");
+  }
   if (state.lake) p.set("lake", state.lake); else p.delete("lake");
 
   if (state.mapRange && state.mapRange !== "30") p.set("mr", state.mapRange); else p.delete("mr");
