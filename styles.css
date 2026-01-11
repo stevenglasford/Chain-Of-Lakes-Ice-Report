@@ -219,15 +219,16 @@ tbody tr:hover{ background: rgba(96,165,250,0.08); }
   min-width: 160px;
 }
 
-/* --- Reddit report card (top) --- */
+
+/* --- Reddit report card --- */
 .reportCard{ grid-column: 1 / span 2; }
 @media (max-width: 980px){ .reportCard{ grid-column:auto; } }
 .reportBody{ padding: 12px 14px; }
-.reportControls{ display:flex; gap:10px; align-items:center; }
+.reportControls{ display:flex; gap:10px; align-items:center; flex-wrap:wrap; }
 #reportSelect{ min-width: 220px; }
 .reportContent{ line-height: 1.45; white-space: pre-wrap; }
 
-/* --- Hamburger menu for unit/lang --- */
+/* --- Hamburger menu for units/lang --- */
 .menuBtn{
   position: fixed;
   right: 14px;
@@ -238,7 +239,7 @@ tbody tr:hover{ background: rgba(96,165,250,0.08); }
   border: 1px solid var(--line);
   background: rgba(11,18,32,0.92);
   backdrop-filter: blur(10px);
-  z-index: 50;
+  z-index: 1000;
   display:flex;
   align-items:center;
   justify-content:center;
@@ -262,8 +263,8 @@ tbody tr:hover{ background: rgba(96,165,250,0.08); }
   border: 1px solid var(--line);
   background: rgba(17,24,39,0.92);
   backdrop-filter: blur(12px);
-  z-index: 50;
-  padding: 12px 12px;
+  z-index: 1000;
+  padding: 12px;
   display:none;
 }
 .menuPanel.open{ display:block; }
