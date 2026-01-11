@@ -1,15 +1,6 @@
 <!doctype html>
 <html lang="en">
 <head>
-  <!-- Google tag (gtag.js) -->
-  <script async src="https://www.googletagmanager.com/gtag/js?id=G-VQW4Z4M2VB"></script>
-  <script>
-    window.dataLayer = window.dataLayer || [];
-    function gtag(){dataLayer.push(arguments);}
-    gtag('js', new Date());
-  
-    gtag('config', 'G-VQW4Z4M2VB');
-  </script>
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
   <meta http-equiv="Pragma" content="no-cache" />
   <meta http-equiv="Expires" content="0" />
@@ -61,6 +52,22 @@
   </header>
 
   <main class="grid">
+    <section class="card reportCard" id="reportCard">
+      <div class="cardHeader">
+        <div>
+          <div class="cardTitle" id="t_report">Ice report</div>
+          <div class="cardMeta" id="reportMeta">Latest Reddit report</div>
+        </div>
+        <div class="reportControls">
+          <select id="reportSelect" title="Choose a report"></select>
+          <a id="reportLink" class="btn" target="_blank" rel="noreferrer">Open</a>
+        </div>
+      </div>
+      <div class="reportBody">
+        <div id="reportContent" class="reportContent">—</div>
+      </div>
+    </section>
+
     <section class="card mapCard">
       <div class="cardHeader mapHeader">
   <div>
@@ -148,6 +155,11 @@
       </div>
     </section>
   </main>
+
+  <button id="menuBtn" class="menuBtn" aria-label="Menu" title="Menu">
+    <span></span><span></span><span></span>
+  </button>
+  <div id="menuPanel" class="menuPanel" aria-hidden="true"></div>
 
   <script
     src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js?v=20260103"
