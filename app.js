@@ -8,17 +8,13 @@ const SHEET_ID = "10smiQBJ8mBWax24aOagG9LdzrrnhFmj0tfRESunUJNI";
 // If you're not sure, open your sheet and look for ".../edit#gid=123456"
 const GID = "2029178353";
 
-// Name of the tab that contains the combined dataset
-const DATA_SHEET_NAME = "AllData";
-
 // If using Publish-to-web CSV, this works well:
 const CSV_URL = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/export?format=csv&gid=${GID}`;
 
 // Option B (fallback): Google Visualization JSON endpoint (sometimes blocked).
-const GVIZ_URL = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:json&sheet=${encodeURIComponent(DATA_SHEET_NAME)}`;
+const GVIZ_URL = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:json&gid=${GID}`;
 
 // Choose fetch mode:
-// GViz usually works without needing "Publish to web", so it's the safest default.
 const FETCH_MODE = "csv"; // "csv" or "gviz"
 
 // ==========================
@@ -36,6 +32,97 @@ const state = {
   mapFrom: localStorage.getItem("mapFrom") || "",
   mapTo: localStorage.getItem("mapTo") || "",
 };
+
+// ---------------------------
+// Shareable URL state
+// ---------------------------
+function hydrateStateFromURL() {
+  const params = new URLSearchParams(window.location.search);
+
+  const q = params.get("q");
+  if (q !== null) state.search = q;
+
+  const lake = params.get("lake");
+  if (lake !== null) state.selectedLake = lake;
+
+  const unit = params.get("unit");
+  if (unit === "in" || unit === "cm") {
+    state.unit = unit;
+    localStorage.setItem("unit", unit);
+  }
+
+  const lang = params.get("lang");
+  if (lang) {
+    state.lang = lang;
+    localStorage.setItem("lang", lang);
+  }
+
+  const range = params.get("range");
+  if (range) {
+    state.mapRange = range;
+    localStorage.setItem("mapRange", range);
+  }
+
+  const from = params.get("from");
+  if (from !== null) {
+    state.mapFrom = from;
+    localStorage.setItem("mapFrom", from);
+  }
+
+  const to = params.get("to");
+  if (to !== null) {
+    state.mapTo = to;
+    localStorage.setItem("mapTo", to);
+  }
+
+  // Handle Back/Forward
+  if (!window.__icePopStateHooked) {
+    window.__icePopStateHooked = true;
+    window.addEventListener("popstate", () => {
+      hydrateStateFromURL();
+      applyTranslations(state.lang);
+
+      // Re-sync UI widgets to hydrated state
+      const searchInput = document.getElementById("searchInput");
+      if (searchInput) searchInput.value = state.search || "";
+      const lakeSelect = document.getElementById("lakeSelect");
+      if (lakeSelect) lakeSelect.value = state.selectedLake;
+      const unitSelect = document.getElementById("unitSelect");
+      if (unitSelect) unitSelect.value = state.unit;
+      const langSelect = document.getElementById("langSelect");
+      if (langSelect) langSelect.value = state.lang;
+
+      const mapRangeSelect = document.getElementById("mapRangeSelect");
+      if (mapRangeSelect) mapRangeSelect.value = state.mapRange;
+      const mapFromInput = document.getElementById("mapFromInput");
+      if (mapFromInput) mapFromInput.value = state.mapFrom || "";
+      const mapToInput = document.getElementById("mapToInput");
+      if (mapToInput) mapToInput.value = state.mapTo || "";
+
+      rerenderAll();
+    });
+  }
+}
+
+function syncUrlFromState(push = false) {
+  const url = new URL(window.location.href);
+
+  const set = (k, v) => {
+    if (v === undefined || v === null || String(v).trim() === "") url.searchParams.delete(k);
+    else url.searchParams.set(k, String(v).trim());
+  };
+
+  set("q", state.search);
+  set("lake", state.selectedLake && state.selectedLake !== "all" ? state.selectedLake : "");
+  set("unit", state.unit);
+  set("lang", state.lang);
+  set("range", state.mapRange);
+  set("from", state.mapRange === "custom" ? state.mapFrom : "");
+  set("to", state.mapRange === "custom" ? state.mapTo : "");
+
+  if (push) window.history.pushState({}, "", url.toString());
+  else window.history.replaceState({}, "", url.toString());
+}
 
 let map, markersLayer;
 
@@ -141,56 +228,6 @@ function parseDate(raw) {
   return isFinite(d.getTime()) ? d : null;
 }
 
-function normalizeDashDate(s) {
-  // Normalize "MM-DD-YYYY" or "M-D-YYYY" to "M-D-YYYY"
-  if (!s) return "";
-  const m = String(s).trim().match(/^(\d{1,2})-(\d{1,2})-(\d{4})$/);
-  if (!m) return String(s).trim();
-  const mm = String(Number(m[1]));
-  const dd = String(Number(m[2]));
-  const yyyy = m[3];
-  return `${mm}-${dd}-${yyyy}`;
-}
-
-function parseDateTokensFromSearch(s) {
-  // If s is "12-31-2025,12-30-2025" -> ["12-31-2025","12-30-2025"]
-  // Only returns tokens that look like dash dates.
-  if (!s) return [];
-  return String(s)
-    .split(",")
-    .map(x => normalizeDashDate(x))
-    .map(x => x.trim())
-    .filter(x => /^\d{1,2}-\d{1,2}-\d{4}$/.test(x));
-}
-
-
-function buildDateRegexFromSearch(s) {
-  // Build a regex that matches ANY date found in the search text.
-  // Accepts dates like 12-31-2025 or 12/31/2025 (also allows single-digit M/D).
-  // If no date-like tokens are found, returns null.
-  if (!s) return null;
-  const text = String(s);
-
-  const matches = [];
-  const re = /(\d{1,2})[\/-](\d{1,2})[\/-](\d{4})/g;
-  let m;
-  while ((m = re.exec(text)) !== null) {
-    const mm = Number(m[1]);
-    const dd = Number(m[2]);
-    const yyyy = m[3];
-    if (!Number.isFinite(mm) || !Number.isFinite(dd)) continue;
-    // Allow optional leading zeros and either "-" or "/"
-    const mmPat = mm < 10 ? `0?${mm}` : `${mm}`;
-    const ddPat = dd < 10 ? `0?${dd}` : `${dd}`;
-    // Match the whole date cell, trimming whitespace
-    matches.push(`\\s*${mmPat}[\\/-]${ddPat}[\\/-]${yyyy}\\s*`);
-  }
-
-  if (!matches.length) return null;
-  // OR all date patterns together; anchored to full field
-  return new RegExp(`^(?:${matches.join("|")})$`, "i");
-}
-
 function normRow(obj) {
   // Flexible header matching
   const dateRaw = obj["Date"] ?? obj["date"] ?? obj["DATE"];
@@ -268,12 +305,12 @@ async function fetchData() {
   try {
     let rawRows = [];
     if (FETCH_MODE === "csv") {
-      const resp = await fetch(CSV_URL + `&_=${Date.now()}`, { cache: "no-store" });
+      const resp = await fetch(CSV_URL, { cache: "no-store" });
       if (!resp.ok) throw new Error("CSV fetch failed");
       const text = await resp.text();
       rawRows = csvToObjects(text);
     } else {
-      const resp = await fetch(GVIZ_URL + `&_=${Date.now()}`, { cache: "no-store" });
+      const resp = await fetch(GVIZ_URL, { cache: "no-store" });
       if (!resp.ok) throw new Error("GVIZ fetch failed");
       const text = await resp.text();
       const json = JSON.parse(text.substring(text.indexOf("{"), text.lastIndexOf("}") + 1));
@@ -303,16 +340,20 @@ async function fetchData() {
 }
 
 function lakeColor(thicknessIn) {
-  // Basic scale: 0 -> red, 12+ -> green-ish; clamp
-  if (thicknessIn == null) return "#94a3b8";
-  const v = Math.max(0, Math.min(12, thicknessIn));
-  const pct = v / 12;
-  // interpolate red->yellow->green
-  const r = pct < 0.5 ? 255 : Math.round(255 * (1 - (pct - 0.5) * 2));
-  const g = pct < 0.5 ? Math.round(255 * (pct * 2)) : 255;
-  const b = 70;
-  return `rgb(${r},${g},${b})`;
+  // Discrete colors for clarity:
+  //  - unknown/invalid: grey
+  //  - <4 in: red
+  //  - 4–<8 in: yellow
+  //  - 8–<=10 in: green
+  //  - >10 in: blue
+  if (thicknessIn == null || !isFinite(thicknessIn)) return "#9aa0a6"; // grey
+
+  if (thicknessIn > 10) return "#1e90ff";      // blue
+  if (thicknessIn >= 8) return "#2e7d32";      // green
+  if (thicknessIn >= 4) return "#f9a825";      // yellow
+  return "#d32f2f";                             // red
 }
+
 
 function updateLegend() {
   const el = document.getElementById("legend");
@@ -387,7 +428,6 @@ function renderLakeOptions(rows) {
 
 function applyFilters() {
   const lake = state.lake;
-  const dateTokens = parseDateTokensFromSearch(state.search);
   const q = state.search.toLowerCase().trim();
 
   let out = state.rows.slice();
@@ -395,20 +435,11 @@ function applyFilters() {
   if (lake) out = out.filter(r => r.lake === lake);
 
   if (q) {
-    const dateRe = buildDateRegexFromSearch(state.search);
-    const hasComma = state.search.includes(",");
-    const tokenCount = parseDateTokensFromSearch(state.search).length;
-
-    if (dateRe && (hasComma || tokenCount >= 2)) {
-      // Regex-based multi-date match against the date field (accepts "-" or "/")
-      out = out.filter(r => dateRe.test(String(r.date_raw || "")));
-    } else {
-      out = out.filter(r =>
-        (r.lake || "").toLowerCase().includes(q) ||
-        (r.info || "").toLowerCase().includes(q) ||
-        (r.date_raw || "").toLowerCase().includes(q)
-      );
-    }
+    out = out.filter(r =>
+      (r.lake || "").toLowerCase().includes(q) ||
+      (r.info || "").toLowerCase().includes(q) ||
+      (r.date_raw || "").toLowerCase().includes(q)
+    );
   }
 
   // sort
@@ -451,7 +482,7 @@ function renderTable(rows) {
     tr.innerHTML = `
       <td>${escapeHtml(r.date_raw || "—")}</td>
       <td>${escapeHtml(r.lake || "—")}</td>
-      <td><span class="badge">${escapeHtml(thickness)}</span></td>
+      <td><span class="dot" style="background:${lakeColor(r.thickness_in)};display:inline-block;width:10px;height:10px;border-radius:50%;margin-right:6px;border:1px solid #0003;vertical-align:middle;"></span><span class="badge">${escapeHtml(thickness)}</span></td>
       <td>${escapeHtml(r.info || "")}</td>
       <td>${escapeHtml(coords)}</td>
     `;
@@ -491,6 +522,8 @@ function renderLatestPerLake(rows) {
 }
 
 function wireUI() {
+  document.getElementById("lakeFilter").value = state.lake;
+  document.getElementById("searchInput").value = state.search;
   document.getElementById("unitSelect").value = state.unit;
   document.getElementById("langSelect").value = state.lang;
 
@@ -542,10 +575,20 @@ function wireUI() {
     rerenderAll();
   });
 
-  document.getElementById("searchInput").addEventListener("input", (e) => {
-    state.search = e.target.value;
-    rerenderAll();
-  });
+  const searchInput = document.getElementById("searchInput");
+
+// Set initial value (from URL if present)
+searchInput.value = state.search || "";
+
+// Update filters + URL as user types
+searchInput.addEventListener("input", (e) => {
+  state.search = e.target.value;
+
+  // Put the search into the URL so it’s shareable: ?q=...
+  setQueryParam("q", state.search, { push: false });
+
+  rerenderAll();
+});
 
   document.getElementById("refreshBtn").addEventListener("click", async () => {
     await loadAndRender();
@@ -575,69 +618,8 @@ function rerenderAll() {
   renderMap(mapRows);
 
   renderLatestPerLake(state.rows);
-
-  // Keep the URL updated so people can share exactly what they're viewing.
-  syncShareURLFromState();
-}
-
-function hydrateShareStateFromURL() {
-  const url = new URL(window.location.href);
-  const p = url.searchParams;
-
-  // Table filters
-  const dates = p.get("dates");
-  const q = p.get("q");
-  const lake = p.get("lake");
-  // Prefer dates= over q= if present
-  if (dates !== null) state.search = dates;
-  else if (q !== null) state.search = q;
-  if (lake !== null) state.lake = lake;
-
-  // Map range
-  const mr = p.get("mr");
-  const from = p.get("from");
-  const to = p.get("to");
-  if (mr) state.mapRange = mr;
-  if (from) state.mapFrom = from;
-  if (to) state.mapTo = to;
-
-  // UI prefs
-  const unit = p.get("unit");
-  const lang = p.get("lang");
-  if (unit) state.unit = unit;
-  if (lang) state.lang = lang;
-}
-
-function syncShareURLFromState() {
-  const url = new URL(window.location.href);
-  const p = url.searchParams;
-
-  // Only include non-default values so the URL stays clean.
-  const dateTokens = parseDateTokensFromSearch(state.search);
-  if (dateTokens.length >= 2) {
-    p.set("dates", dateTokens.join(","));
-    p.delete("q");
-  } else {
-    p.delete("dates");
-    if (state.search) p.set("q", state.search); else p.delete("q");
-  }
-  if (state.lake) p.set("lake", state.lake); else p.delete("lake");
-
-  if (state.mapRange && state.mapRange !== "30") p.set("mr", state.mapRange); else p.delete("mr");
-  if (state.mapRange === "custom") {
-    if (state.mapFrom) p.set("from", state.mapFrom); else p.delete("from");
-    if (state.mapTo) p.set("to", state.mapTo); else p.delete("to");
-  } else {
-    p.delete("from");
-    p.delete("to");
-  }
-
-  if (state.unit && state.unit !== "cm") p.set("unit", state.unit); else p.delete("unit");
-  if (state.lang && state.lang !== "en") p.set("lang", state.lang); else p.delete("lang");
-
-  const qs = p.toString();
-  const newUrl = url.pathname + (qs ? `?${qs}` : "") + url.hash;
-  window.history.replaceState({}, "", newUrl);
+  syncStateToURL();
+  syncUrlFromState(false);
 }
 
 async function loadAndRender() {
@@ -647,18 +629,31 @@ async function loadAndRender() {
 }
 
 (function init() {
+  hydrateStateFromURL();
+  // Load URL params into state first
+  readStateFromURL();
+
+  // Pull initial search from URL, e.g. ?q=12-23-2025
+  state.search = getQueryParam("q") || "";
+
   // Sheet link
   const sheetLink = document.getElementById("sheetLink");
   sheetLink.href = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/edit`;
   sheetLink.textContent = `docs.google.com/spreadsheets/d/${SHEET_ID}`;
 
-  // If the URL includes filters (e.g. ?q=12-23-2025), hydrate state first so UI + data match.
-  hydrateShareStateFromURL();
-
   applyTranslations(state.lang);
   initMap();
-  wireUI();
+  wireUI();       // wireUI will now set the input value from state.search
   loadAndRender();
+
+  // If the user presses back/forward, sync UI with the URL
+  window.addEventListener("popstate", () => {
+    const q = getQueryParam("q") || "";
+    state.search = q;
+    const input = document.getElementById("searchInput");
+    if (input) input.value = q;
+    rerenderAll();
+  });
 })();
 
 function toISODateStringUTC(d) {
@@ -723,926 +718,294 @@ function filterRowsForMap(rows) {
   });
 }
 
-function getQueryParam(name) {
+function readStateFromURL() {
   const url = new URL(window.location.href);
-  return url.searchParams.get(name) || "";
+  const p = url.searchParams;
+
+  // Table filters
+  if (p.has("q")) state.search = p.get("q") || "";
+  if (p.has("lake")) state.lake = p.get("lake") || "";
+
+  // Display prefs
+  if (p.has("unit")) state.unit = p.get("unit") || state.unit;
+  if (p.has("lang")) state.lang = p.get("lang") || state.lang;
+
+  // Sorting
+  if (p.has("sort")) state.sortKey = p.get("sort") || state.sortKey;
+  if (p.has("dir")) state.sortDir = p.get("dir") || state.sortDir;
+
+  // Map date range
+  if (p.has("range")) state.mapRange = p.get("range") || state.mapRange;
+  if (p.has("from")) state.mapFrom = p.get("from") || "";
+  if (p.has("to")) state.mapTo = p.get("to") || "";
 }
 
-function setQueryParam(name, value, { push = false } = {}) {
+function syncStateToURL() {
   const url = new URL(window.location.href);
+  const p = url.searchParams;
 
-  if (value && value.trim() !== "") {
-    url.searchParams.set(name, value.trim());
+  // Always include these so links are “exact view”
+  p.set("unit", state.unit);
+  p.set("lang", state.lang);
+  p.set("sort", state.sortKey);
+  p.set("dir", state.sortDir);
+
+  // Optional filters
+  if (state.search && state.search.trim() !== "") p.set("q", state.search.trim());
+  else p.delete("q");
+
+  if (state.lake && state.lake.trim() !== "") p.set("lake", state.lake.trim());
+  else p.delete("lake");
+
+  // Map range
+  p.set("range", state.mapRange);
+  if (state.mapRange === "custom") {
+    if (state.mapFrom) p.set("from", state.mapFrom); else p.delete("from");
+    if (state.mapTo) p.set("to", state.mapTo); else p.delete("to");
   } else {
-    url.searchParams.delete(name);
+    p.delete("from");
+    p.delete("to");
   }
 
-  if (push) {
-    window.history.pushState({}, "", url.toString());
-  } else {
-    window.history.replaceState({}, "", url.toString());
-  }
-}
-//
-
-function normalizeDashOrSlashDateToDash(s) {
-  // Convert "MM/DD/YYYY" or "MM-DD-YYYY" into "M-D-YYYY" (no leading zeros)
-  if (!s) return "";
-  const m = String(s).trim().match(/^(\d{1,2})[\/-](\d{1,2})[\/-](\d{4})$/);
-  if (!m) return String(s).trim();
-  const mm = String(Number(m[1]));
-  const dd = String(Number(m[2]));
-  const yyyy = m[3];
-  return `${mm}-${dd}-${yyyy}`;
+  // Update the URL without reloading
+  window.history.replaceState({}, "", url.toString());
 }
 
-function extractDashDateFromTitle(title) {
-  // Find first date-like token in title and normalize to dash form.
-  if (!title) return "";
-  const m = String(title).match(/(\d{1,2})[\/-](\d{1,2})[\/-](\d{4})/);
-  if (!m) return "";
-  return normalizeDashOrSlashDateToDash(`${m[1]}-${m[2]}-${m[3]}`);
-}
+/* --- Reddit Ice Report addon (minimal patch) --- */
+(() => {
+  "use strict";
 
-async function fetchRedditReports() {
-  // Uses Reddit's public JSON (no auth). Endpoint: /user/<name>/submitted.json
-  const url = `https://www.reddit.com/user/${encodeURIComponent(REDDIT_USERNAME)}/submitted.json?limit=${REDDIT_FETCH_LIMIT}&raw_json=1`;
-  const resp = await fetch(url, { cache: "no-store" });
-  if (!resp.ok) throw new Error("Reddit fetch failed");
-  const json = await resp.json();
-  const children = json?.data?.children || [];
-  const posts = children.map(c => c?.data).filter(Boolean);
+  const REDDIT_USERNAME = "stevenglasford";
+  const REDDIT_REPORT_TITLE_RE = /^(?:Ice Report|Chain of Lakes Ice Report|Minneapolis Chain of Lakes Ice Report)\b/i;
+  const REDDIT_FETCH_LIMIT = 100;
 
-  const reports = [];
-  for (const p of posts) {
-    const title = p.title || "";
-    if (!REDDIT_REPORT_TITLE_RE.test(title)) continue;
-
-    const dateDash = extractDashDateFromTitle(title);
-    if (!dateDash) continue;
-
-    reports.push({
-      date: dateDash,
-      title,
-      permalink: p.permalink ? `https://www.reddit.com${p.permalink}` : "",
-      selftext: p.selftext || "",
-      created_utc: p.created_utc || 0,
-      id: p.id || ""
-    });
+  function normalizeDashOrSlashDateToDash(s) {
+    if (!s) return "";
+    const m = String(s).trim().match(/^(\d{1,2})[\/-](\d{1,2})[\/-](\d{4})$/);
+    if (!m) return String(s).trim();
+    const mm = String(Number(m[1]));
+    const dd = String(Number(m[2]));
+    const yyyy = m[3];
+    return `${mm}-${dd}-${yyyy}`;
   }
 
-  // If multiple reports share a date, keep the most recent by created_utc.
-  const byDate = new Map();
-  for (const r of reports) {
-    const prev = byDate.get(r.date);
-    if (!prev || (r.created_utc || 0) > (prev.created_utc || 0)) byDate.set(r.date, r);
+  function extractDashDateFromTitle(title) {
+    if (!title) return "";
+    const m = String(title).match(/(\d{1,2})[\/-](\d{1,2})[\/-](\d{4})/);
+    if (!m) return "";
+    return normalizeDashOrSlashDateToDash(`${m[1]}-${m[2]}-${m[3]}`);
   }
 
-  const deduped = Array.from(byDate.values())
-    .sort((a,b) => {
-      const da = parseDate(a.date)?.getTime() || 0;
-      const db = parseDate(b.date)?.getTime() || 0;
-      if (db != da) return db - da;
+  async function fetchRedditReports() {
+    const url = `https://www.reddit.com/user/${encodeURIComponent(REDDIT_USERNAME)}/submitted.json?limit=${REDDIT_FETCH_LIMIT}&raw_json=1`;
+    const resp = await fetch(url, { cache: "no-store" });
+    if (!resp.ok) throw new Error(`Reddit HTTP ${resp.status}`);
+    const json = await resp.json();
+    const posts = (json?.data?.children || []).map(c => c?.data).filter(Boolean);
+
+    const reports = [];
+    for (const p of posts) {
+      const title = p.title || "";
+      if (!REDDIT_REPORT_TITLE_RE.test(title)) continue;
+      const dateDash = extractDashDateFromTitle(title);
+      if (!dateDash) continue;
+
+      reports.push({
+        date: dateDash,
+        title,
+        permalink: p.permalink ? `https://www.reddit.com${p.permalink}` : "",
+        selftext: p.selftext || "",
+        created_utc: p.created_utc || 0,
+      });
+    }
+
+    const byDate = new Map();
+    for (const r of reports) {
+      const prev = byDate.get(r.date);
+      if (!prev || (r.created_utc || 0) > (prev.created_utc || 0)) byDate.set(r.date, r);
+    }
+
+    // parseDate exists in your app; use it if available, else fallback Date.parse
+    const parse = (window.parseDate || (s => {
+      const m = String(s).match(/^(\d{1,2})-(\d{1,2})-(\d{4})$/);
+      if (m) return new Date(Number(m[3]), Number(m[1]) - 1, Number(m[2]));
+      const t = Date.parse(s);
+      return Number.isFinite(t) ? new Date(t) : null;
+    }));
+
+    return Array.from(byDate.values()).sort((a,b) => {
+      const da = parse(a.date)?.getTime() || 0;
+      const db = parse(b.date)?.getTime() || 0;
+      if (db !== da) return db - da;
       return (b.created_utc || 0) - (a.created_utc || 0);
     });
-
-  state.reports = deduped;
-  return deduped;
-}
-
-function renderReportPicker() {
-  const sel = document.getElementById("reportSelect");
-  const content = document.getElementById("reportContent");
-  const meta = document.getElementById("reportMeta");
-  const link = document.getElementById("reportLink");
-  if (!sel || !content || !meta || !link) return;
-
-  const reports = state.reports || [];
-  sel.innerHTML = "";
-
-  if (!reports.length) {
-    sel.innerHTML = `<option value="">(No Reddit reports found)</option>`;
-    sel.value = "";
-    meta.textContent = "No Reddit reports found";
-    content.textContent = "—";
-    link.style.display = "none";
-    return;
   }
 
-  for (const r of reports) {
-    const opt = document.createElement("option");
-    opt.value = r.date;
-    opt.textContent = r.date;
-    sel.appendChild(opt);
+  function ensureState() {
+    if (!window.state) return null;
+    if (!("reports" in window.state)) window.state.reports = [];
+    if (!("reportDate" in window.state)) window.state.reportDate = "";
+    return window.state;
   }
 
-  const desired = state.reportDate && reports.some(r => r.date === state.reportDate)
-    ? state.reportDate
-    : reports[0].date;
-
-  sel.value = desired;
-  setActiveReport(desired, { updateUrl: false });
-}
-
-function setActiveReport(dateDash, { updateUrl = true } = {}) {
-  const reports = state.reports || [];
-  const r = reports.find(x => x.date === dateDash) || reports[0] || null;
-
-  const content = document.getElementById("reportContent");
-  const meta = document.getElementById("reportMeta");
-  const link = document.getElementById("reportLink");
-  const sel = document.getElementById("reportSelect");
-  if (!content || !meta || !link || !sel) return;
-
-  if (!r) {
-    content.textContent = "—";
-    meta.textContent = "Latest Reddit report";
-    link.style.display = "none";
-    state.reportDate = "";
-    if (updateUrl) syncShareURLFromState();
-    return;
+  function readReportParamIntoState() {
+    const st = ensureState();
+    if (!st) return;
+    const p = new URLSearchParams(window.location.search);
+    const r = p.get("report");
+    if (r) st.reportDate = normalizeDashOrSlashDateToDash(r);
   }
 
-  state.reportDate = r.date;
-  sel.value = r.date;
+  function patchUrlSyncToIncludeReport() {
+    const st = ensureState();
+    if (!st) return;
+    if (!window.syncShareURLFromState || window.syncShareURLFromState.__patched_for_report) return;
 
-  meta.textContent = r.title || r.date;
-  link.href = r.permalink || "#";
-  link.style.display = r.permalink ? "" : "none";
-  content.textContent = (r.selftext || "").trim() || "—";
-
-  if (updateUrl) syncShareURLFromState();
-}
- ==========================
-//  CONFIG — EDIT THESE ONLY
-// ==========================
-const SHEET_ID = "10smiQBJ8mBWax24aOagG9LdzrrnhFmj0tfRESunUJNI";
-
-// Option A (recommended): if you publish to web, use CSV export like below.
-// You must set the gid of your data tab.
-// If you're not sure, open your sheet and look for ".../edit#gid=123456"
-const GID = "2029178353";
-
-// Name of the tab that contains the combined dataset
-const DATA_SHEET_NAME = "AllData";
-
-// If using Publish-to-web CSV, this works well:
-const CSV_URL = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/export?format=csv&gid=${GID}`;
-
-// Option B (fallback): Google Visualization JSON endpoint (sometimes blocked).
-const GVIZ_URL = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:json&sheet=${encodeURIComponent(DATA_SHEET_NAME)}`;
-
-// Choose fetch mode:
-// GViz usually works without needing "Publish to web", so it's the safest default.
-const FETCH_MODE = "csv"; // "csv" or "gviz"
-
-// Reddit "Ice Report" integration
-const REDDIT_USERNAME = "stevenglasford";
-// Title patterns (case-insensitive) that count as an ice report.
-const REDDIT_REPORT_TITLE_RE = /^(?:Ice Report|Chain of Lakes Ice Report|Minneapolis Chain of Lakes Ice Report)\b/i;
-// Pull up to this many recent posts; adjust higher if you post a lot.
-const REDDIT_FETCH_LIMIT = 100;
-
-// ==========================
-
-const state = {
-  rows: [],
-  filtered: [],
-  unit: localStorage.getItem("unit") || "in",
-  lang: localStorage.getItem("lang") || "en",
-  sortKey: "date",
-  sortDir: "desc",
-  lake: "",
-  search: "",
-  // Reddit report selection (dash date like 12-31-2025)
-  reportDate: "",
-  reports: [],
-  mapRange: localStorage.getItem("mapRange") || "all",
-  mapFrom: localStorage.getItem("mapFrom") || "",
-  mapTo: localStorage.getItem("mapTo") || "",
-};
-
-let map, markersLayer;
-
-function setStatus(msg) {
-  document.getElementById("statusLine").textContent = msg;
-}
-
-function parseMixedFractionToInches(raw) {
-  // Accepts: "5 5/8", "9 1/4", "3/8", "5", "8 7/8)", "9 1/8!!"
-  if (!raw) return null;
-  const s = String(raw).replace(/[^0-9\/\s.]/g, " ").trim(); // remove weird chars
-  if (!s) return null;
-
-  // If it's a plain decimal number:
-  if (/^\d+(\.\d+)?$/.test(s)) return Number(s);
-
-  // Mixed fraction: "A B/C"
-  const parts = s.split(/\s+/).filter(Boolean);
-  let whole = 0;
-  let frac = 0;
-
-  if (parts.length === 1 && parts[0].includes("/")) {
-    const [n, d] = parts[0].split("/");
-    if (d && Number(d) !== 0) frac = Number(n) / Number(d);
-    return isFinite(frac) ? frac : null;
+    const original = window.syncShareURLFromState;
+    const wrapped = function(...args) {
+      original.apply(this, args);
+      // original already updates URL; we need to add/overwrite report param while preserving others
+      const p = new URLSearchParams(window.location.search);
+      if (st.reportDate) p.set("report", st.reportDate);
+      else p.delete("report");
+      const newUrl = `${location.pathname}?${p.toString()}${location.hash || ""}`;
+      history.replaceState(null, "", newUrl);
+    };
+    wrapped.__patched_for_report = true;
+    window.syncShareURLFromState = wrapped;
   }
 
-  if (parts.length >= 1 && /^\d+$/.test(parts[0])) whole = Number(parts[0]);
+  function renderReportPicker() {
+    const st = ensureState();
+    if (!st) return;
+    const sel = document.getElementById("reportSelect");
+    const content = document.getElementById("reportContent");
+    const meta = document.getElementById("reportMeta");
+    const link = document.getElementById("reportLink");
+    if (!sel || !content || !meta || !link) return;
 
-  const fracPart = parts.find(p => p.includes("/"));
-  if (fracPart) {
-    const [n, d] = fracPart.split("/");
-    if (d && Number(d) !== 0) frac = Number(n) / Number(d);
-  }
+    sel.innerHTML = "";
+    const reports = st.reports || [];
 
-  const val = whole + frac;
-  return isFinite(val) ? val : null;
-}
-
-function inchesToCm(inches) {
-  if (inches == null) return null;
-  return inches * 2.54;
-}
-
-function formatThickness(row) {
-  const inches = row.thickness_in;
-  const cm = row.thickness_cm;
-
-  if (state.unit === "in") {
-    if (inches == null) return t(state.lang, "no_thickness");
-    return `${inches.toFixed(2)} in`;
-  } else {
-    const v = (cm != null) ? cm : (inches != null ? inchesToCm(inches) : null);
-    if (v == null) return t(state.lang, "no_thickness");
-    return `${v.toFixed(2)} cm`;
-  }
-}
-
-function parseCoords(raw) {
-  // "44.96853° N, 93.28444° W"
-  if (!raw) return null;
-  const s = String(raw);
-
-  const mLat = s.match(/(-?\d+(\.\d+)?)[^\d\-]*\s*°?\s*([NS])/i);
-  const mLon = s.match(/(-?\d+(\.\d+)?)[^\d\-]*\s*°?\s*([EW])/i);
-
-  // If it has two numbers but no N/S/E/W, try splitting by comma:
-  if (!mLat || !mLon) {
-    const nums = s.match(/-?\d+(\.\d+)?/g);
-    if (nums && nums.length >= 2) {
-      const lat = Number(nums[0]);
-      const lon = Number(nums[1]);
-      if (isFinite(lat) && isFinite(lon)) return { lat, lon };
-    }
-    return null;
-  }
-
-  let lat = Number(mLat[1]);
-  let lon = Number(mLon[1]);
-  const ns = mLat[3].toUpperCase();
-  const ew = mLon[3].toUpperCase();
-
-  if (ns === "S") lat = -Math.abs(lat);
-  if (ns === "N") lat = Math.abs(lat);
-
-  if (ew === "W") lon = -Math.abs(lon);
-  if (ew === "E") lon = Math.abs(lon);
-
-  if (!isFinite(lat) || !isFinite(lon)) return null;
-  return { lat, lon };
-}
-
-function parseDate(raw) {
-  // Your format is M-D-YYYY or MM-DD-YYYY (e.g., 12-23-2025)
-  if (!raw) return null;
-  const s = String(raw).trim();
-  const m = s.match(/^(\d{1,2})-(\d{1,2})-(\d{4})$/);
-  if (!m) return null;
-  const mm = Number(m[1]);
-  const dd = Number(m[2]);
-  const yyyy = Number(m[3]);
-  const d = new Date(Date.UTC(yyyy, mm - 1, dd));
-  return isFinite(d.getTime()) ? d : null;
-}
-
-function normalizeDashDate(s) {
-  // Normalize "MM-DD-YYYY" or "M-D-YYYY" to "M-D-YYYY"
-  if (!s) return "";
-  const m = String(s).trim().match(/^(\d{1,2})-(\d{1,2})-(\d{4})$/);
-  if (!m) return String(s).trim();
-  const mm = String(Number(m[1]));
-  const dd = String(Number(m[2]));
-  const yyyy = m[3];
-  return `${mm}-${dd}-${yyyy}`;
-}
-
-function parseDateTokensFromSearch(s) {
-  // If s is "12-31-2025,12-30-2025" -> ["12-31-2025","12-30-2025"]
-  // Only returns tokens that look like dash dates.
-  if (!s) return [];
-  return String(s)
-    .split(",")
-    .map(x => normalizeDashDate(x))
-    .map(x => x.trim())
-    .filter(x => /^\d{1,2}-\d{1,2}-\d{4}$/.test(x));
-}
-
-function normRow(obj) {
-  // Flexible header matching
-  const dateRaw = obj["Date"] ?? obj["date"] ?? obj["DATE"];
-  const lake = (obj["Lake"] ?? obj["lake"] ?? "").toString().trim();
-  const coordsRaw = obj["Coordinates"] ?? obj["coords"] ?? obj["Coordinate"] ?? "";
-  const info = (obj["Info"] ?? obj["info"] ?? "").toString().trim();
-
-  const thicknessInRaw = obj["Thickness (Inches)"] ?? obj["thickness_in"] ?? obj["Thickness"] ?? obj["thickness"] ?? "";
-  const thicknessCmRaw = obj["Thickness (cm)"] ?? obj["Thickness_cm"] ?? obj["Thickness (cm) "] ?? obj["thickness_cm"] ?? "";
-
-  const dateObj = parseDate(dateRaw);
-  const coords = parseCoords(coordsRaw);
-
-  const thickness_in = parseMixedFractionToInches(thicknessInRaw);
-  const thickness_cm = (thicknessCmRaw !== "" && thicknessCmRaw != null && isFinite(Number(thicknessCmRaw)))
-    ? Number(thicknessCmRaw)
-    : (thickness_in != null ? inchesToCm(thickness_in) : null);
-
-  return {
-    date_raw: dateRaw ? String(dateRaw).trim() : "",
-    date: dateObj,
-    date_sort: dateObj ? dateObj.getTime() : 0,
-    lake,
-    coords_raw: coordsRaw ? String(coordsRaw).trim() : "",
-    coords,
-    info,
-    thickness_in,
-    thickness_cm
-  };
-}
-
-function csvToObjects(csvText) {
-  // Simple CSV parser good enough for this sheet.
-  const lines = csvText.replace(/\r/g, "").split("\n").filter(l => l.trim().length);
-  if (!lines.length) return [];
-  const headers = splitCsvLine(lines[0]).map(h => h.trim());
-  const out = [];
-  for (let i = 1; i < lines.length; i++) {
-    const cols = splitCsvLine(lines[i]);
-    const obj = {};
-    headers.forEach((h, idx) => obj[h] = cols[idx] ?? "");
-    out.push(obj);
-  }
-  return out;
-}
-
-function splitCsvLine(line) {
-  const res = [];
-  let cur = "";
-  let inQuotes = false;
-  for (let i = 0; i < line.length; i++) {
-    const ch = line[i];
-    if (ch === '"') {
-      // toggle quotes or escaped quote
-      if (inQuotes && line[i + 1] === '"') {
-        cur += '"';
-        i++;
-      } else {
-        inQuotes = !inQuotes;
-      }
-    } else if (ch === "," && !inQuotes) {
-      res.push(cur);
-      cur = "";
-    } else {
-      cur += ch;
-    }
-  }
-  res.push(cur);
-  return res;
-}
-
-async function fetchData() {
-  setStatus(t(state.lang, "status_loading"));
-
-  try {
-    let rawRows = [];
-    if (FETCH_MODE === "csv") {
-      const resp = await fetch(CSV_URL + `&_=${Date.now()}`, { cache: "no-store" });
-      if (!resp.ok) throw new Error("CSV fetch failed");
-      const text = await resp.text();
-      rawRows = csvToObjects(text);
-    } else {
-      const resp = await fetch(GVIZ_URL + `&_=${Date.now()}`, { cache: "no-store" });
-      if (!resp.ok) throw new Error("GVIZ fetch failed");
-      const text = await resp.text();
-      const json = JSON.parse(text.substring(text.indexOf("{"), text.lastIndexOf("}") + 1));
-      const table = json.table;
-      const headers = table.cols.map(c => c.label);
-      rawRows = table.rows.map(r => {
-        const obj = {};
-        r.c.forEach((cell, i) => obj[headers[i]] = cell ? (cell.v ?? "") : "");
-        return obj;
-      });
+    if (!reports.length) {
+      sel.innerHTML = `<option value="">(No Reddit reports found)</option>`;
+      link.style.display = "none";
+      meta.textContent = "No Reddit reports found";
+      content.textContent = "—";
+      return;
     }
 
-    const rows = rawRows
-      .map(normRow)
-      .filter(r => r.lake || r.date_raw || r.coords_raw || r.info || r.thickness_in != null || r.thickness_cm != null);
-
-    // Sort newest first by default
-    rows.sort((a,b) => b.date_sort - a.date_sort);
-
-    state.rows = rows;
-    setStatus(t(state.lang, "status_loaded", rows.length));
-  } catch (e) {
-    console.error(e);
-    setStatus(t(state.lang, "status_error"));
-    state.rows = [];
-  }
-}
-
-function lakeColor(thicknessIn) {
-  // Basic scale: 0 -> red, 12+ -> green-ish; clamp
-  if (thicknessIn == null) return "#94a3b8";
-  const v = Math.max(0, Math.min(12, thicknessIn));
-  const pct = v / 12;
-  // interpolate red->yellow->green
-  const r = pct < 0.5 ? 255 : Math.round(255 * (1 - (pct - 0.5) * 2));
-  const g = pct < 0.5 ? Math.round(255 * (pct * 2)) : 255;
-  const b = 70;
-  return `rgb(${r},${g},${b})`;
-}
-
-function updateLegend() {
-  const el = document.getElementById("legend");
-  el.innerHTML = `
-    <div><span class="badge">●</span> Marker color roughly follows thickness (thin = red, thick = green).</div>
-    <div style="margin-top:6px;">Tip: click markers to see details.</div>
-  `;
-}
-
-function initMap() {
-  map = L.map("map", { preferCanvas: true }).setView([44.96, -93.27], 11);
-
-  L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
-    maxZoom: 19,
-    attribution: '&copy; OpenStreetMap'
-  }).addTo(map);
-
-  markersLayer = L.layerGroup().addTo(map);
-  updateLegend();
-}
-
-function renderMap(rows) {
-  markersLayer.clearLayers();
-
-  const pts = rows.filter(r => r.coords && isFinite(r.coords.lat) && isFinite(r.coords.lon));
-
-  for (const r of pts) {
-    const color = lakeColor(r.thickness_in);
-    const thicknessLabel = formatThickness(r);
-    const popup = `
-      <div style="font-weight:800;margin-bottom:4px;">${escapeHtml(r.lake || "—")}</div>
-      <div><b>${escapeHtml(r.date_raw || "—")}</b></div>
-      <div>${escapeHtml(thicknessLabel)}</div>
-      <div style="color:#94a3b8;margin-top:6px;line-height:1.35;">
-        ${escapeHtml(r.info || "")}
-      </div>
-      <div style="color:#94a3b8;margin-top:6px;">
-        ${escapeHtml(r.coords_raw || "")}
-      </div>
-    `;
-
-    const marker = L.circleMarker([r.coords.lat, r.coords.lon], {
-      radius: 7,
-      weight: 2,
-      color: color,
-      fillColor: color,
-      fillOpacity: 0.35
-    }).bindPopup(popup);
-
-    marker.addTo(markersLayer);
-  }
-
-  if (pts.length) {
-    const bounds = L.latLngBounds(pts.map(r => [r.coords.lat, r.coords.lon]));
-    map.fitBounds(bounds.pad(0.18));
-  }
-}
-
-function escapeHtml(s) {
-  return String(s).replace(/[&<>"']/g, (m) => ({
-    "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"
-  }[m]));
-}
-
-function renderLakeOptions(rows) {
-  const lakes = Array.from(new Set(rows.map(r => r.lake).filter(Boolean))).sort();
-  const sel = document.getElementById("lakeFilter");
-  const keep = state.lake;
-  sel.innerHTML = `<option value="">All</option>` + lakes.map(l => `<option value="${escapeHtml(l)}">${escapeHtml(l)}</option>`).join("");
-  sel.value = keep;
-}
-
-function applyFilters() {
-  const lake = state.lake;
-  const dateTokens = parseDateTokensFromSearch(state.search);
-  const q = state.search.toLowerCase().trim();
-
-  let out = state.rows.slice();
-
-  if (lake) out = out.filter(r => r.lake === lake);
-
-  if (q) {
-    if (dateTokens.length) {
-      // If q contains one or more dash-dates (optionally comma-separated), match ANY of them.
-      const set = new Set(dateTokens.map(normalizeDashDate));
-      out = out.filter(r => set.has(normalizeDashDate(r.date_raw || "")));
-    } else {
-      out = out.filter(r =>
-        (r.lake || "").toLowerCase().includes(q) ||
-        (r.info || "").toLowerCase().includes(q) ||
-        (r.date_raw || "").toLowerCase().includes(q)
-      );
-    }
-  }
-
-  // sort
-  out.sort((a,b) => {
-    let av, bv;
-    switch (state.sortKey) {
-      case "lake": av = a.lake; bv = b.lake; break;
-      case "info": av = a.info; bv = b.info; break;
-      case "coords": av = a.coords_raw; bv = b.coords_raw; break;
-      case "thickness":
-        av = (state.unit === "in") ? (a.thickness_in ?? -1) : (a.thickness_cm ?? -1);
-        bv = (state.unit === "in") ? (b.thickness_in ?? -1) : (b.thickness_cm ?? -1);
-        break;
-      case "date":
-      default:
-        av = a.date_sort; bv = b.date_sort;
+    for (const r of reports) {
+      const opt = document.createElement("option");
+      opt.value = r.date;
+      opt.textContent = r.date;
+      sel.appendChild(opt);
     }
 
-    if (typeof av === "number" && typeof bv === "number") {
-      return state.sortDir === "asc" ? av - bv : bv - av;
-    }
-    av = (av ?? "").toString();
-    bv = (bv ?? "").toString();
-    return state.sortDir === "asc" ? av.localeCompare(bv) : bv.localeCompare(av);
-  });
+    // decide active report: URL/reportDate if set, else latest
+    const active = (st.reportDate && reports.some(x => x.date === st.reportDate)) ? st.reportDate : reports[0].date;
+    sel.value = active;
+    setActiveReport(active, { updateUrl: false, alsoFilterData: false });
 
-  state.filtered = out;
-}
-
-function renderTable(rows) {
-  const tbody = document.querySelector("#dataTable tbody");
-  tbody.innerHTML = "";
-
-  for (const r of rows) {
-    const tr = document.createElement("tr");
-
-    const thickness = formatThickness(r);
-    const coords = r.coords_raw ? r.coords_raw : t(state.lang, "no_coords");
-
-    tr.innerHTML = `
-      <td>${escapeHtml(r.date_raw || "—")}</td>
-      <td>${escapeHtml(r.lake || "—")}</td>
-      <td><span class="badge">${escapeHtml(thickness)}</span></td>
-      <td>${escapeHtml(r.info || "")}</td>
-      <td>${escapeHtml(coords)}</td>
-    `;
-
-    tbody.appendChild(tr);
-  }
-}
-
-function renderLatestPerLake(rows) {
-  // pick latest (max date_sort) per lake
-  const byLake = new Map();
-  for (const r of rows) {
-    if (!r.lake) continue;
-    const prev = byLake.get(r.lake);
-    if (!prev || r.date_sort > prev.date_sort) byLake.set(r.lake, r);
-  }
-
-  const list = Array.from(byLake.values()).sort((a,b) => (b.date_sort - a.date_sort));
-  const el = document.getElementById("latestList");
-  el.innerHTML = "";
-
-  for (const r of list) {
-    const div = document.createElement("div");
-    div.className = "latestItem";
-    div.innerHTML = `
-      <div class="row1">
-        <div>${escapeHtml(r.lake)}</div>
-        <div>${escapeHtml(formatThickness(r))}</div>
-      </div>
-      <div class="row2">
-        <div><b>${escapeHtml(r.date_raw || "—")}</b></div>
-        <div>${escapeHtml(r.info || "")}</div>
-      </div>
-    `;
-    el.appendChild(div);
-  }
-}
-
-function wireUI() {
-  document.getElementById("unitSelect").value = state.unit;
-  document.getElementById("langSelect").value = state.lang;
-
-  document.getElementById("unitSelect").addEventListener("change", (e) => {
-    state.unit = e.target.value;
-    localStorage.setItem("unit", state.unit);
-    rerenderAll();
-  });
-
-  document.getElementById("langSelect").addEventListener("change", (e) => {
-    state.lang = e.target.value;
-    localStorage.setItem("lang", state.lang);
-    applyTranslations(state.lang);
-    rerenderAll();
-  });
-  
-    // Map range UI init
-  const mapRangeSelect = document.getElementById("mapRangeSelect");
-  const customWrap = document.getElementById("customRangeWrap");
-  const mapFrom = document.getElementById("mapFrom");
-  const mapTo = document.getElementById("mapTo");
-
-  mapRangeSelect.value = state.mapRange;
-  mapFrom.value = state.mapFrom;
-  mapTo.value = state.mapTo;
-  customWrap.style.display = (state.mapRange === "custom") ? "flex" : "none";
-
-  mapRangeSelect.addEventListener("change", () => {
-    state.mapRange = mapRangeSelect.value;
-    localStorage.setItem("mapRange", state.mapRange);
-    customWrap.style.display = (state.mapRange === "custom") ? "flex" : "none";
-    rerenderAll();
-  });
-
-  mapFrom.addEventListener("change", () => {
-    state.mapFrom = mapFrom.value;
-    localStorage.setItem("mapFrom", state.mapFrom);
-    rerenderAll();
-  });
-
-  mapTo.addEventListener("change", () => {
-    state.mapTo = mapTo.value;
-    localStorage.setItem("mapTo", state.mapTo);
-    rerenderAll();
-  });
-
-  document.getElementById("lakeFilter").addEventListener("change", (e) => {
-    state.lake = e.target.value;
-    rerenderAll();
-  });
-
-  document.getElementById("searchInput").addEventListener("input", (e) => {
-    state.search = e.target.value;
-    rerenderAll();
-  });
-
-  document.getElementById("refreshBtn").addEventListener("click", async () => {
-    await loadAndRender();
-  });
-
-  // Reddit report picker
-  const reportSelect = document.getElementById("reportSelect");
-  if (reportSelect) {
-    reportSelect.addEventListener("change", (e) => {
-      setActiveReport(e.target.value, { updateUrl: true });
+    sel.addEventListener("change", (e) => {
+      setActiveReport(e.target.value, { updateUrl: true, alsoFilterData: true });
     });
   }
 
-  // Hamburger menu: move unit/lang controls into the floating panel
-  const menuBtn = document.getElementById("menuBtn");
-  const menuPanel = document.getElementById("menuPanel");
-  const controls = document.querySelector(".topbar .controls");
-  if (menuBtn && menuPanel && controls) {
+  function setActiveReport(dateDash, { updateUrl = true, alsoFilterData = true } = {}) {
+    const st = ensureState();
+    if (!st) return;
+
+    const reports = st.reports || [];
+    const r = reports.find(x => x.date === dateDash) || null;
+
+    const content = document.getElementById("reportContent");
+    const meta = document.getElementById("reportMeta");
+    const link = document.getElementById("reportLink");
+    const sel = document.getElementById("reportSelect");
+
+    if (!content || !meta || !link || !sel) return;
+
+    if (!r) {
+      st.reportDate = "";
+      meta.textContent = "Latest Reddit report";
+      content.textContent = "—";
+      link.style.display = "none";
+      if (updateUrl && window.syncShareURLFromState) window.syncShareURLFromState();
+      return;
+    }
+
+    st.reportDate = r.date;
+    meta.textContent = r.title || r.date;
+    content.textContent = (r.selftext || "").trim() || "—";
+    link.href = r.permalink || "#";
+    link.style.display = r.permalink ? "" : "none";
+
+    // Optional: when user chooses a report date, also filter map/table to that date
+    if (alsoFilterData && typeof st.search === "string") {
+      st.search = r.date;
+      const input = document.getElementById("searchInput");
+      if (input) input.value = r.date;
+      if (typeof window.rerenderAll === "function") window.rerenderAll();
+    }
+
+    if (updateUrl && window.syncShareURLFromState) window.syncShareURLFromState();
+  }
+
+  function setupHamburgerMenu() {
+    const btn = document.getElementById("menuBtn");
+    const panel = document.getElementById("menuPanel");
+    const controls = document.querySelector(".topbar .controls");
+    if (!btn || !panel || !controls) return;
+
     const unitLabel = document.getElementById("unitSelect")?.closest("label.control");
     const langLabel = document.getElementById("langSelect")?.closest("label.control");
-    if (unitLabel) menuPanel.appendChild(unitLabel);
-    if (langLabel) menuPanel.appendChild(langLabel);
+
+    if (unitLabel) panel.appendChild(unitLabel);
+    if (langLabel) panel.appendChild(langLabel);
 
     const toggle = () => {
-      const open = menuPanel.classList.toggle("open");
-      menuPanel.setAttribute("aria-hidden", open ? "false" : "true");
+      const open = panel.classList.toggle("open");
+      panel.setAttribute("aria-hidden", open ? "false" : "true");
     };
-    menuBtn.addEventListener("click", toggle);
+    btn.addEventListener("click", toggle);
+
     document.addEventListener("click", (ev) => {
-      if (!menuPanel.classList.contains("open")) return;
+      if (!panel.classList.contains("open")) return;
       const t = ev.target;
-      if (t === menuBtn || menuPanel.contains(t)) return;
-      menuPanel.classList.remove("open");
-      menuPanel.setAttribute("aria-hidden", "true");
+      if (t === btn || panel.contains(t)) return;
+      panel.classList.remove("open");
+      panel.setAttribute("aria-hidden", "true");
     });
   }
 
-  document.querySelectorAll("#dataTable thead th").forEach(th => {
-    th.addEventListener("click", () => {
-      const key = th.getAttribute("data-key");
-      if (!key) return;
-      if (state.sortKey === key) {
-        state.sortDir = (state.sortDir === "asc") ? "desc" : "asc";
-      } else {
-        state.sortKey = key;
-        state.sortDir = (key === "date") ? "desc" : "asc";
-      }
-      rerenderAll();
-    });
+  document.addEventListener("DOMContentLoaded", async () => {
+    // make report param work on shared URLs
+    readReportParamIntoState();
+    patchUrlSyncToIncludeReport();
+
+    // menu: move unit/lang into hamburger
+    setupHamburgerMenu();
+
+    // load reddit reports and render picker
+    const st = ensureState();
+    if (!st) return;
+
+    try {
+      st.reports = await fetchRedditReports();
+    } catch (e) {
+      console.warn("Reddit reports unavailable:", e);
+      st.reports = [];
+    }
+    renderReportPicker();
+
+    // If user did NOT specify q/dates already, default to latest report date for filtering
+    const p = new URLSearchParams(location.search);
+    const hasDataFilter = p.has("q") || p.has("dates");
+    if (!hasDataFilter && st.reports.length) {
+      // If report param is set, keep it; otherwise pick latest
+      const desired = st.reportDate || st.reports[0].date;
+      setActiveReport(desired, { updateUrl: true, alsoFilterData: true });
+    }
   });
-}
-
-function rerenderAll() {
-  applyFilters();
-  renderTable(state.filtered);
-
-  // Map uses date range + current table filters (lake/search) by default:
-  const mapRows = filterRowsForMap(state.filtered);
-  renderMap(mapRows);
-
-  renderLatestPerLake(state.rows);
-
-  // Keep the URL updated so people can share exactly what they're viewing.
-  syncShareURLFromState();
-}
-
-function hydrateShareStateFromURL() {
-  const url = new URL(window.location.href);
-  const p = url.searchParams;
-
-  // Table filters
-  const dates = p.get("dates");
-  const q = p.get("q");
-  const lake = p.get("lake");
-  // Prefer dates= over q= if present
-  if (dates !== null) state.search = dates;
-  else if (q !== null) state.search = q;
-  if (lake !== null) state.lake = lake;
-
-  // Map range
-  const mr = p.get("mr");
-  const from = p.get("from");
-  const to = p.get("to");
-  if (mr) state.mapRange = mr;
-  if (from) state.mapFrom = from;
-  if (to) state.mapTo = to;
-
-  // UI prefs
-  const unit = p.get("unit");
-  const lang = p.get("lang");
-  if (unit) state.unit = unit;
-  if (lang) state.lang = lang;
-
-  // Reddit report
-  const report = p.get("report");
-  if (report) state.reportDate = normalizeDashOrSlashDateToDash(report);
-}
-
-function syncShareURLFromState() {
-  const url = new URL(window.location.href);
-  const p = url.searchParams;
-
-  // Only include non-default values so the URL stays clean.
-  const dateTokens = parseDateTokensFromSearch(state.search);
-  if (dateTokens.length >= 2) {
-    p.set("dates", dateTokens.join(","));
-    p.delete("q");
-  } else {
-    p.delete("dates");
-    if (state.search) p.set("q", state.search); else p.delete("q");
-  }
-  if (state.lake) p.set("lake", state.lake); else p.delete("lake");
-
-  if (state.mapRange && state.mapRange !== "30") p.set("mr", state.mapRange); else p.delete("mr");
-  if (state.mapRange === "custom") {
-    if (state.mapFrom) p.set("from", state.mapFrom); else p.delete("from");
-    if (state.mapTo) p.set("to", state.mapTo); else p.delete("to");
-  } else {
-    p.delete("from");
-    p.delete("to");
-  }
-
-  if (state.unit && state.unit !== "cm") p.set("unit", state.unit); else p.delete("unit");
-  if (state.lang && state.lang !== "en") p.set("lang", state.lang); else p.delete("lang");
-
-  // Reddit report (shareable)
-  if (state.reportDate) p.set("report", state.reportDate); else p.delete("report");
-
-  const qs = p.toString();
-  const newUrl = url.pathname + (qs ? `?${qs}` : "") + url.hash;
-  window.history.replaceState({}, "", newUrl);
-}
-
-async function loadAndRender() {
-  await fetchData();
-  renderLakeOptions(state.rows);
-
-  // Load Reddit reports (non-fatal)
-  try {
-    await fetchRedditReports();
-  } catch (e) {
-    console.warn("Reddit reports unavailable:", e);
-    state.reports = [];
-  }
-  renderReportPicker();
-
-  rerenderAll();
-}
-
-(function init() {
-  // Sheet link
-  const sheetLink = document.getElementById("sheetLink");
-  sheetLink.href = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/edit`;
-  sheetLink.textContent = `docs.google.com/spreadsheets/d/${SHEET_ID}`;
-
-  // If the URL includes filters (e.g. ?q=12-23-2025), hydrate state first so UI + data match.
-  hydrateShareStateFromURL();
-
-  applyTranslations(state.lang);
-  initMap();
-  wireUI();
-  loadAndRender();
 })();
-
-function toISODateStringUTC(d) {
-  const yyyy = d.getUTCFullYear();
-  const mm = String(d.getUTCMonth() + 1).padStart(2, "0");
-  const dd = String(d.getUTCDate()).padStart(2, "0");
-  return `${yyyy}-${mm}-${dd}`;
-}
-
-function getSeasonStartUTC() {
-  // “This season” = Nov 1 of current season year.
-  // If today is before Nov 1, season started Nov 1 of previous year.
-  const now = new Date();
-  const y = now.getUTCFullYear();
-  const nov1ThisYear = Date.UTC(y, 10, 1); // month 10 = November
-  const seasonYear = (now.getTime() >= nov1ThisYear) ? y : (y - 1);
-  return new Date(Date.UTC(seasonYear, 10, 1));
-}
-
-function getNowUTCDateFloor() {
-  const now = new Date();
-  return new Date(Date.UTC(now.getUTCFullYear(), now.getUTCMonth(), now.getUTCDate()));
-}
-
-function computeMapDateWindow() {
-  const mode = state.mapRange;
-  const now = getNowUTCDateFloor();
-
-  if (mode === "all") return { start: null, end: null };
-
-  if (mode === "season") {
-    const start = getSeasonStartUTC();
-    return { start, end: null };
-  }
-
-  const daysMap = { "7d": 7, "14d": 14, "30d": 30 };
-  if (daysMap[mode]) {
-    const days = daysMap[mode];
-    const start = new Date(now.getTime() - (days * 24 * 60 * 60 * 1000));
-    return { start, end: null };
-  }
-
-  if (mode === "custom") {
-    const start = state.mapFrom ? new Date(state.mapFrom + "T00:00:00Z") : null;
-    const end = state.mapTo ? new Date(state.mapTo + "T23:59:59Z") : null;
-    return { start: start && isFinite(start) ? start : null, end: end && isFinite(end) ? end : null };
-  }
-
-  return { start: null, end: null };
-}
-
-function filterRowsForMap(rows) {
-  const { start, end } = computeMapDateWindow();
-  if (!start && !end) return rows;
-
-  return rows.filter(r => {
-    if (!r.date || !r.date_sort) return false; // no date => don’t show on map
-    const t = r.date_sort;
-    if (start && t < start.getTime()) return false;
-    if (end && t > end.getTime()) return false;
-    return true;
-  });
-}
-
-function getQueryParam(name) {
-  const url = new URL(window.location.href);
-  return url.searchParams.get(name) || "";
-}
-
-function setQueryParam(name, value, { push = false } = {}) {
-  const url = new URL(window.location.href);
-
-  if (value && value.trim() !== "") {
-    url.searchParams.set(name, value.trim());
-  } else {
-    url.searchParams.delete(name);
-  }
-
-  if (push) {
-    window.history.pushState({}, "", url.toString());
-  } else {
-    window.history.replaceState({}, "", url.toString());
-  }
-}
