@@ -1,7 +1,7 @@
 // Minimal translation dictionary. Add/adjust phrases anytime.
 const I18N = {
   en: {
-    t_title: "Ice Report",
+    t_title: "Frozen Lakes Report",
     t_subtitle: "Live from Google Sheets",
     t_units: "Units",
     t_language: "Language",
