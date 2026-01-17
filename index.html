@@ -1,6 +1,20 @@
 <!doctype html>
 <html lang="en">
 <head>
+  <script>
+    (function () {
+      // Prevent infinite loop just in case
+      if (location.hostname === "ice.glasford.io") {
+        const target =
+          "https://freeze.glasford.io" +
+          location.pathname +
+          location.search +
+          location.hash;
+  
+        location.replace(target);
+      }
+    })();
+  </script>
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
   <meta http-equiv="Pragma" content="no-cache" />
   <meta http-equiv="Expires" content="0" />
