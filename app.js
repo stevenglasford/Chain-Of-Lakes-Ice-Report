@@ -32,6 +32,9 @@ const state = {
   sortDir: "desc",
   lake: "",
   search: "",
+  // Selected Reddit report date (M-D-YYYY)
+  reportDate: "",
+  reports: [],
   mapRange: localStorage.getItem("mapRange") || "all",
   mapFrom: localStorage.getItem("mapFrom") || "",
   mapTo: localStorage.getItem("mapTo") || "",
@@ -139,6 +142,134 @@ function parseDate(raw) {
   const yyyy = Number(m[3]);
   const d = new Date(Date.UTC(yyyy, mm - 1, dd));
   return isFinite(d.getTime()) ? d : null;
+}
+
+
+function normalizeDashOrSlashDateToDash(s) {
+  if (!s) return "";
+  const m = String(s).trim().match(/^(\d{1,2})[\/-](\d{1,2})[\/-](\d{4})$/);
+  if (!m) return String(s).trim();
+  const mm = String(Number(m[1]));
+  const dd = String(Number(m[2]));
+  const yyyy = m[3];
+  return `${mm}-${dd}-${yyyy}`;
+}
+
+function extractDashDateFromTitle(title) {
+  if (!title) return "";
+  const m = String(title).match(/(\d{1,2})[\/-](\d{1,2})[\/-](\d{4})/);
+  if (!m) return "";
+  return normalizeDashOrSlashDateToDash(`${m[1]}-${m[2]}-${m[3]}`);
+}
+
+async function fetchRedditReports() {
+  const url = `https://www.reddit.com/user/${encodeURIComponent(REDDIT_USERNAME)}/submitted.json?limit=${REDDIT_FETCH_LIMIT}&raw_json=1`;
+  const resp = await fetch(url, { cache: "no-store" });
+  if (!resp.ok) throw new Error(`Reddit HTTP ${resp.status}`);
+  const json = await resp.json();
+  const posts = (json?.data?.children || []).map(c => c?.data).filter(Boolean);
+
+  const reports = [];
+  for (const p of posts) {
+    const title = p.title || "";
+    if (!REDDIT_REPORT_TITLE_RE.test(title)) continue;
+    const date = extractDashDateFromTitle(title);
+    if (!date) continue;
+
+    reports.push({
+      date,
+      title,
+      permalink: p.permalink ? `https://www.reddit.com${p.permalink}` : "",
+      selftext: p.selftext || "",
+      created_utc: p.created_utc || 0,
+    });
+  }
+
+  // Deduplicate by date (keep newest post for that date)
+  const byDate = new Map();
+  for (const r of reports) {
+    const prev = byDate.get(r.date);
+    if (!prev || (r.created_utc || 0) > (prev.created_utc || 0)) byDate.set(r.date, r);
+  }
+
+  const out = Array.from(byDate.values()).sort((a,b) => {
+    const da = parseDate(a.date)?.getTime() || 0;
+    const db = parseDate(b.date)?.getTime() || 0;
+    if (db !== da) return db - da;
+    return (b.created_utc || 0) - (a.created_utc || 0);
+  });
+
+  state.reports = out;
+  return out;
+}
+
+function renderReportUI() {
+  const sel = document.getElementById("reportSelect");
+  const meta = document.getElementById("reportMeta");
+  const content = document.getElementById("reportContent");
+  const link = document.getElementById("reportLink");
+  if (!sel || !meta || !content || !link) return;
+
+  const reports = state.reports || [];
+  sel.innerHTML = "";
+
+  if (!reports.length) {
+    sel.innerHTML = `<option value="">(No Reddit reports found)</option>`;
+    meta.textContent = "No Reddit reports found";
+    content.textContent = "—";
+    link.style.display = "none";
+    return;
+  }
+
+  for (const r of reports) {
+    const opt = document.createElement("option");
+    opt.value = r.date;
+    opt.textContent = r.date;
+    sel.appendChild(opt);
+  }
+
+  const desired = (state.reportDate && reports.some(r => r.date === state.reportDate))
+    ? state.reportDate
+    : reports[0].date;
+
+  sel.value = desired;
+  setActiveReport(desired, { updateUrl: false, alsoFilterData: false });
+
+  // only bind once
+  if (!sel.__bound) {
+    sel.addEventListener("change", (e) => setActiveReport(e.target.value, { updateUrl: true, alsoFilterData: true }));
+    sel.__bound = true;
+  }
+}
+
+function setActiveReport(dateDash, { updateUrl = true, alsoFilterData = true } = {}) {
+  const reports = state.reports || [];
+  const r = reports.find(x => x.date === dateDash) || reports[0] || null;
+
+  const meta = document.getElementById("reportMeta");
+  const content = document.getElementById("reportContent");
+  const link = document.getElementById("reportLink");
+  const sel = document.getElementById("reportSelect");
+  if (!meta || !content || !link || !sel) return;
+
+  if (!r) return;
+
+  state.reportDate = r.date;
+  sel.value = r.date;
+  meta.textContent = r.title || r.date;
+  content.textContent = (r.selftext || "").trim() || "—";
+  link.href = r.permalink || "#";
+  link.style.display = r.permalink ? "" : "none";
+
+  if (alsoFilterData) {
+    // set search to date (single date) and rerender; keep user's other filters intact
+    state.search = r.date;
+    const input = document.getElementById("searchInput");
+    if (input) input.value = r.date;
+    rerenderAll();
+  }
+
+  if (updateUrl) syncShareURLFromState();
 }
 
 function normalizeDashDate(s) {
@@ -604,8 +735,10 @@ function hydrateShareStateFromURL() {
   // UI prefs
   const unit = p.get("unit");
   const lang = p.get("lang");
+  const report = p.get("report");
   if (unit) state.unit = unit;
   if (lang) state.lang = lang;
+  if (report) state.reportDate = normalizeDashOrSlashDateToDash(report);
 }
 
 function syncShareURLFromState() {
@@ -634,6 +767,7 @@ function syncShareURLFromState() {
 
   if (state.unit && state.unit !== "cm") p.set("unit", state.unit); else p.delete("unit");
   if (state.lang && state.lang !== "en") p.set("lang", state.lang); else p.delete("lang");
+  if (state.reportDate) p.set("report", state.reportDate); else p.delete("report");
 
   const qs = p.toString();
   const newUrl = url.pathname + (qs ? `?${qs}` : "") + url.hash;
@@ -643,6 +777,24 @@ function syncShareURLFromState() {
 async function loadAndRender() {
   await fetchData();
   renderLakeOptions(state.rows);
+
+  // Reddit reports (non-fatal)
+  try {
+    await fetchRedditReports();
+  } catch (e) {
+    console.warn("Reddit reports unavailable:", e);
+    state.reports = [];
+  }
+  renderReportUI();
+
+  // If no explicit q/dates in URL, default to latest report (or report=) for filtering
+  const p = new URLSearchParams(location.search);
+  const hasDataFilter = p.has("q") || p.has("dates");
+  if (!hasDataFilter && state.reports.length) {
+    const desired = state.reportDate || state.reports[0].date;
+    setActiveReport(desired, { updateUrl: true, alsoFilterData: true });
+  }
+
   rerenderAll();
 }
 
@@ -743,3 +895,62 @@ function setQueryParam(name, value, { push = false } = {}) {
     window.history.replaceState({}, "", url.toString());
   }
 }
+// ===============================
+// Hamburger menu (Units + Language)
+// ===============================
+(function () {
+  function findLabelFor(selectEl) {
+    if (!selectEl) return null;
+    return selectEl.closest('label');
+  }
+
+  function initMenu() {
+    const menuBtn = document.getElementById('menuBtn');
+    const menuPanel = document.getElementById('menuPanel');
+    const unitSelect = document.getElementById('unitSelect');
+    const langSelect = document.getElementById('langSelect');
+
+    if (!menuBtn || !menuPanel || !unitSelect || !langSelect) return;
+
+    // Move the existing controls into the floating panel (keeps event listeners intact)
+    const unitLabel = findLabelFor(unitSelect);
+    const langLabel = findLabelFor(langSelect);
+
+    // Only move if they are not already inside the panel
+    if (unitLabel && !menuPanel.contains(unitLabel)) menuPanel.appendChild(unitLabel);
+    if (langLabel && !menuPanel.contains(langLabel)) menuPanel.appendChild(langLabel);
+
+    function setOpen(open) {
+      if (open) {
+        menuPanel.classList.add('open');
+        menuPanel.setAttribute('aria-hidden', 'false');
+      } else {
+        menuPanel.classList.remove('open');
+        menuPanel.setAttribute('aria-hidden', 'true');
+      }
+    }
+
+    // Toggle on click
+    menuBtn.addEventListener('click', (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      const isOpen = menuPanel.classList.contains('open');
+      setOpen(!isOpen);
+    });
+
+    // Close when clicking outside
+    document.addEventListener('click', (e) => {
+      if (!menuPanel.classList.contains('open')) return;
+      if (menuPanel.contains(e.target) || menuBtn.contains(e.target)) return;
+      setOpen(false);
+    });
+
+    // Close on Escape
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') setOpen(false);
+    });
+  }
+
+  // Your script runs at end of body; still, init on next tick to ensure wireUI() already ran
+  setTimeout(initMenu, 0);
+})();
