@@ -1,7 +1,7 @@
 // Minimal translation dictionary. Add/adjust phrases anytime.
 const I18N = {
   en: {
-    t_title: "Frozen Lakes Report",
+    t_title: "Minneapolis Frozen Lakes Report",
     t_subtitle: "Live from Google Sheets",
     t_units: "Units",
     t_language: "Language",
@@ -27,6 +27,14 @@ const I18N = {
     t_date_range: "Date range",
     t_from: "From",
     t_to: "To",
+    t_search_ph: "Info / lake / date…",
+    t_all: "All",
+    t_range_all: "All",
+    t_range_7d: "Last 7 days",
+    t_range_14d: "Last 14 days",
+    t_range_30d: "Last 30 days",
+    t_range_season: "This season",
+    t_range_custom: "Custom",
   },
 
   fr: {
@@ -56,6 +64,14 @@ const I18N = {
     t_date_range: "Plage de dates",
     t_from: "Du",
     t_to: "Au",
+    t_search_ph: "Info / lac / date…",
+    t_all: "Tous",
+    t_range_all: "Tous",
+    t_range_7d: "7 derniers jours",
+    t_range_14d: "14 derniers jours",
+    t_range_30d: "30 derniers jours",
+    t_range_season: "Cette saison",
+    t_range_custom: "Personnalisé",
   },
 
   es: {
@@ -71,6 +87,7 @@ const I18N = {
     t_filters: "Filtros",
     t_lake: "Lago",
     t_search: "Buscar",
+    t_search_ph: "Info / lago / fecha…",
     t_source: "Fuente:",
     th_date: "Fecha",
     th_lake: "Lago",
@@ -85,6 +102,14 @@ const I18N = {
     t_date_range: "Rango de fechas",
     t_from: "Desde",
     t_to: "Hasta",
+    t_search_ph: "Info / lago / fecha…",
+    t_all: "Todos",
+    t_range_all: "Todos",
+    t_range_7d: "Últimos 7 días",
+    t_range_14d: "Últimos 14 días",
+    t_range_30d: "Últimos 30 días",
+    t_range_season: "Esta temporada",
+    t_range_custom: "Personalizado",
   },
 
   // These are simple placeholders—feel free to replace with better translations.
@@ -101,6 +126,7 @@ const I18N = {
     t_filters: "Lim",
     t_lake: "Pas dej",
     t_search: "Nrhiav",
+    t_search_ph: "Info / pas dej / hnub…",
     t_source: "Chaw los:",
     th_date: "Hnub",
     th_lake: "Pas dej",
@@ -115,6 +141,14 @@ const I18N = {
     t_date_range: "Qhov ntau hnub tim",
     t_from: "Pib",
     t_to: "Xaus",
+    t_search_ph: "Info / pas dej / hnub…",
+    t_all: "Txhua yam",
+    t_range_all: "Txhua yam",
+    t_range_7d: "7 hnub dhau los",
+    t_range_14d: "14 hnub dhau los",
+    t_range_30d: "30 hnub dhau los",
+    t_range_season: "Lub caij no",
+    t_range_custom: "Kho raws li xav",
   },
 
   so: {
@@ -130,6 +164,7 @@ const I18N = {
     t_filters: "Shaandheyn",
     t_lake: "Haro",
     t_search: "Raadi",
+    t_search_ph: "Info / haro / taariikh…",
     t_source: "Isha:",
     th_date: "Taariikh",
     th_lake: "Haro",
@@ -144,6 +179,14 @@ const I18N = {
     t_date_range: "Xadka taariikhaha",
     t_from: "Laga bilaabo",
     t_to: "Ilaa",
+    t_search_ph: "Info / haro / taariikh…",
+    t_all: "Dhammaan",
+    t_range_all: "Dhammaan",
+    t_range_7d: "7 maalmood ee u dambeeyay",
+    t_range_14d: "14 maalmood ee u dambeeyay",
+    t_range_30d: "30 maalmood ee u dambeeyay",
+    t_range_season: "Xilligan",
+    t_range_custom: "Gaar ah",
   },
 
   ar: {
@@ -173,6 +216,14 @@ const I18N = {
     t_date_range: "نطاق التاريخ",
     t_from: "من",
     t_to: "إلى",
+    t_search_ph: "معلومات / بحيرة / تاريخ…",
+    t_all: "الكل",
+    t_range_all: "الكل",
+    t_range_7d: "آخر ٧ أيام",
+    t_range_14d: "آخر ١٤ يومًا",
+    t_range_30d: "آخر ٣٠ يومًا",
+    t_range_season: "هذا الموسم",
+    t_range_custom: "مخصص",
   },
 
   aii: {
@@ -202,6 +253,51 @@ const I18N = {
     t_date_range: "ܬܚܘܡܐ ܕܝܘܡܬ̈ܐ",
     t_from: "ܡܢ",
     t_to: "ܥܕܡܐ ܠ",
+    t_search_ph: "ܡܘܕܥܢܘܬܐ / ܝܡܐ / ܝܘܡܐ…",
+    t_all: "ܟܠܗܘܢ",
+    t_range_all: "ܟܠܗܘܢ",
+    t_range_7d: "ܚܪ̈ܝܐ 7 ܝܘܡ̈ܐ",
+    t_range_14d: "ܚܪ̈ܝܐ 14 ܝܘܡ̈ܐ",
+    t_range_30d: "ܚܪ̈ܝܐ 30 ܝܘܡ̈ܐ",
+    t_range_season: "ܗܢܐ ܥܕܢܐ",
+    t_range_custom: "ܦܪܨܘܦܝܐ",
+  },
+    fi: {
+    t_title: "Jääraportti",
+    t_subtitle: "Suoraan Google Sheetsistä",
+    t_units: "Yksiköt",
+    t_language: "Kieli",
+    t_refresh: "Päivitä",
+    t_map: "Kartta",
+    t_latest: "Uusin per järvi",
+    t_latest_hint: "Uusin merkintä jokaiselle järvelle",
+    t_table: "Data",
+    t_filters: "Suodattimet",
+    t_lake: "Järvi",
+    t_search: "Haku",
+    t_search_ph: "Info / järvi / päivämäärä…",
+    t_source: "Lähde:",
+    th_date: "Päivämäärä",
+    th_lake: "Järvi",
+    th_thickness: "Paksuus",
+    th_info: "Info",
+    th_coords: "Koordinaatit",
+    status_loading: "Ladataan…",
+    status_loaded: (n) => `Ladattu ${n} riviä`,
+    status_error: "Tietojen lataus epäonnistui (tarkista sheetin julkaisuasetukset).",
+    no_coords: "Ei koordinaatteja",
+    no_thickness: "Ei paksuutta",
+    t_date_range: "Päivämääräväli",
+    t_from: "Alkaen",
+    t_to: "Asti",
+    t_search_ph: "Info / järvi / päivämäärä…",
+    t_all: "Kaikki",
+    t_range_all: "Kaikki",
+    t_range_7d: "Viimeiset 7 päivää",
+    t_range_14d: "Viimeiset 14 päivää",
+    t_range_30d: "Viimeiset 30 päivää",
+    t_range_season: "Tämä kausi",
+    t_range_custom: "Mukautettu",
   }
 };
 
@@ -220,5 +316,36 @@ function applyTranslations(lang) {
   for (const k of keys) {
     const el = document.getElementById(k);
     if (el && typeof I18N.en[k] !== "function") el.textContent = t(lang, k);
+  }
+
+  // Inputs / placeholders (not handled by textContent loop)
+  const searchInput = document.getElementById("searchInput");
+  if (searchInput) {
+    // Fallback to English placeholder if the language doesn't define one.
+    searchInput.placeholder = t(lang, "t_search_ph");
+  }
+    // Translate date-range select options by value
+  const rangeSelect = document.getElementById("mapRangeSelect");
+  if (rangeSelect) {
+    const labelByValue = {
+      all: t(lang, "t_range_all"),
+      "7d": t(lang, "t_range_7d"),
+      "14d": t(lang, "t_range_14d"),
+      "30d": t(lang, "t_range_30d"),
+      season: t(lang, "t_range_season"),
+      custom: t(lang, "t_range_custom"),
+    };
+
+    for (const opt of rangeSelect.options) {
+      const v = opt.value;
+      if (labelByValue[v]) opt.textContent = labelByValue[v];
+    }
+  }
+
+  // Translate the "All" option inside the lake filter (value="")
+  const lakeFilter = document.getElementById("lakeFilter");
+  if (lakeFilter) {
+    const allOpt = lakeFilter.querySelector('option[value=""]');
+    if (allOpt) allOpt.textContent = t(lang, "t_all");
   }
 }

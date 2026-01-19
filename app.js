@@ -720,8 +720,8 @@ function hydrateShareStateFromURL() {
   const q = p.get("q");
   const lake = p.get("lake");
   // Prefer dates= over q= if present
-  if (dates !== null) state.search = dates;
-  else if (q !== null) state.search = q;
+  if (dates !== null) state.search = decodeURIComponent(dates);
+  else if (q !== null) state.search = decodeURIComponent(q);
   if (lake !== null) state.lake = lake;
 
   // Map range
@@ -895,6 +895,7 @@ function setQueryParam(name, value, { push = false } = {}) {
     window.history.replaceState({}, "", url.toString());
   }
 }
+
 // ===============================
 // Hamburger menu (Units + Language)
 // ===============================
