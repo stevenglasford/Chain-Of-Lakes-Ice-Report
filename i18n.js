@@ -1,7 +1,7 @@
 // Minimal translation dictionary. Add/adjust phrases anytime.
 const I18N = {
   en: {
-    t_title: "Minneapolis Frozen Lakes Report",
+    t_title: "Frozen Lakes Report",
     t_subtitle: "Live from Google Sheets",
     t_units: "Units",
     t_language: "Language",
@@ -35,6 +35,18 @@ const I18N = {
     t_range_30d: "Last 30 days",
     t_range_season: "This season",
     t_range_custom: "Custom",
+    t_reports: "Frozen Lakes Report",
+    t_reports_hint: "Latest Reddit report (select a date)",
+    t_reports_date: "Date",
+    t_reports_open: "Open",
+    t_reports_none: "No Reddit reports found",
+    t_reports_loading: "Loading Reddit reports…",
+    t_reports_error: "Could not load Reddit reports",
+    t_latest_tag: "(latest)",
+    t_read_more: "Read more",
+    t_show_less: "Show less",
+    t_feedback_btn: "Submit Feedback about the Report",
+    t_donate_btn: "Donate to Minneapolis Frozen Lakes Report",
   },
 
   fr: {
@@ -72,6 +84,18 @@ const I18N = {
     t_range_30d: "30 derniers jours",
     t_range_season: "Cette saison",
     t_range_custom: "Personnalisé",
+    t_reports: "Rapports de glace",
+    t_reports_hint: "Dernier rapport Reddit (choisis une date)",
+    t_reports_date: "Date",
+    t_reports_open: "Ouvrir",
+    t_reports_none: "Aucun rapport Reddit trouvé",
+    t_reports_loading: "Chargement des rapports Reddit…",
+    t_reports_error: "Impossible de charger les rapports Reddit",
+    t_latest_tag: "(dernier)",
+    t_read_more: "Lire la suite",
+    t_show_less: "Réduire",
+    t_feedback_btn: "Donner votre avis sur le rapport",
+    t_donate_btn: "Faire un don au rapport sur les lacs gelés de Minneapolis",
   },
 
   es: {
@@ -87,7 +111,6 @@ const I18N = {
     t_filters: "Filtros",
     t_lake: "Lago",
     t_search: "Buscar",
-    t_search_ph: "Info / lago / fecha…",
     t_source: "Fuente:",
     th_date: "Fecha",
     th_lake: "Lago",
@@ -110,6 +133,18 @@ const I18N = {
     t_range_30d: "Últimos 30 días",
     t_range_season: "Esta temporada",
     t_range_custom: "Personalizado",
+    t_reports: "Informes de hielo",
+    t_reports_hint: "Último informe de Reddit (elige una fecha)",
+    t_reports_date: "Fecha",
+    t_reports_open: "Abrir",
+    t_reports_none: "No se encontraron informes de Reddit",
+    t_reports_loading: "Cargando informes de Reddit…",
+    t_reports_error: "No se pudieron cargar los informes de Reddit",
+    t_latest_tag: "(más reciente)",
+    t_read_more: "Leer más",
+    t_show_less: "Mostrar menos",
+    t_feedback_btn: "Enviar comentarios sobre el informe",
+    t_donate_btn: "Donar al informe de lagos congelados de Minneapolis",
   },
 
   // These are simple placeholders—feel free to replace with better translations.
@@ -126,7 +161,6 @@ const I18N = {
     t_filters: "Lim",
     t_lake: "Pas dej",
     t_search: "Nrhiav",
-    t_search_ph: "Info / pas dej / hnub…",
     t_source: "Chaw los:",
     th_date: "Hnub",
     th_lake: "Pas dej",
@@ -149,6 +183,18 @@ const I18N = {
     t_range_30d: "30 hnub dhau los",
     t_range_season: "Lub caij no",
     t_range_custom: "Kho raws li xav",
+    t_reports: "Daim ntawv qhia dej khov",
+    t_reports_hint: "Reddit daim ntawv tshiab (xaiv hnub)",
+    t_reports_date: "Hnub",
+    t_reports_open: "Qhib",
+    t_reports_none: "Tsis pom Reddit daim ntawv qhia",
+    t_reports_loading: "Tab tom thauj Reddit daim ntawv…",
+    t_reports_error: "Thauj Reddit daim ntawv tsis tau",
+    t_latest_tag: "(tshiab tshaj)",
+    t_read_more: "Nyeem ntxiv",
+    t_show_less: "Qhia tsawg dua",
+    t_feedback_btn: "Xa tswv yim txog daim ntawv tshaj qhia",
+    t_donate_btn: "Pub nyiaj rau Minneapolis Frozen Lakes Report",
   },
 
   so: {
@@ -164,7 +210,6 @@ const I18N = {
     t_filters: "Shaandheyn",
     t_lake: "Haro",
     t_search: "Raadi",
-    t_search_ph: "Info / haro / taariikh…",
     t_source: "Isha:",
     th_date: "Taariikh",
     th_lake: "Haro",
@@ -187,6 +232,18 @@ const I18N = {
     t_range_30d: "30 maalmood ee u dambeeyay",
     t_range_season: "Xilligan",
     t_range_custom: "Gaar ah",
+    t_reports: "Warbixinada barafka",
+    t_reports_hint: "Warbixinta Reddit ee ugu dambeysa (door taariikh)",
+    t_reports_date: "Taariikh",
+    t_reports_open: "Fur",
+    t_reports_none: "Warbixin Reddit lama helin",
+    t_reports_loading: "Waa la soo dejinayaa warbixinada Reddit…",
+    t_reports_error: "Lama soo dejin karo warbixinada Reddit",
+    t_latest_tag: "(ugu dambeeyay)",
+    t_read_more: "Akhri wax dheeraad ah",
+    t_show_less: "Muuji wax ka yar",
+    t_feedback_btn: "Gudbi faallo ku saabsan warbixinta",
+    t_donate_btn: "Ku tabaruc warbixinta harooyinka barafaysan ee Minneapolis",
   },
 
   ar: {
@@ -224,6 +281,18 @@ const I18N = {
     t_range_30d: "آخر ٣٠ يومًا",
     t_range_season: "هذا الموسم",
     t_range_custom: "مخصص",
+    t_reports: "تقارير الجليد",
+    t_reports_hint: "أحدث تقرير من Reddit (اختر تاريخًا)",
+    t_reports_date: "التاريخ",
+    t_reports_open: "فتح",
+    t_reports_none: "لا توجد تقارير Reddit",
+    t_reports_loading: "جارٍ تحميل تقارير Reddit…",
+    t_reports_error: "تعذّر تحميل تقارير Reddit",
+    t_latest_tag: "(الأحدث)",
+    t_read_more: "اقرأ المزيد",
+    t_show_less: "عرض أقل",
+    t_feedback_btn: "أرسل ملاحظات حول التقرير",
+    t_donate_btn: "تبرّع لتقرير بحيرات مينيابوليس المتجمّدة",
   },
 
   aii: {
@@ -253,16 +322,14 @@ const I18N = {
     t_date_range: "ܬܚܘܡܐ ܕܝܘܡܬ̈ܐ",
     t_from: "ܡܢ",
     t_to: "ܥܕܡܐ ܠ",
-    t_search_ph: "ܡܘܕܥܢܘܬܐ / ܝܡܐ / ܝܘܡܐ…",
-    t_all: "ܟܠܗܘܢ",
-    t_range_all: "ܟܠܗܘܢ",
-    t_range_7d: "ܚܪ̈ܝܐ 7 ܝܘܡ̈ܐ",
-    t_range_14d: "ܚܪ̈ܝܐ 14 ܝܘܡ̈ܐ",
-    t_range_30d: "ܚܪ̈ܝܐ 30 ܝܘܡ̈ܐ",
-    t_range_season: "ܗܢܐ ܥܕܢܐ",
-    t_range_custom: "ܦܪܨܘܦܝܐ",
+    t_latest_tag: "(ܚܕܬܐ)",
+    t_read_more: "ܩܪܝ ܝܬܝܪ",
+    t_show_less: "ܚܘܝ ܒܨܝܪ",
+    t_feedback_btn: "ܫܕܪ ܚܘܫܒܢܐ ܥܠ ܕܘܟܬܐ",
+    t_donate_btn: "ܗܒ ܬܪܘܡܬܐ ܠܕܘܟܬܐ ܕܝ̈ܡܐ ܓܠܝ̈ܕܐ ܕܡܝܢܝܐܦܘܠܝܣ",
   },
-    fi: {
+
+  fi: {
     t_title: "Jääraportti",
     t_subtitle: "Suoraan Google Sheetsistä",
     t_units: "Yksiköt",
@@ -275,7 +342,6 @@ const I18N = {
     t_filters: "Suodattimet",
     t_lake: "Järvi",
     t_search: "Haku",
-    t_search_ph: "Info / järvi / päivämäärä…",
     t_source: "Lähde:",
     th_date: "Päivämäärä",
     th_lake: "Järvi",
@@ -298,7 +364,21 @@ const I18N = {
     t_range_30d: "Viimeiset 30 päivää",
     t_range_season: "Tämä kausi",
     t_range_custom: "Mukautettu",
-  }
+    t_reports: "Jääraportit",
+    t_reports_hint: "Uusin Reddit-raportti (valitse päivämäärä)",
+    t_reports_date: "Päivämäärä",
+    t_reports_open: "Avaa",
+    t_reports_none: "Reddit-raportteja ei löytynyt",
+    t_reports_loading: "Ladataan Reddit-raportteja…",
+    t_reports_error: "Reddit-raporttien lataus epäonnistui",
+    t_latest_tag: "(uusin)",
+    t_read_more: "Lue lisää",
+    t_show_less: "Näytä vähemmän",
+    t_feedback_btn: "Lähetä palautetta raportista",
+    t_donate_btn: "Lahjoita Minneapolisin jäätyneiden järvien raportille",
+  },
+
+
 };
 
 function t(lang, key, arg) {
@@ -318,13 +398,11 @@ function applyTranslations(lang) {
     if (el && typeof I18N.en[k] !== "function") el.textContent = t(lang, k);
   }
 
-  // Inputs / placeholders (not handled by textContent loop)
+  // Inputs / placeholders
   const searchInput = document.getElementById("searchInput");
-  if (searchInput) {
-    // Fallback to English placeholder if the language doesn't define one.
-    searchInput.placeholder = t(lang, "t_search_ph");
-  }
-    // Translate date-range select options by value
+  if (searchInput) searchInput.placeholder = t(lang, "t_search_ph");
+
+  // Translate date-range select options by value
   const rangeSelect = document.getElementById("mapRangeSelect");
   if (rangeSelect) {
     const labelByValue = {
@@ -335,14 +413,13 @@ function applyTranslations(lang) {
       season: t(lang, "t_range_season"),
       custom: t(lang, "t_range_custom"),
     };
-
     for (const opt of rangeSelect.options) {
       const v = opt.value;
       if (labelByValue[v]) opt.textContent = labelByValue[v];
     }
   }
 
-  // Translate the "All" option inside the lake filter (value="")
+  // Translate the "All" option inside the lake filter
   const lakeFilter = document.getElementById("lakeFilter");
   if (lakeFilter) {
     const allOpt = lakeFilter.querySelector('option[value=""]');

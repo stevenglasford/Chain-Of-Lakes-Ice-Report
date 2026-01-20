@@ -32,9 +32,8 @@ const state = {
   sortDir: "desc",
   lake: "",
   search: "",
-  // Selected Reddit report date (M-D-YYYY)
-  reportDate: "",
   reports: [],
+  reportDate: "",
   mapRange: localStorage.getItem("mapRange") || "all",
   mapFrom: localStorage.getItem("mapFrom") || "",
   mapTo: localStorage.getItem("mapTo") || "",
@@ -142,134 +141,6 @@ function parseDate(raw) {
   const yyyy = Number(m[3]);
   const d = new Date(Date.UTC(yyyy, mm - 1, dd));
   return isFinite(d.getTime()) ? d : null;
-}
-
-
-function normalizeDashOrSlashDateToDash(s) {
-  if (!s) return "";
-  const m = String(s).trim().match(/^(\d{1,2})[\/-](\d{1,2})[\/-](\d{4})$/);
-  if (!m) return String(s).trim();
-  const mm = String(Number(m[1]));
-  const dd = String(Number(m[2]));
-  const yyyy = m[3];
-  return `${mm}-${dd}-${yyyy}`;
-}
-
-function extractDashDateFromTitle(title) {
-  if (!title) return "";
-  const m = String(title).match(/(\d{1,2})[\/-](\d{1,2})[\/-](\d{4})/);
-  if (!m) return "";
-  return normalizeDashOrSlashDateToDash(`${m[1]}-${m[2]}-${m[3]}`);
-}
-
-async function fetchRedditReports() {
-  const url = `https://www.reddit.com/user/${encodeURIComponent(REDDIT_USERNAME)}/submitted.json?limit=${REDDIT_FETCH_LIMIT}&raw_json=1`;
-  const resp = await fetch(url, { cache: "no-store" });
-  if (!resp.ok) throw new Error(`Reddit HTTP ${resp.status}`);
-  const json = await resp.json();
-  const posts = (json?.data?.children || []).map(c => c?.data).filter(Boolean);
-
-  const reports = [];
-  for (const p of posts) {
-    const title = p.title || "";
-    if (!REDDIT_REPORT_TITLE_RE.test(title)) continue;
-    const date = extractDashDateFromTitle(title);
-    if (!date) continue;
-
-    reports.push({
-      date,
-      title,
-      permalink: p.permalink ? `https://www.reddit.com${p.permalink}` : "",
-      selftext: p.selftext || "",
-      created_utc: p.created_utc || 0,
-    });
-  }
-
-  // Deduplicate by date (keep newest post for that date)
-  const byDate = new Map();
-  for (const r of reports) {
-    const prev = byDate.get(r.date);
-    if (!prev || (r.created_utc || 0) > (prev.created_utc || 0)) byDate.set(r.date, r);
-  }
-
-  const out = Array.from(byDate.values()).sort((a,b) => {
-    const da = parseDate(a.date)?.getTime() || 0;
-    const db = parseDate(b.date)?.getTime() || 0;
-    if (db !== da) return db - da;
-    return (b.created_utc || 0) - (a.created_utc || 0);
-  });
-
-  state.reports = out;
-  return out;
-}
-
-function renderReportUI() {
-  const sel = document.getElementById("reportSelect");
-  const meta = document.getElementById("reportMeta");
-  const content = document.getElementById("reportContent");
-  const link = document.getElementById("reportLink");
-  if (!sel || !meta || !content || !link) return;
-
-  const reports = state.reports || [];
-  sel.innerHTML = "";
-
-  if (!reports.length) {
-    sel.innerHTML = `<option value="">(No Reddit reports found)</option>`;
-    meta.textContent = "No Reddit reports found";
-    content.textContent = "—";
-    link.style.display = "none";
-    return;
-  }
-
-  for (const r of reports) {
-    const opt = document.createElement("option");
-    opt.value = r.date;
-    opt.textContent = r.date;
-    sel.appendChild(opt);
-  }
-
-  const desired = (state.reportDate && reports.some(r => r.date === state.reportDate))
-    ? state.reportDate
-    : reports[0].date;
-
-  sel.value = desired;
-  setActiveReport(desired, { updateUrl: false, alsoFilterData: false });
-
-  // only bind once
-  if (!sel.__bound) {
-    sel.addEventListener("change", (e) => setActiveReport(e.target.value, { updateUrl: true, alsoFilterData: true }));
-    sel.__bound = true;
-  }
-}
-
-function setActiveReport(dateDash, { updateUrl = true, alsoFilterData = true } = {}) {
-  const reports = state.reports || [];
-  const r = reports.find(x => x.date === dateDash) || reports[0] || null;
-
-  const meta = document.getElementById("reportMeta");
-  const content = document.getElementById("reportContent");
-  const link = document.getElementById("reportLink");
-  const sel = document.getElementById("reportSelect");
-  if (!meta || !content || !link || !sel) return;
-
-  if (!r) return;
-
-  state.reportDate = r.date;
-  sel.value = r.date;
-  meta.textContent = r.title || r.date;
-  content.textContent = (r.selftext || "").trim() || "—";
-  link.href = r.permalink || "#";
-  link.style.display = r.permalink ? "" : "none";
-
-  if (alsoFilterData) {
-    // set search to date (single date) and rerender; keep user's other filters intact
-    state.search = r.date;
-    const input = document.getElementById("searchInput");
-    if (input) input.value = r.date;
-    rerenderAll();
-  }
-
-  if (updateUrl) syncShareURLFromState();
 }
 
 function normalizeDashDate(s) {
@@ -720,8 +591,8 @@ function hydrateShareStateFromURL() {
   const q = p.get("q");
   const lake = p.get("lake");
   // Prefer dates= over q= if present
-  if (dates !== null) state.search = decodeURIComponent(dates);
-  else if (q !== null) state.search = decodeURIComponent(q);
+  if (dates !== null) state.search = dates;
+  else if (q !== null) state.search = q;
   if (lake !== null) state.lake = lake;
 
   // Map range
@@ -735,10 +606,8 @@ function hydrateShareStateFromURL() {
   // UI prefs
   const unit = p.get("unit");
   const lang = p.get("lang");
-  const report = p.get("report");
   if (unit) state.unit = unit;
   if (lang) state.lang = lang;
-  if (report) state.reportDate = normalizeDashOrSlashDateToDash(report);
 }
 
 function syncShareURLFromState() {
@@ -767,57 +636,374 @@ function syncShareURLFromState() {
 
   if (state.unit && state.unit !== "cm") p.set("unit", state.unit); else p.delete("unit");
   if (state.lang && state.lang !== "en") p.set("lang", state.lang); else p.delete("lang");
-  if (state.reportDate) p.set("report", state.reportDate); else p.delete("report");
 
   const qs = p.toString();
   const newUrl = url.pathname + (qs ? `?${qs}` : "") + url.hash;
   window.history.replaceState({}, "", newUrl);
 }
 
+
+
+// ---------------------------
+// Reddit ice reports (direct from Reddit, no caching)
+// ---------------------------
+// NOTE: Reddit may block some requests in some environments. If it fails,
+// the rest of the app still works.
+const REDDIT_USERNAME = "stevenglasford"; // change if needed
+const REDDIT_FETCH_LIMIT = 100;
+const REDDIT_REPORT_TITLE_RE = /^(?:Ice Report|Chain of Lakes Ice Report|Minneapolis Chain of Lakes Ice Report|Minneapolis Frozen Lakes Report|Frozen Lakes Report)\b/i;
+
+function normalizeDashOrSlashDateToDash(s) {
+  // Accept 12-31-2025 or 12/31/2025 -> 12-31-2025 (no leading zeros requirement)
+  if (!s) return "";
+  const m = String(s).trim().match(/^(\d{1,2})[\/-](\d{1,2})[\/-](\d{4})$/);
+  if (!m) return "";
+  const mm = String(Number(m[1]));
+  const dd = String(Number(m[2]));
+  const yyyy = m[3];
+  return `${mm}-${dd}-${yyyy}`;
+}
+
+function extractDashDateFromTitle(title) {
+  // Finds first MM-DD-YYYY or MM/DD/YYYY in a title
+  if (!title) return "";
+  const m = String(title).match(/(\d{1,2}[\/-]\d{1,2}[\/-]\d{4})/);
+  return m ? (normalizeDashOrSlashDateToDash(m[1]) || "") : "";
+}
+
+function ensureReportsUI() {
+  // Create a report card at the top of <main class="grid"> without changing HTML.
+  if (document.getElementById('reportSelect')) return;
+
+  const main = document.querySelector('main.grid');
+  if (!main) return;
+
+  const section = document.createElement('section');
+  section.className = 'card reportCard';
+
+  section.innerHTML = `
+    <div class="cardHeader">
+      <div>
+        <div class="cardTitle" id="t_reports">Frozen Lakes Report</div>
+        <div class="cardMeta" id="t_reports_hint">Latest Reddit report (select a date)</div>
+      </div>
+      <div class="filters" style="gap:10px; align-items:center;">
+        <label class="control">
+          <span id="t_reports_date">Date</span>
+          <select id="reportSelect"></select>
+        </label>
+        <a id="reportLink" class="btn" target="_blank" rel="noreferrer" style="display:none; text-decoration:none;"><span id="t_reports_open">Open</span></a>
+      </div>
+    </div>
+    <div id="reportBody" class="reportBody" style="padding:12px 16px;">
+      <div id="reportStatus" class="cardMeta" style="margin-bottom:8px;"></div>
+      <div id="reportText" class="reportText"></div>
+      <div id="reportPermalink" class="cardMeta" style="margin-top:10px;"></div>
+      <div style="margin-top:10px;">
+        <button id="reportToggle" class="btn" type="button" style="display:none;"></button>
+      </div>
+      <div id="reportMedia" style="margin-top:12px;"></div>
+    </div>
+  `;
+
+  // Insert as first card in grid
+  main.insertBefore(section, main.firstChild);
+
+  // Translate newly inserted nodes
+  if (typeof applyTranslations === 'function') applyTranslations(state.lang);
+}
+
+function extractMediaFromPost(p) {
+  const items = [];
+
+  // Gallery posts
+  if (p && p.is_gallery && p.gallery_data && p.media_metadata) {
+    const arr = (p.gallery_data.items || []);
+    for (const it of arr) {
+      const meta = p.media_metadata[it.media_id];
+      const u = decodeHtmlEntities(meta?.s?.u || "");
+      if (u) items.push({ type: "image", url: u });
+    }
+  }
+
+  // Single image
+  const uod = p?.url_overridden_by_dest || "";
+  if (p?.post_hint === "image" && uod) items.push({ type: "image", url: uod });
+
+  // Preview images (fallback)
+  const prev = p?.preview?.images?.[0]?.source?.url;
+  if (prev) items.push({ type: "image", url: decodeHtmlEntities(prev) });
+
+  // Reddit hosted video
+  const v = p?.media?.reddit_video?.fallback_url;
+  if (v) items.push({ type: "video", url: v });
+
+  // Remove duplicates
+  const seen = new Set();
+  return items.filter(it => {
+    if (!it.url) return false;
+    const k = `${it.type}|${it.url}`;
+    if (seen.has(k)) return false;
+    seen.add(k);
+    return true;
+  });
+}
+
+async function fetchRedditReports() {
+  const url = `https://www.reddit.com/user/${encodeURIComponent(REDDIT_USERNAME)}/submitted.json?limit=${REDDIT_FETCH_LIMIT}&raw_json=1`;
+  const resp = await fetch(url, { cache: 'no-store' });
+  if (!resp.ok) throw new Error(`Reddit HTTP ${resp.status}`);
+  const json = await resp.json();
+  const posts = (json && json.data && json.data.children ? json.data.children : []).map(c => c && c.data).filter(Boolean);
+
+  const reports = [];
+  for (const p of posts) {
+    const title = p.title || '';
+    if (!REDDIT_REPORT_TITLE_RE.test(title)) continue;
+    const date = extractDashDateFromTitle(title);
+    if (!date) continue;
+    reports.push({
+      date,
+      title,
+      permalink: p.permalink ? `https://www.reddit.com${p.permalink}` : '',
+      selftext: p.selftext || '',
+      created_utc: p.created_utc || 0,
+      media: extractMediaFromPost(p),
+    });
+  }
+
+  // Deduplicate by date (keep newest post for that date)
+  const byDate = new Map();
+  for (const r of reports) {
+    const prev = byDate.get(r.date);
+    if (!prev || (r.created_utc || 0) > (prev.created_utc || 0)) byDate.set(r.date, r);
+  }
+
+  // Sort by date desc
+  const out = Array.from(byDate.values()).sort((a, b) => {
+    const da = parseDate(a.date)?.getTime() || 0;
+    const db = parseDate(b.date)?.getTime() || 0;
+    if (db !== da) return db - da;
+    return (b.created_utc || 0) - (a.created_utc || 0);
+  });
+
+  state.reports = out;
+  return out;
+}
+
+function firstNWords(text, n) {
+  const words = String(text || "").trim().split(/\s+/).filter(Boolean);
+  return {
+    preview: words.slice(0, n).join(" "),
+    truncated: words.length > n,
+  };
+}
+
+function decodeHtmlEntities(s) {
+  // Reddit gallery URLs sometimes contain &amp;
+  return String(s || "").replaceAll("&amp;", "&");
+}
+
+function setReportSelection(date) {
+  const sel = document.getElementById('reportSelect');
+  if (!sel) return;
+
+  const report = (state.reports || []).find(r => r.date === date) || null;
+  state.reportDate = report ? report.date : '';
+
+  // Sync URL param report= (shareable), without disturbing existing q/dates filters
+  try {
+    const u = new URL(window.location.href);
+    const p = u.searchParams;
+    if (state.reportDate) p.set('report', state.reportDate);
+    else p.delete('report');
+    u.search = p.toString();
+    window.history.replaceState({}, '', u.toString());
+  } catch (_) {}
+
+  const status = document.getElementById('reportStatus');
+  const text = document.getElementById('reportText');
+  const link = document.getElementById('reportLink');
+  const pl = document.getElementById("reportPermalink");
+  
+  if (pl) {
+    if (report.permalink) {
+      const href = report.permalink;
+      pl.innerHTML = `<a href="${href}" target="_blank" rel="noreferrer">${href}</a>`;
+    } else {
+      pl.textContent = "";
+    }
+  }
+  
+
+  if (!report) {
+    if (status) status.textContent = (typeof t === 'function') ? t(state.lang, 't_reports_none') : '';
+    if (text) text.textContent = '';
+    if (link) link.style.display = 'none';
+    const mediaBox = document.getElementById("reportMedia");
+    if (mediaBox) { mediaBox.innerHTML = ""; mediaBox.style.display = "none"; }
+    return;
+  }
+
+  if (status) status.textContent = report.title;
+  // --- Text rendering: 100 words + Read more toggle ---
+  const full = (report.selftext || "").trim();
+  const cut = firstNWords(full, 25);
+  
+  const toggleBtn = document.getElementById("reportToggle");
+  const expandedKey = `reportExpanded:${report.date}`;
+  const expanded = (sessionStorage.getItem(expandedKey) === "1");
+  
+  // --- Media: only show when expanded ---
+  const mediaBox = document.getElementById("reportMedia");
+  if (mediaBox) {
+    if (!expanded) {
+      // Hide media when collapsed
+      mediaBox.innerHTML = "";
+      mediaBox.style.display = "none";
+    } else {
+      mediaBox.style.display = "";
+      mediaBox.innerHTML = "";
+  
+      const media = report.media || [];
+      for (const m of media) {
+        if (m.type === "image") {
+          const img = document.createElement("img");
+          img.src = m.url;
+          img.loading = "lazy";
+          img.style.maxWidth = "100%";
+          img.style.display = "block";
+          img.style.marginTop = "10px";
+          mediaBox.appendChild(img);
+        } else if (m.type === "video") {
+          const a = document.createElement("a");
+          a.href = m.url;
+          a.target = "_blank";
+          a.rel = "noreferrer";
+          a.textContent = m.url;
+          a.style.display = "block";
+          a.style.marginTop = "10px";
+          mediaBox.appendChild(a);
+        }
+      }
+    }
+  }
+  const shown = expanded ? full : cut.preview;
+  
+  // Render markdown if available (see section E)
+  if (text) {
+    if (window.marked && typeof window.marked.parse === "function") {
+      text.innerHTML = window.marked.parse(shown || "");
+    } else {
+      // fallback (still readable)
+      text.textContent = shown || "";
+      text.style.whiteSpace = "pre-wrap";
+    }
+  }
+  
+  if (toggleBtn) {
+    if (cut.truncated) {
+      toggleBtn.style.display = "";
+      toggleBtn.textContent = expanded
+        ? ((typeof t === "function") ? t(state.lang, "t_show_less") : "Show less")
+        : ((typeof t === "function") ? t(state.lang, "t_read_more") : "Read more");
+  
+      toggleBtn.onclick = () => {
+        sessionStorage.setItem(expandedKey, expanded ? "0" : "1");
+        setReportSelection(report.date);
+      };
+    } else {
+      toggleBtn.style.display = "none";
+    }
+  }
+    if (link) {
+      link.href = report.permalink || '#';
+      link.style.display = report.permalink ? '' : 'none';
+    }
+  
+}
+
+function ensureMarkedLoaded() {
+  return new Promise((resolve) => {
+    if (window.marked && typeof window.marked.parse === "function") return resolve(true);
+    const s = document.createElement("script");
+    s.src = "https://cdn.jsdelivr.net/npm/marked/marked.min.js";
+    s.onload = () => resolve(true);
+    s.onerror = () => resolve(false); // fail gracefully
+    document.head.appendChild(s);
+  });
+}
+
+async function loadRedditReports() {
+  ensureReportsUI();
+
+  const status = document.getElementById('reportStatus');
+  if (status) status.textContent = (typeof t === 'function') ? t(state.lang, 't_reports_loading') : 'Loading…';
+
+  try {
+    const reports = await fetchRedditReports();
+
+    await ensureMarkedLoaded();
+
+    const sel = document.getElementById('reportSelect');
+    if (!sel) return;
+
+    sel.innerHTML = '';
+
+    for (let i = 0; i < reports.length; i++) {
+      const r = reports[i];
+      const opt = document.createElement('option');
+      opt.value = r.date;
+    
+      const latestTag = (typeof t === 'function')
+        ? t(state.lang, 't_latest_tag')
+        : '(latest)';
+    
+      opt.textContent = (i === 0) ? `${r.date} ${latestTag}` : r.date;
+      sel.appendChild(opt);
+    }
+
+    // Determine selected report from URL (?report=) else default to latest.
+    const p = new URLSearchParams(window.location.search);
+    const fromUrl = normalizeDashOrSlashDateToDash(p.get('report') || '') || '';
+    const pick = fromUrl || (reports[0] ? reports[0].date : '');
+
+    sel.value = pick || '';
+    setReportSelection(sel.value);
+
+    // When user changes report date
+    sel.addEventListener('change', () => {
+      setReportSelection(sel.value);
+    });
+
+    if (status) status.textContent = '';
+  } catch (err) {
+    console.warn('Reddit reports failed:', err);
+    const status = document.getElementById('reportStatus');
+    if (status) status.textContent = (typeof t === 'function') ? t(state.lang, 't_reports_error') : 'Could not load Reddit reports.';
+  }
+}
 async function loadAndRender() {
   await fetchData();
   renderLakeOptions(state.rows);
-
-  // Reddit reports (non-fatal)
-  try {
-    await fetchRedditReports();
-  } catch (e) {
-    console.warn("Reddit reports unavailable:", e);
-    state.reports = [];
-  }
-  renderReportUI();
-
-  // If no explicit q/dates in URL, default to latest report (or report=) for filtering
-  const p = new URLSearchParams(location.search);
-  const hasDataFilter = p.has("q") || p.has("dates");
-  if (!hasDataFilter && state.reports.length) {
-    const desired = state.reportDate || state.reports[0].date;
-    setActiveReport(desired, { updateUrl: true, alsoFilterData: true });
-  }
-
   rerenderAll();
 }
 
 (function init() {
+  // Sheet link
   const sheetLink = document.getElementById("sheetLink");
   sheetLink.href = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/edit`;
   sheetLink.textContent = `docs.google.com/spreadsheets/d/${SHEET_ID}`;
 
+  // If the URL includes filters (e.g. ?q=12-23-2025), hydrate state first so UI + data match.
   hydrateShareStateFromURL();
-
-  // Reflect URL query into the search box (dates wins over q/date)
-  const url = new URLSearchParams(location.search);
-  const initial = (url.get("dates") || url.get("q") || url.get("date") || "").trim();
-  if (initial) state.search = initial;
 
   applyTranslations(state.lang);
   initMap();
   wireUI();
-
-  const input = document.getElementById("searchInput");
-  if (input) input.value = state.search || initial || "";
-
   loadAndRender();
+  // Load Reddit reports (non-blocking)
+  loadRedditReports();
 })();
 
 function toISODateStringUTC(d) {

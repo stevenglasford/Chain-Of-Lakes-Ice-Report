@@ -262,3 +262,13 @@ tbody tr:hover{ background: rgba(96,165,250,0.08); }
   background: var(--text);
   border-radius: 2px;
 }
+
+/* Make Reddit report links high-contrast */
+.reportCard a {
+  color: #0b5cff; /* strong blue */
+  text-decoration: underline;
+}
+
+.reportCard a:hover {
+  color: #083fa1;
+}
