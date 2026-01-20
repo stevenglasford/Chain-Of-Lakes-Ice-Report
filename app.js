@@ -799,17 +799,24 @@ async function loadAndRender() {
 }
 
 (function init() {
-  // Sheet link
   const sheetLink = document.getElementById("sheetLink");
   sheetLink.href = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/edit`;
   sheetLink.textContent = `docs.google.com/spreadsheets/d/${SHEET_ID}`;
 
-  // If the URL includes filters (e.g. ?q=12-23-2025), hydrate state first so UI + data match.
   hydrateShareStateFromURL();
+
+  // Reflect URL query into the search box (dates wins over q/date)
+  const url = new URLSearchParams(location.search);
+  const initial = (url.get("dates") || url.get("q") || url.get("date") || "").trim();
+  if (initial) state.search = initial;
 
   applyTranslations(state.lang);
   initMap();
   wireUI();
+
+  const input = document.getElementById("searchInput");
+  if (input) input.value = state.search || initial || "";
+
   loadAndRender();
 })();
 
