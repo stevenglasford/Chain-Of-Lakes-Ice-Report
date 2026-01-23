@@ -47,6 +47,8 @@ const I18N = {
     t_show_less: "Show less",
     t_feedback_btn: "Submit Feedback about the Report",
     t_donate_btn: "Donate to Minneapolis Frozen Lakes Report",
+    t_inches: "inches",
+    t_centimeters: "centimeters",
   },
 
   fr: {
@@ -96,6 +98,8 @@ const I18N = {
     t_show_less: "Réduire",
     t_feedback_btn: "Donner votre avis sur le rapport",
     t_donate_btn: "Faire un don au rapport sur les lacs gelés de Minneapolis",
+    t_inches: "pouces",
+    t_centimeters: "centimètres",
   },
 
   es: {
@@ -145,6 +149,8 @@ const I18N = {
     t_show_less: "Mostrar menos",
     t_feedback_btn: "Enviar comentarios sobre el informe",
     t_donate_btn: "Donar al informe de lagos congelados de Minneapolis",
+    t_inches: "pulgadas",
+    t_centimeters: "centímetros",
   },
 
   // These are simple placeholders—feel free to replace with better translations.
