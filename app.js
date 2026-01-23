@@ -220,7 +220,9 @@ function normRow(obj) {
     coords,
     info,
     thickness_in,
-    thickness_cm
+    thickness_cm,
+    thickness_in_raw: (thicknessInRaw!=null?String(thicknessInRaw).trim():""),
+    thickness_cm_raw: (thicknessCmRaw!=null?String(thicknessCmRaw).trim():"")
   };
 }
 
@@ -462,6 +464,276 @@ function renderTable(rows) {
   }
 }
 
+// ---------------------------
+// Two-week "Latest" summary + "Outdated points"
+// ---------------------------
+
+const DAY_MS = 24 * 60 * 60 * 1000;
+const TWO_WEEKS_MS = 14 * DAY_MS;
+
+function roundToEighth(inches) {
+  if (inches == null || !isFinite(inches)) return null;
+  return Math.round(inches * 8) / 8;
+}
+
+function inchesToMixedFraction(inches) {
+  // Converts decimal inches to a mixed fraction rounded to nearest 1/8.
+  // Examples: 13 -> "13", 13.25 -> "13 1/4", 0.125 -> "1/8"
+  const v = roundToEighth(inches);
+  if (v == null) return "—";
+  const whole = Math.floor(v + 1e-9);
+  const frac = v - whole;
+  const n = Math.round(frac * 8);
+
+  const gcd = (a, b) => (b ? gcd(b, a % b) : a);
+  if (n === 0) return String(whole);
+  if (whole === 0) {
+    const g = gcd(n, 8);
+    return `${n / g}/${8 / g}`;
+  }
+  const g = gcd(n, 8);
+  return `${whole} ${n / g}/${8 / g}`;
+}
+
+function formatDeltaInches(delta) {
+  if (delta == null || !isFinite(delta)) return "N/A";
+  if (Math.abs(delta) < 1e-9) return "0";
+  const sign = delta > 0 ? "+" : "−";
+  return `${sign}${inchesToMixedFraction(Math.abs(delta))}`;
+}
+
+function isHazardRow(r) {
+  const t = r?.thickness_in;
+  const info = String(r?.info || "").toLowerCase();
+  // Treat <= 1/4" or explicit hazards as unsafe for averaging.
+  if (t == null || !isFinite(t)) return true;
+  if (t <= 0.25) return true;
+  if (info.includes("portage")) return true;
+  if (info.includes("hole")) return true;
+  if (info.includes("open water")) return true;
+  if (info.includes("leak")) return true;
+  if (info.includes("thin")) return true;
+  if (info.trim() === "!") return true;
+  return false;
+}
+
+function mean(nums) {
+  const arr = nums.filter(v => v != null && isFinite(v));
+  if (!arr.length) return null;
+  return arr.reduce((a, b) => a + b, 0) / arr.length;
+}
+
+function summarizeNotesForDate(rowsOnDate) {
+  const infos = rowsOnDate
+    .map(r => String(r.info || "").trim())
+    .filter(Boolean)
+    .filter(x => x !== "!");
+
+  const hazards = rowsOnDate.filter(isHazardRow);
+  const hazardInfo = hazards.map(r => String(r.info || "").trim()).filter(Boolean);
+
+  // Keep notes short: first 2 unique signals.
+  const uniq = (xs) => {
+    const out = [];
+    const seen = new Set();
+    for (const x of xs) {
+      const k = x.toLowerCase();
+      if (seen.has(k)) continue;
+      seen.add(k);
+      out.push(x);
+    }
+    return out;
+  };
+
+  const bits = [];
+  if (hazards.length) {
+    // Prefer explicit hazard notes when present
+    const h = uniq(hazardInfo);
+    if (h.length) bits.push(...h.slice(0, 2));
+    else bits.push("⚠️ Hazard / thin spot");
+  }
+
+  const clean = uniq(infos);
+  for (const x of clean) {
+    if (bits.length >= 2) break;
+    bits.push(x);
+  }
+
+  return bits.join("; ");
+}
+
+function computeLatestSummary(rows) {
+  const dated = rows.filter(r => r.date_sort);
+  if (!dated.length) return { latest: [], outdated: [], latestDate: null, cutoff: null };
+
+  const mostRecent = Math.max(...dated.map(r => r.date_sort));
+  const latestDate = new Date(mostRecent);
+  const cutoff = mostRecent - TWO_WEEKS_MS;
+
+  // Group all rows by lake/location
+  const byLake = new Map();
+  for (const r of dated) {
+    if (!r.lake) continue;
+    const arr = byLake.get(r.lake) || [];
+    arr.push(r);
+    byLake.set(r.lake, arr);
+  }
+
+  const latest = [];
+  const outdated = [];
+
+  for (const [lake, lakeRows] of byLake.entries()) {
+    lakeRows.sort((a, b) => b.date_sort - a.date_sort);
+    const rLatestAny = lakeRows[0];
+    if (!rLatestAny) continue;
+
+    // Outdated points = latest measurement older than 14 days from global most recent date
+    if (rLatestAny.date_sort < cutoff) {
+      outdated.push(rLatestAny);
+      continue;
+    }
+
+    // Latest date for this lake (within last 14 days)
+    const latestDateRaw = rLatestAny.date_raw;
+    const rowsLatestDate = lakeRows.filter(r => r.date_raw === latestDateRaw);
+
+    // Previous measurement date for delta (immediate prior date with >=1 valid thickness)
+    const prevDateRaw = lakeRows.find(r => r.date_raw !== latestDateRaw)?.date_raw || "";
+    const rowsPrevDate = prevDateRaw ? lakeRows.filter(r => r.date_raw === prevDateRaw) : [];
+
+    const validLatest = rowsLatestDate.filter(r => !isHazardRow(r));
+    const validPrev = rowsPrevDate.filter(r => !isHazardRow(r));
+
+    const latestVals = validLatest.map(r => r.thickness_in).filter(v => v != null && isFinite(v));
+    const prevVals = validPrev.map(r => r.thickness_in).filter(v => v != null && isFinite(v));
+
+    const minV = latestVals.length ? Math.min(...latestVals) : null;
+    const maxV = latestVals.length ? Math.max(...latestVals) : null;
+    const avgV = mean(latestVals);
+    const prevAvg = mean(prevVals);
+    const delta = (avgV != null && prevAvg != null) ? (avgV - prevAvg) : null;
+
+    latest.push({
+      lake,
+      date_raw: latestDateRaw,
+      samples: latestVals.length,
+      min: minV,
+      max: maxV,
+      avg: avgV,
+      delta,
+      notes: summarizeNotesForDate(rowsLatestDate),
+      sortKey: rLatestAny.date_sort,
+    });
+  }
+
+  // Sort latest summary: newest lakes first, then name
+  latest.sort((a, b) => (b.sortKey - a.sortKey) || a.lake.localeCompare(b.lake));
+  // Sort outdated: oldest first (more urgent to update), then name
+  outdated.sort((a, b) => (a.date_sort - b.date_sort) || (a.lake || "").localeCompare(b.lake || ""));
+
+  return { latest, outdated, latestDate, cutoff: new Date(cutoff) };
+}
+
+function renderLatestSummaryTable(summaryRows) {
+  const tbody = document.querySelector("#latestSummaryTable tbody");
+  if (!tbody) return;
+  tbody.innerHTML = "";
+
+  for (const s of summaryRows) {
+    const tr = document.createElement("tr");
+
+    const minS = (s.min == null) ? "—" : inchesToMixedFraction(s.min);
+    const maxS = (s.max == null) ? "—" : inchesToMixedFraction(s.max);
+    const avgS = (s.avg == null) ? "⚠️" : inchesToMixedFraction(s.avg);
+    const dS = (s.delta == null) ? "N/A" : formatDeltaInches(s.delta);
+
+    tr.innerHTML = `
+      <td><b>${escapeHtml(s.lake)}</b></td>
+      <td style="text-align:right;">${escapeHtml(String(s.samples || 0))}</td>
+      <td style="text-align:right;">${escapeHtml(minS)}</td>
+      <td style="text-align:right;">${escapeHtml(maxS)}</td>
+      <td style="text-align:right;"><b>${escapeHtml(avgS)}</b></td>
+      <td style="text-align:right;"><b>${escapeHtml(dS)}</b></td>
+      <td>${escapeHtml(s.notes || "")}</td>
+    `;
+    tbody.appendChild(tr);
+  }
+}
+
+function renderOutdatedPointsTable(rows) {
+  const tbody = document.querySelector("#outdatedPointsTable tbody");
+  if (!tbody) return;
+  tbody.innerHTML = "";
+
+  for (const r of rows) {
+    const tr = document.createElement("tr");
+    const thickness = formatThickness(r);
+    const coords = r.coords_raw ? r.coords_raw : t(state.lang, "no_coords");
+    tr.innerHTML = `
+      <td>${escapeHtml(r.date_raw || "—")}</td>
+      <td>${escapeHtml(r.lake || "—")}</td>
+      <td><span class="badge">${escapeHtml(thickness)}</span></td>
+      <td>${escapeHtml(r.info || "")}</td>
+      <td>${escapeHtml(coords)}</td>
+    `;
+    tbody.appendChild(tr);
+  }
+}
+
+function buildLatestMarkdown(summary, outdatedRows, latestDate, cutoffDate) {
+  const fmtDash = (d) => {
+    if (!d) return "—";
+    // Convert UTC date to M-D-YYYY
+    const mm = d.getUTCMonth() + 1;
+    const dd = d.getUTCDate();
+    const yyyy = d.getUTCFullYear();
+    return `${mm}-${dd}-${yyyy}`;
+  };
+
+  const titleDate = fmtDash(latestDate);
+  const cutoff = fmtDash(cutoffDate);
+
+  const lines = [];
+  lines.push(`## 🧊 Latest (last 14 days) — Minneapolis Frozen Lakes Report`);
+  lines.push(`**As of:** ${titleDate} (includes measurements back to ${cutoff})`);
+  lines.push(``);
+  lines.push(`| Lake / Location | Samples | Min | Max | Avg (≈) | Change | Notes |`);
+  lines.push(`|---|---:|---:|---:|---:|---:|---|`);
+
+  for (const s of summary) {
+    const minS = (s.min == null) ? "—" : inchesToMixedFraction(s.min);
+    const maxS = (s.max == null) ? "—" : inchesToMixedFraction(s.max);
+    const avgS = (s.avg == null) ? "⚠️" : inchesToMixedFraction(s.avg);
+    const dS = (s.delta == null) ? "N/A" : formatDeltaInches(s.delta);
+    const notes = (s.notes || "").replace(/\|/g, "/"); // avoid breaking tables
+    lines.push(`| **${s.lake}** | ${s.samples || 0} | ${minS} | ${maxS} | **${avgS}** | **${dS}** | ${notes} |`);
+  }
+
+  if (outdatedRows && outdatedRows.length) {
+    lines.push(``);
+    lines.push(`### Outdated points (latest measurement older than 14 days)`);
+    lines.push(`| Date | Lake / Location | Thickness | Notes |`);
+    lines.push(`|---|---|---:|---|`);
+    for (const r of outdatedRows) {
+      const thick = inchesToMixedFraction(r.thickness_in);
+      const note = String(r.info || "").replace(/\|/g, "/");
+      lines.push(`| ${r.date_raw || "—"} | **${r.lake || "—"}** | ${thick} | ${note} |`);
+    }
+  }
+
+  return lines.join("\n");
+}
+
+function renderLatestAndOutdated() {
+  const { latest, outdated, latestDate, cutoff } = computeLatestSummary(state.rows);
+  renderLatestSummaryTable(latest);
+  renderOutdatedPointsTable(outdated);
+
+  // Console markdown (copy/paste for Reddit)
+  const md = buildLatestMarkdown(latest, outdated, latestDate, cutoff);
+  console.log("\n" + md + "\n");
+}
+
 function renderLatestPerLake(rows) {
   // pick latest (max date_sort) per lake
   const byLake = new Map();
@@ -491,6 +763,9 @@ function renderLatestPerLake(rows) {
     el.appendChild(div);
   }
 }
+
+
+
 
 function wireUI() {
   document.getElementById("unitSelect").value = state.unit;
@@ -577,6 +852,9 @@ function rerenderAll() {
   renderMap(mapRows);
 
   renderLatestPerLake(state.rows);
+
+  // Two-week summary tables + console markdown output
+  renderLatestAndOutdated();
 
   // Keep the URL updated so people can share exactly what they're viewing.
   syncShareURLFromState();

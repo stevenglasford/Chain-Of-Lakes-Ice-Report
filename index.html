@@ -105,6 +105,7 @@
       <div class="legend" id="legend"></div>
     </section>
 
+
     <section class="card summaryCard">
       <div class="cardHeader">
         <div class="cardTitle" id="t_latest">Latest per lake</div>
@@ -117,8 +118,46 @@
       <div class="cardHeader tableHeader">
         <div>
           <div class="cardTitle" id="t_table">Data</div>
-          <div class="cardMeta" id="t_filters">Filters</div>
+          <div class="cardMeta" id="t_filters">Summary tables</div>
         </div>
+      </div>
+<div class="sectionLabel" style="margin:10px 0 6px; font-weight:800;" id="t_latest_table_title">Latest (last 14 days)</div>
+      <div class="cardMeta" style="margin:0 0 10px;" id="t_latest_table_hint">Aggregated summary + change vs previous measurement</div>
+
+      <div class="tableWrap">
+        <table id="latestSummaryTable">
+          <thead>
+            <tr>
+              <th>Lake / Location</th>
+              <th>Samples</th>
+              <th>Min</th>
+              <th>Max</th>
+              <th>Avg (≈)</th>
+              <th>Change</th>
+              <th>Notes</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </div>
+
+      <div class="sectionLabel" style="margin:16px 0 6px; font-weight:800;" id="t_outdated_points_title">Outdated points</div>
+      <div class="cardMeta" style="margin:0 0 10px;" id="t_outdated_points_hint">Latest measurement is older than 14 days</div>
+
+      <div class="tableWrap">
+        <table id="outdatedPointsTable">
+          <thead>
+            <tr>
+              <th id="th_date_out">Date</th>
+              <th id="th_lake_out">Lake</th>
+              <th id="th_thickness_out">Thickness</th>
+              <th id="th_info_out">Info</th>
+              <th id="th_coords_out">Coordinates</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </div>
 
         <div class="filters">
           <label class="control">
@@ -135,15 +174,20 @@
         </div>
       </div>
 
+      
+
+      <div class="sectionLabel" style="margin:16px 0 6px; font-weight:800;" id="t_all_data_title">All data (filterable)</div>
+      <div class="cardMeta" style="margin:0 0 10px;" id="t_all_data_hint">This is the full dataset from the sheet</div>
+
       <div class="tableWrap">
         <table id="dataTable">
           <thead>
             <tr>
-              <th data-key="date" id="th_date">Date</th>
-              <th data-key="lake" id="th_lake">Lake</th>
-              <th data-key="thickness" id="th_thickness">Thickness</th>
-              <th data-key="info" id="th_info">Info</th>
-              <th data-key="coords" id="th_coords">Coordinates</th>
+              <th data-key="date">Date</th>
+              <th data-key="lake">Lake</th>
+              <th data-key="thickness">Thickness</th>
+              <th data-key="info">Info</th>
+              <th data-key="coords">Coordinates</th>
             </tr>
           </thead>
           <tbody></tbody>
