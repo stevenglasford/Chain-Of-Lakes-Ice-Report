@@ -201,6 +201,8 @@ const I18N = {
     t_show_less: "Qhia tsawg dua",
     t_feedback_btn: "Xa tswv yim txog daim ntawv tshaj qhia",
     t_donate_btn: "Pub nyiaj rau Minneapolis Frozen Lakes Report",
+    t_inches: "nti",
+    t_centimeters: "sentime"
   },
 
   so: {
@@ -250,6 +252,8 @@ const I18N = {
     t_show_less: "Muuji wax ka yar",
     t_feedback_btn: "Gudbi faallo ku saabsan warbixinta",
     t_donate_btn: "Ku tabaruc warbixinta harooyinka barafaysan ee Minneapolis",
+    t_inches: "inji",
+    t_centimeters: "sentimitir",
   },
 
   ar: {
@@ -299,6 +303,8 @@ const I18N = {
     t_show_less: "عرض أقل",
     t_feedback_btn: "أرسل ملاحظات حول التقرير",
     t_donate_btn: "تبرّع لتقرير بحيرات مينيابوليس المتجمّدة",
+    t_inches: "بوصة",
+    t_centimeters: "سنتيمتر",
   },
 
   aii: {
@@ -333,6 +339,8 @@ const I18N = {
     t_show_less: "ܚܘܝ ܒܨܝܪ",
     t_feedback_btn: "ܫܕܪ ܚܘܫܒܢܐ ܥܠ ܕܘܟܬܐ",
     t_donate_btn: "ܗܒ ܬܪܘܡܬܐ ܠܕܘܟܬܐ ܕܝ̈ܡܐ ܓܠܝ̈ܕܐ ܕܡܝܢܝܐܦܘܠܝܣ",
+    t_inches: "ܐܢܫ",
+    t_centimeters: "ܣܢܬܝܡܬܪ",
   },
 
   fi: {
@@ -382,6 +390,8 @@ const I18N = {
     t_show_less: "Näytä vähemmän",
     t_feedback_btn: "Lähetä palautetta raportista",
     t_donate_btn: "Lahjoita Minneapolisin jäätyneiden järvien raportille",
+    t_inches: "tuumaa",
+    t_centimeters: "senttimetriä",
   },
   nl: {
     t_title: "Bevroren Meren Rapport",
@@ -430,6 +440,8 @@ const I18N = {
     t_show_less: "Minder tonen",
     t_feedback_btn: "Feedback over het rapport indienen",
     t_donate_btn: "Doneer aan het Minneapolis Bevroren Meren Rapport",
+    t_inches: "inch",
+    t_centimeters: "centimeter",
   }
 
 };
