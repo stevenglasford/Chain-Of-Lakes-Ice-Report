@@ -60,31 +60,6 @@ function buildLatestByLake(rows) {
   return Array.from(latest.values());
 }
 
-function buildLatestDayRows(rows) {
-  // "Latest" = all points from the most recent *date* present in the current filtered dataset.
-  // (Not "latest per lake".)
-  let maxDayKey = null;
-
-  for (const r of rows) {
-    if (!r || !r.date_sort) continue;
-    const d = new Date(r.date_sort);
-    if (isNaN(d.getTime())) continue;
-    const dayKey = d.getFullYear() + "-" + String(d.getMonth()+1).padStart(2,"0") + "-" + String(d.getDate()).padStart(2,"0");
-    if (maxDayKey === null || dayKey > maxDayKey) maxDayKey = dayKey;
-  }
-
-  if (!maxDayKey) return [];
-
-  return rows.filter(r => {
-    if (!r || !r.date_sort) return false;
-    const d = new Date(r.date_sort);
-    if (isNaN(d.getTime())) return false;
-    const dayKey = d.getFullYear() + "-" + String(d.getMonth()+1).padStart(2,"0") + "-" + String(d.getDate()).padStart(2,"0");
-    return dayKey === maxDayKey;
-  });
-}
-
-
 function parseMixedFractionToInches(raw) {
   // Accepts: "5 5/8", "9 1/4", "3/8", "5", "8 7/8)", "9 1/8!!"
   if (!raw) return null;
@@ -888,16 +863,16 @@ function rerenderAll() {
   renderTable(state.filtered);
 
   // Map uses date range + current table filters (lake/search) by default:
-  let mapRows;
+  let mapRows = filterRowsForMap(state.filtered);
+  
+  // "latest" = newest point per lake (still respecting lake/search filters)
   if (state.mapRange === "latest") {
-    // Show ALL points from the most recent measurement date in the current filtered dataset
-    mapRows = buildLatestDayRows(state.filtered);
-  } else {
-    mapRows = filterRowsForMap(state.filtered);
+    mapRows = buildLatestByLake(mapRows);
   }
+
   renderMap(mapRows);
 
-  // renderLatestPerLake(state.rows);
+  renderLatestPerLake(state.rows);
 
   // Two-week summary tables + console markdown output
   renderLatestAndOutdated();
@@ -1325,7 +1300,7 @@ async function loadRedditReports() {
 }
 async function loadAndRender() {
   await fetchData();
-  //renderLakeOptions(state.rows);
+  renderLakeOptions(state.rows);
   rerenderAll();
 }
 
