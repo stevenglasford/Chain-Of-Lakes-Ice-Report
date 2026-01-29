@@ -151,6 +151,45 @@ input{ min-width:220px; }
   overflow:auto;
   max-height: 520px;
 }
+
+/* Summary tables should be fully visible (no scroll box) */
+.tableWrap.noScroll{
+  overflow: visible;
+  max-height: none;
+}
+
+/* Section header row with copy button */
+.sectionHeaderRow{
+  display:flex;
+  align-items:flex-start;
+  justify-content:space-between;
+  gap:12px;
+}
+
+.iconBtn{
+  display:inline-flex;
+  align-items:center;
+  gap:8px;
+  padding:8px 10px;
+  border-radius:12px;
+  background:#0b1220;
+  border:1px solid var(--line);
+  color:var(--text);
+  cursor:pointer;
+  font-weight:700;
+  user-select:none;
+}
+.iconBtn:hover{ border-color:#35507a; }
+.iconBtn:active{ transform: translateY(1px); }
+.iconBtnText{ font-size:12px; color:var(--muted); font-weight:700; }
+
+/* Make summary tables fit without forcing horizontal scroll */
+#latestSummaryTable{
+  min-width: 0;
+}
+#latestSummaryTable th, #latestSummaryTable td{
+  white-space: normal;
+}
 table{
   width:100%;
   border-collapse:collapse;
@@ -271,4 +310,235 @@ tbody tr:hover{ background: rgba(96,165,250,0.08); }
 
 .reportCard a:hover {
   color: #083fa1;
+}
+
+/* Allow horizontal scrolling for wide summary tables (averages table) */
+.tableWrap.hscroll {
+  overflow-x: auto;
+  overflow-y: visible;        /* don't force vertical scrolling */
+  -webkit-overflow-scrolling: touch;
+}
+
+/* Keep the table from squeezing columns too hard */
+.tableWrap.hscroll table {
+  width: max-content;         /* expand to fit columns */
+  min-width: 100%;            /* but at least fill the card */
+}
+
+/* Optional: nicer scroll behavior on mobile */
+.tableWrap.hscroll::-webkit-scrollbar {
+  height: 10px;
+}
+
+.markdownWrap {
+  overflow-x: auto;
+  overflow-y: hidden;          /* critical: no vertical scroll */
+  max-width: 100%;
+  -webkit-overflow-scrolling: touch;
+}
+
+.markdownWrap pre {
+  margin: 0;
+  padding: 0.75rem;
+  background: transparent;
+}
+
+.markdownWrap code {
+  display: inline-block;
+  white-space: pre;            /* preserve markdown layout */
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+  font-size: 0.85rem;
+  line-height: 1.4;
+}
+
+.markdownRenderWrap { max-width: 100%; }
+
+.mdRendered table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.mdRendered th, .mdRendered td {
+  padding: 10px 12px;
+  border-bottom: 1px solid rgba(255,255,255,0.12);
+  text-align: left;
+  vertical-align: top;
+}
+
+.mdRendered th {
+  font-weight: 800;
+}
+
+.mdRendered code {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+}
+
+/* Horizontal scroll container for rendered markdown tables */
+.markdownRenderWrap {
+  overflow-x: auto;
+  overflow-y: hidden;
+  max-width: 100%;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* Let the table take as much width as it needs, but not less than the card */
+.mdRendered table {
+  border-collapse: collapse;
+  min-width: 100%;      /* still fills the card when it fits */
+}
+
+/* -----------------------------
+   Collapsible table cells (3-line clamp)
+   - Default: clamp to 3 lines
+   - If clamped, show a small button to expand/collapse
+------------------------------ */
+
+/* Ensure cell text can wrap */
+.mdRendered td,
+.mdRendered th {
+  white-space: normal;
+  word-break: break-word;
+}
+
+/* The clamped text wrapper (JS injects this div into each cell) */
+.cellClampText {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 3;
+  overflow: hidden;
+  line-height: 1.35;
+  max-height: calc(1.35em * 3);
+}
+
+/* Expanded state: show full text */
+td.cellExpanded .cellClampText {
+  -webkit-line-clamp: unset;
+  max-height: none;
+  overflow: visible;
+}
+
+/* Only show the button when JS detects overflow */
+.cellExpandBtn {
+  display: none;
+  margin-top: 6px;
+  padding: 4px 8px;
+  font-size: 0.85rem;
+  border-radius: 999px;
+  border: 1px solid rgba(255,255,255,0.22);
+  background: rgba(0,0,0,0.12);
+  color: inherit;
+  cursor: pointer;
+}
+
+td.cellClamped .cellExpandBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.cellExpandBtn:hover {
+  background: rgba(0,0,0,0.22);
+}
+
+.cellExpandBtn:focus-visible {
+  outline: 3px solid rgba(0,120,255,.55);
+  outline-offset: 2px;
+}
+
+.cellExpandBtn {
+  width: 26px;
+  height: 22px;
+  padding: 0;
+  justify-content: center;
+  border-radius: 8px;
+  line-height: 1;
+  font-size: 1rem;
+}
+
+/* --- Fix ugly word-splitting + force horizontal scroll on phones --- */
+
+/* Let the table become wider than the screen (so scroll activates) */
+.mdRendered table {
+  table-layout: auto;
+  width: max-content;
+  min-width: 100%;
+}
+
+/* Default: DO NOT wrap / DO NOT break words in cells */
+.mdRendered th,
+.mdRendered td {
+  white-space: nowrap;
+  word-break: normal;
+  overflow-wrap: normal;
+  hyphens: none;
+}
+
+/* Notes column: allow wrapping + your 3-line clamp behavior */
+.mdRendered th:last-child,
+.mdRendered td:last-child {
+  white-space: normal;
+  max-width: 360px; /* tweak: 280–480px */
+}
+
+/* Clamp wrapper: NEVER break words mid-word */
+.cellClampText {
+  word-break: normal;
+  overflow-wrap: normal;
+  hyphens: none;
+}
+
+/* Keep the clamp only on Notes (last column) so other columns stay compact */
+.mdRendered td:not(:last-child) .cellClampText {
+  -webkit-line-clamp: unset !important;
+  max-height: none !important;
+  overflow: visible !important;
+}
+.mdRendered td:not(:last-child) .cellExpandBtn {
+  display: none !important; /* expand button only meaningful for Notes */
+}
+
+/* ---------- Markdown table layout balance ---------- */
+
+.mdRendered table {
+  border-collapse: collapse;
+  table-layout: auto;
+  min-width: 100%;
+  max-width: 100%;
+}
+
+/* Base cell styling */
+.mdRendered th,
+.mdRendered td {
+  padding: 8px 10px;
+  vertical-align: top;
+}
+
+/* Numeric / short columns → never wrap */
+.mdRendered th:nth-child(2),
+.mdRendered th:nth-child(3),
+.mdRendered th:nth-child(4),
+.mdRendered th:nth-child(5),
+.mdRendered th:nth-child(6),
+.mdRendered td:nth-child(2),
+.mdRendered td:nth-child(3),
+.mdRendered td:nth-child(4),
+.mdRendered td:nth-child(5),
+.mdRendered td:nth-child(6) {
+  white-space: nowrap;
+}
+
+/* Lake / Location → natural word wrapping only */
+.mdRendered th:first-child,
+.mdRendered td:first-child {
+  white-space: normal;
+  max-width: 220px;
+  overflow-wrap: break-word;
+}
+
+/* Notes → controlled wrapping + clamp */
+.mdRendered th:last-child,
+.mdRendered td:last-child {
+  white-space: normal;
+  max-width: 320px;
+  overflow-wrap: break-word;
 }

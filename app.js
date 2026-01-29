@@ -37,12 +37,96 @@ const state = {
   mapRange: localStorage.getItem("mapRange") || "all",
   mapFrom: localStorage.getItem("mapFrom") || "",
   mapTo: localStorage.getItem("mapTo") || "",
+  latestMarkdown: "",
 };
 
 let map, markersLayer;
 
 function setStatus(msg) {
   document.getElementById("statusLine").textContent = msg;
+}
+
+async function copyTextToClipboard(text) {
+  if (!text) return false;
+  // Modern API
+  try {
+    if (navigator.clipboard && typeof navigator.clipboard.writeText === "function") {
+      await navigator.clipboard.writeText(text);
+      return true;
+    }
+  } catch (_) {}
+
+  // Fallback
+  try {
+    const ta = document.createElement("textarea");
+    ta.value = text;
+    ta.setAttribute("readonly", "");
+    ta.style.position = "fixed";
+    ta.style.left = "-9999px";
+    ta.style.top = "0";
+    document.body.appendChild(ta);
+    ta.select();
+    const ok = document.execCommand("copy");
+    document.body.removeChild(ta);
+    return !!ok;
+  } catch (_) {
+    return false;
+  }
+}
+
+function applyCellExpandButtonsToMarkdownTables(rootEl) {
+  if (!rootEl) return;
+
+  const tables = rootEl.querySelectorAll("table");
+  tables.forEach((table) => {
+    // Only touch tables inside your markdown renderer
+    // (If your rootEl is already the md container, this is enough.)
+    const tds = table.querySelectorAll("tbody td:last-child");
+    tds.forEach((td) => {
+      // Skip if we've already processed this cell
+      if (td.querySelector(".cellClampText")) return;
+
+      // Wrap existing content
+      const wrap = document.createElement("div");
+      wrap.className = "cellClampText";
+      wrap.innerHTML = td.innerHTML;
+
+      td.innerHTML = "";
+      td.appendChild(wrap);
+
+      // Add button (hidden unless clamped)
+      const btn = document.createElement("button");
+      btn.type = "button";
+      btn.className = "cellExpandBtn";
+
+      const EMOJI_EXPAND = "⤢";
+      const EMOJI_COLLAPSE = "⤡";
+      btn.textContent = EMOJI_EXPAND;
+      btn.title = "Expand";
+      btn.setAttribute("aria-label", "Expand");
+      
+      btn.addEventListener("click", () => {
+        const expanded = td.classList.toggle("cellExpanded");
+        btn.textContent = expanded ? EMOJI_COLLAPSE : EMOJI_EXPAND;
+        btn.title = expanded ? "Collapse" : "Expand";
+        btn.setAttribute("aria-label", btn.title);
+      });
+
+      td.appendChild(btn);
+
+      // After layout, detect overflow and enable the button only when needed
+      requestAnimationFrame(() => {
+        // If content is taller than the clamped box, it's clamped
+        const isOverflowing = wrap.scrollHeight > wrap.clientHeight + 1;
+        if (isOverflowing) {
+          td.classList.add("cellClamped");
+        } else {
+          // No need for button if not clamped
+          btn.remove();
+        }
+      });
+    });
+  });
 }
 
 function buildLatestByLake(rows) {
@@ -734,7 +818,6 @@ function buildLatestMarkdown(summary, outdatedRows, latestDate, cutoffDate) {
   const cutoff = fmtDash(cutoffDate);
 
   const lines = [];
-  lines.push(`## 🧊 Latest (last 14 days) — Minneapolis Frozen Lakes Report`);
   lines.push(`**As of:** ${titleDate} (includes measurements back to ${cutoff})`);
   lines.push(``);
   lines.push(`| Lake / Location | Samples | Min | Max | Avg (≈) | Change | Notes |`);
@@ -769,8 +852,25 @@ function renderLatestAndOutdated() {
   renderLatestSummaryTable(latest);
   renderOutdatedPointsTable(outdated);
 
-  // Console markdown (copy/paste for Reddit)
+    
+  // Console markdown (copy/paste for Reddit) + store for copy button
   const md = buildLatestMarkdown(latest, outdated, latestDate, cutoff);
+  state.latestMarkdown = md;
+
+  const renderedEl = document.getElementById("latestMarkdownRendered");
+  if (renderedEl) {
+    const html = marked.parse(md, { gfm: true, breaks: false });
+    renderedEl.innerHTML = DOMPurify.sanitize(html);
+    applyCellExpandButtonsToMarkdownTables(renderedEl);
+  }
+  
+  // Enable copy button once we have markdown
+  const copyBtn = document.getElementById("copyLatestMarkdownBtn");
+  if (copyBtn) copyBtn.disabled = !md;
+
+  console.log("\n" + md + "\n");  
+  
+  if (copyBtn) copyBtn.disabled = !md;
   console.log("\n" + md + "\n");
 }
 
@@ -881,6 +981,29 @@ function wireUI() {
       rerenderAll();
     });
   });
+
+  const copyBtn = document.getElementById("copyLatestMarkdownBtn");
+  if (copyBtn) {
+    copyBtn.addEventListener("click", async () => {
+      const md = state.latestMarkdown || "";
+      if (!md) return;
+
+      try {
+        await navigator.clipboard.writeText(md);
+        // optional tiny UX feedback:
+        copyBtn.classList.add("copied");
+        setTimeout(() => copyBtn.classList.remove("copied"), 700);
+      } catch (e) {
+        // fallback if clipboard is blocked
+        const ta = document.createElement("textarea");
+        ta.value = md;
+        document.body.appendChild(ta);
+        ta.select();
+        document.execCommand("copy");
+        ta.remove();
+      }
+    });
+  }
 }
 
 function rerenderAll() {
@@ -897,7 +1020,7 @@ function rerenderAll() {
   }
   renderMap(mapRows);
 
-  // renderLatestPerLake(state.rows);
+  renderLatestPerLake(state.rows);
 
   // Two-week summary tables + console markdown output
   renderLatestAndOutdated();
@@ -1325,7 +1448,7 @@ async function loadRedditReports() {
 }
 async function loadAndRender() {
   await fetchData();
-  //renderLakeOptions(state.rows);
+  renderLakeOptions(state.rows);
   rerenderAll();
 }
 

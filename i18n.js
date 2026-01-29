@@ -50,6 +50,8 @@ const I18N = {
     t_donate_btn: "Donate to Minneapolis Frozen Lakes Report",
     t_inches: "inches",
     t_centimeters: "centimeters",
+    t_copy_markdown: "Copy",
+    copied: "Copied!",
   },
 
   fr: {

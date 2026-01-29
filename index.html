@@ -106,7 +106,7 @@
       <div class="legend" id="legend"></div>
     </section>
 
-<!--
+
     <section class="card summaryCard">
       <div class="cardHeader">
         <div class="cardTitle" id="t_latest">Latest per lake</div>
@@ -114,7 +114,6 @@
       </div>
       <div id="latestList" class="latestList"></div>
     </section>
--->
 
     <section class="card tableCard">
       <div class="cardHeader tableHeader">
@@ -123,24 +122,29 @@
           <div class="cardMeta" id="t_filters">Summary tables</div>
         </div>
       </div>
-<div class="sectionLabel" style="margin:10px 0 6px; font-weight:800;" id="t_latest_table_title">Latest (last 14 days)</div>
-      <div class="cardMeta" style="margin:0 0 10px;" id="t_latest_table_hint">Aggregated summary + change vs previous measurement</div>
-
-      <div class="tableWrap">
-        <table id="latestSummaryTable">
-          <thead>
-            <tr>
-              <th>Lake / Location</th>
-              <th>Samples</th>
-              <th>Min</th>
-              <th>Max</th>
-              <th>Avg (≈)</th>
-              <th>Change</th>
-              <th>Notes</th>
-            </tr>
-          </thead>
-          <tbody></tbody>
-        </table>
+      <div class="sectionHeaderRow hscroll" style="margin:10px 0 10px;">
+        <div>
+          <div class="sectionLabel" style="margin:0; font-weight:800;" id="t_latest_table_title">
+            Latest (last 14 days)
+          </div>
+          <div class="cardMeta" style="margin:4px 0 0;" id="t_latest_table_hint">
+            Aggregated summary + change vs previous measurement
+          </div>
+        </div>
+      
+        <button
+          class="iconBtn"
+          id="copyLatestMarkdownBtn"
+          type="button"
+          title="Copy markdown"
+        >
+          <span aria-hidden="true">⧉</span>
+          <span class="iconBtnText" id="t_copy_markdown">Copy</span>
+        </button>
+      </div>
+      
+      <div class="markdownRenderWrap hscroll">
+        <div id="latestMarkdownRendered" class="mdRendered"></div>
       </div>
 
       <div class="sectionLabel" style="margin:16px 0 6px; font-weight:800;" id="t_outdated_points_title">Outdated points</div>
@@ -161,6 +165,13 @@
         </table>
       </div>
 
+
+      </div>
+
+      
+
+      <div class="sectionLabel" style="margin:16px 0 6px; font-weight:800;" id="t_all_data_title">All data (filterable)</div>
+      <div class="cardMeta" style="margin:0 0 10px;" id="t_all_data_hint">This is the full dataset from the sheet</div>
         <div class="filters">
           <label class="control">
             <span id="t_lake">Lake</span>
@@ -174,13 +185,6 @@
             <input id="searchInput" placeholder="Info / lake / date…" />
           </label>
         </div>
-      </div>
-
-      
-
-      <div class="sectionLabel" style="margin:16px 0 6px; font-weight:800;" id="t_all_data_title">All data (filterable)</div>
-      <div class="cardMeta" style="margin:0 0 10px;" id="t_all_data_hint">This is the full dataset from the sheet</div>
-
       <div class="tableWrap">
         <table id="dataTable">
           <thead>
@@ -208,7 +212,8 @@
     integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
     crossorigin=""
   ></script>
-
+  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/dompurify@3.0.6/dist/purify.min.js"></script>
   <script src="i18n.js?v=20260103"></script>
   <script src="app.js?v=20260103"></script>
     <!-- Floating hamburger menu -->

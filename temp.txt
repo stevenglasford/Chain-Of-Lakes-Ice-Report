@@ -1,0 +1,32 @@
+## 🧊 Latest (last 14 days) — Minneapolis Frozen Lakes Report
+**As of:** 1-28-2026 (includes measurements back to 1-14-2026)
+
+| Lake / Location | Samples | Min | Max | Avg (≈) | Change | Notes |
+|---|---:|---:|---:|---:|---:|---|
+| **Bde Maka Ska** | 8 | 19 1/2 | 20 5/8 | **20 1/8** | **+3/4** |  |
+| **Burnham Bridge** | 1 | 14 3/4 | 14 3/4 | **14 3/4** | **+5** |  |
+| **Cedar Lake** | 6 | 14 3/4 | 19 5/8 | **18 1/2** | **+3 3/4** |  |
+| **Cedar Lake Channel** | 1 | 16 | 16 | **16** | **+5** |  |
+| **Dean Parkway Bridge** | 1 | 18 3/4 | 18 3/4 | **18 3/4** | **+3 3/4** |  |
+| **East Lake of the Isles Parkway Bridge** | 1 | 18 3/8 | 18 3/8 | **18 3/8** | **+3 3/8** |  |
+| **Kenilworth Lagoon** | 1 | 18 1/2 | 18 1/2 | **18 1/2** | **+3 3/4** |  |
+| **Lake Harriet** | 6 | 19 1/4 | 21 1/4 | **20 1/8** | **+3 5/8** |  |
+| **Lake Hiawatha** | 4 | 20 | 20 1/2 | **20 1/4** | **+3 3/4** |  |
+| **Lake Nokomis** | 6 | 16 1/4 | 20 1/4 | **19 1/2** | **+3 1/4** | Zamboni ice |
+| **Lake of the Isles** | 8 | 16 7/8 | 20 1/4 | **19 1/4** | **+3 3/4** |  |
+| **Lake Street Bridge** | 1 | 15 5/8 | 15 5/8 | **15 5/8** | **+3 1/8** | No portage needed; No portage needed |
+| **Loring Pond** | 3 | 16 1/2 | 18 1/2 | **17 1/4** | **+4 1/4** |  |
+| **LRT Bridge** | 1 | 15 3/4 | 15 3/4 | **15 3/4** | **+3 3/4** |  |
+| **Midtown Greenway Bridge** | 1 | 13 3/4 | 13 3/4 | **13 3/4** | **+4** |  |
+
+### Outdated points (latest measurement older than 14 days)
+| Date | Lake / Location | Thickness | Notes |
+|---|---|---:|---|
+| 12-26-2024 | **Brownie Lake** | 5 1/2 |  |
+| 12-26-2024 | **Brownie tunnel** | 7 |  |
+| 12-26-2024 | **Spring Lake** | 6 1/4 |  |
+| 12-31-2024 | **East East Lake of the Isles Parkway Bridge** | 6 3/4 |  |
+| 12-31-2024 | **Lake of the Isles Lagoon and Channel** | 4 3/8 |  |
+| 1-14-2025 | **Lake Street Lagoon** | 12 5/8 | 12 5/8 |
+| 1-28-2025 | **Lake Street Channel** | 14 3/4 | 14 3/4 |
+| 12-17-2025 | **Kenilworth Channel** | 8 |  |
