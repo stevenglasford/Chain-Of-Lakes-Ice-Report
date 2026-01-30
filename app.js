@@ -807,7 +807,6 @@ function renderOutdatedPointsTable(rows) {
 function buildLatestMarkdown(summary, outdatedRows, latestDate, cutoffDate) {
   const fmtDash = (d) => {
     if (!d) return "—";
-    // Convert UTC date to M-D-YYYY
     const mm = d.getUTCMonth() + 1;
     const dd = d.getUTCDate();
     const yyyy = d.getUTCFullYear();
@@ -817,31 +816,52 @@ function buildLatestMarkdown(summary, outdatedRows, latestDate, cutoffDate) {
   const titleDate = fmtDash(latestDate);
   const cutoff = fmtDash(cutoffDate);
 
+  // ---- unit-aware formatting for markdown ----
+  const fmtCm = (cm) => {
+    if (cm == null || !isFinite(cm)) return "—";
+    // 1 decimal, trim trailing .0
+    const v = Math.round(cm * 10) / 10;
+    return (Math.abs(v - Math.round(v)) < 1e-9) ? String(Math.round(v)) : String(v);
+  };
+
+  const fmtMeasure = (inches) => {
+    if (inches == null || !isFinite(inches)) return "—";
+    if (state.unit === "cm") return fmtCm(inchesToCm(inches));
+    return inchesToMixedFraction(inches);
+  };
+
+  const fmtDelta = (deltaInches) => {
+    if (deltaInches == null || !isFinite(deltaInches)) return t(state.lang, "t_md_na");
+    if (Math.abs(deltaInches) < 1e-9) return "0";
+
+    const sign = deltaInches > 0 ? "+" : "−";
+    if (state.unit === "cm") {
+      const dcm = Math.abs(deltaInches) * 2.54;
+      return `${sign}${fmtCm(dcm)}`;
+    }
+    return `${sign}${inchesToMixedFraction(Math.abs(deltaInches))}`;
+  };
+
+  const unitLabel = (state.unit === "cm") ? t(state.lang, "t_centimeters") : t(state.lang, "t_inches");
+
   const lines = [];
-  lines.push(`**As of:** ${titleDate} (includes measurements back to ${cutoff})`);
+  //lines.push(`## 🧊 ${t(state.lang, "t_md_latest_title")}`);
+  lines.push(`**${t(state.lang, "t_md_as_of")}** ${titleDate} (${t(state.lang, "t_md_includes_back_to")} ${cutoff})`);
+  lines.push(`**${t(state.lang, "t_md_units")}** ${unitLabel}`);
   lines.push(``);
-  lines.push(`| Lake / Location | Samples | Min | Max | Avg (≈) | Change | Notes |`);
+  lines.push(`| ${t(state.lang, "t_col_lake_location")} | ${t(state.lang, "t_col_samples")} | ${t(state.lang, "t_col_min")} | ${t(state.lang, "t_col_max")} | ${t(state.lang, "t_col_avg")} | ${t(state.lang, "t_col_change")} | ${t(state.lang, "t_col_notes")} |`);
   lines.push(`|---|---:|---:|---:|---:|---:|---|`);
 
   for (const s of summary) {
-    const minS = (s.min == null) ? "—" : inchesToMixedFraction(s.min);
-    const maxS = (s.max == null) ? "—" : inchesToMixedFraction(s.max);
-    const avgS = (s.avg == null) ? "⚠️" : inchesToMixedFraction(s.avg);
-    const dS = (s.delta == null) ? "N/A" : formatDeltaInches(s.delta);
-    const notes = (s.notes || "").replace(/\|/g, "/"); // avoid breaking tables
-    lines.push(`| **${s.lake}** | ${s.samples || 0} | ${minS} | ${maxS} | **${avgS}** | **${dS}** | ${notes} |`);
-  }
+    const minS = (s.min == null) ? "—" : fmtMeasure(s.min);
+    const maxS = (s.max == null) ? "—" : fmtMeasure(s.max);
 
-  if (outdatedRows && outdatedRows.length) {
-    lines.push(``);
-    lines.push(`### Outdated points (latest measurement older than 14 days)`);
-    lines.push(`| Date | Lake / Location | Thickness | Notes |`);
-    lines.push(`|---|---|---:|---|`);
-    for (const r of outdatedRows) {
-      const thick = inchesToMixedFraction(r.thickness_in);
-      const note = String(r.info || "").replace(/\|/g, "/");
-      lines.push(`| ${r.date_raw || "—"} | **${r.lake || "—"}** | ${thick} | ${note} |`);
-    }
+    // Keep your "⚠️" rule for avg if you were doing that
+    const avgS = (s.avg == null) ? "⚠️" : fmtMeasure(s.avg);
+
+    const dS = (s.delta == null) ? t(state.lang, "t_md_na") : fmtDelta(s.delta);
+    const notes = (s.notes || "").replace(/\|/g, "/"); // don't break markdown table
+    lines.push(`| **${s.lake}** | ${s.samples || 0} | ${minS} | ${maxS} | **${avgS}** | **${dS}** | ${notes} |`);
   }
 
   return lines.join("\n");
@@ -875,24 +895,38 @@ function renderLatestAndOutdated() {
 }
 
 function renderLatestPerLake(rows) {
-  // pick latest (max date_sort) per lake
+  const container = document.getElementById("latestList");
+  if (!container) return;
+
+  container.innerHTML = "";
+
+  const PREFERRED_ORDER = [
+    "Loring Pond",
+    "Cedar Lake",
+    "Lake of the Isles",
+    "Bde Maka Ska",
+    "Lake Harriet",
+    "Lake Nokomis",
+    "Lake Hiawatha",
+  ];
+
+  // Build "latest per lake" by date_sort
   const byLake = new Map();
-  for (const r of rows) {
-    if (!r.lake) continue;
+  for (const r of (rows || [])) {
+    if (!r || !r.lake) continue;
     const prev = byLake.get(r.lake);
-    if (!prev || r.date_sort > prev.date_sort) byLake.set(r.lake, r);
+    const rSort = (r.date_sort ?? -Infinity);
+    const pSort = (prev?.date_sort ?? -Infinity);
+    if (!prev || rSort > pSort) byLake.set(r.lake, r);
   }
 
-  const list = Array.from(byLake.values()).sort((a,b) => (b.date_sort - a.date_sort));
-  const el = document.getElementById("latestList");
-  el.innerHTML = "";
-
-  for (const r of list) {
+  // Helper: render a single card-like item (matches your existing latestItem styling)
+  const renderItem = (r) => {
     const div = document.createElement("div");
     div.className = "latestItem";
     div.innerHTML = `
       <div class="row1">
-        <div>${escapeHtml(r.lake)}</div>
+        <div>${escapeHtml(r.lake || "—")}</div>
         <div>${escapeHtml(formatThickness(r))}</div>
       </div>
       <div class="row2">
@@ -900,10 +934,63 @@ function renderLatestPerLake(rows) {
         <div>${escapeHtml(r.info || "")}</div>
       </div>
     `;
-    el.appendChild(div);
+    return div;
+  };
+
+  // Split preferred vs others
+  const preferred = [];
+  const others = [];
+
+  for (const [lake, r] of byLake.entries()) {
+    if (PREFERRED_ORDER.includes(lake)) preferred.push(r);
+    else others.push(r);
+  }
+
+  // Sort preferred by the exact order requested
+  preferred.sort(
+    (a, b) => PREFERRED_ORDER.indexOf(a.lake) - PREFERRED_ORDER.indexOf(b.lake)
+  );
+
+  // Sort others (newest first, then lake name)
+  others.sort(
+    (a, b) =>
+      (b.date_sort - a.date_sort) ||
+      String(a.lake || "").localeCompare(String(b.lake || ""))
+  );
+
+  // Render preferred first
+  for (const r of preferred) container.appendChild(renderItem(r));
+
+  // Render others hidden (if any)
+  for (const r of others) {
+    const el = renderItem(r);
+    el.classList.add("latestExtra", "isHidden");
+    container.appendChild(el);
+  }
+
+  // Expand / collapse control
+  if (others.length > 0) {
+    const wrap = document.createElement("div");
+    wrap.className = "latestMoreWrap";
+
+    const btn = document.createElement("button");
+    btn.type = "button";
+    btn.className = "latestMoreBtn";
+    btn.textContent = "➕";
+
+    let expanded = false;
+    btn.addEventListener("click", () => {
+      expanded = !expanded;
+      btn.textContent = expanded ? "➖" : "➕";
+      container
+        .querySelectorAll(".latestExtra")
+        .forEach((el) => el.classList.toggle("isHidden", !expanded));
+    });
+
+    wrap.appendChild(btn);
+    container.appendChild(wrap);
   }
 }
-
 
 
 

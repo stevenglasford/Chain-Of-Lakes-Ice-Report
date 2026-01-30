@@ -542,3 +542,26 @@ td.cellClamped .cellExpandBtn {
   max-width: 320px;
   overflow-wrap: break-word;
 }
+
+/* Hide extra latest-per-lake items until expanded */
+.latestItem.isHidden {
+  display: none;
+}
+
+/* Expand / collapse button */
+.latestMoreWrap {
+  text-align: center;
+  margin-top: 6px;
+}
+
+.latestMoreBtn {
+  background: none;
+  border: none;
+  font-size: 1.2rem;
+  cursor: pointer;
+  opacity: 0.75;
+}
+
+.latestMoreBtn:hover {
+  opacity: 1;
+}
