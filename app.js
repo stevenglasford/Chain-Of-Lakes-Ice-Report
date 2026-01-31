@@ -1146,9 +1146,17 @@ function hydrateShareStateFromURL() {
   }
 
   // UI prefs
-  const unit = p.get("unit");
+  // UI prefs (support both `units` and legacy `unit`)
+  let unit = p.get("units") || p.get("unit");  // <-- accept both
   const lang = p.get("lang");
-  if (unit) state.unit = unit;
+  
+  if (unit) {
+    unit = String(unit).toLowerCase().trim();
+    // normalize a few possible variants
+    if (unit === "cm" || unit === "centimeters" || unit === "centimetres") state.unit = "cm";
+    else state.unit = "in"; // treat anything else as inches
+  }
+  
   if (lang) state.lang = lang;
 }
 
@@ -1184,7 +1192,14 @@ function syncShareURLFromState() {
     p.delete("to");
   }
 
-  if (state.unit && state.unit !== "cm") p.set("unit", state.unit); else p.delete("unit");
+  p.delete("unit"); // legacy cleanup
+
+  if (state.unit === "cm") {
+    p.set("units", "cm");
+  } else {
+    p.delete("units");
+  }
+  
   if (state.lang && state.lang !== "en") p.set("lang", state.lang); else p.delete("lang");
 
   const qs = p.toString();
