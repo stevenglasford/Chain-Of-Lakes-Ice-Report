@@ -145,26 +145,24 @@ function buildLatestByLake(rows) {
 }
 
 function buildLatestDayRows(rows) {
-  // "Latest" = all points from the most recent *date* present in the current filtered dataset.
-  // (Not "latest per lake".)
-  let maxDayKey = null;
+  // "Latest" = all points from the most recent date present in the current filtered dataset,
+  // PLUS the immediately previous date (1 day earlier). This supports multi-day measurement runs.
+  let maxMs = null;
 
   for (const r of rows) {
     if (!r || !r.date_sort) continue;
-    const d = new Date(r.date_sort);
-    if (isNaN(d.getTime())) continue;
-    const dayKey = d.getFullYear() + "-" + String(d.getMonth()+1).padStart(2,"0") + "-" + String(d.getDate()).padStart(2,"0");
-    if (maxDayKey === null || dayKey > maxDayKey) maxDayKey = dayKey;
+    const ms = Number(r.date_sort);
+    if (!isFinite(ms)) continue;
+    if (maxMs === null || ms > maxMs) maxMs = ms;
   }
 
-  if (!maxDayKey) return [];
+  if (maxMs == null) return [];
+
+  const prevMs = maxMs - (24 * 60 * 60 * 1000); // 1 day earlier (date_sort is midnight-UTC)
 
   return rows.filter(r => {
     if (!r || !r.date_sort) return false;
-    const d = new Date(r.date_sort);
-    if (isNaN(d.getTime())) return false;
-    const dayKey = d.getFullYear() + "-" + String(d.getMonth()+1).padStart(2,"0") + "-" + String(d.getDate()).padStart(2,"0");
-    return dayKey === maxDayKey;
+    return r.date_sort === maxMs || r.date_sort === prevMs;
   });
 }
 
