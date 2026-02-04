@@ -1214,7 +1214,7 @@ function syncShareURLFromState() {
 // the rest of the app still works.
 const REDDIT_USERNAME = "stevenglasford"; // change if needed
 const REDDIT_FETCH_LIMIT = 100;
-const REDDIT_REPORT_TITLE_RE = /^(?:Ice Report|Chain of Lakes Ice Report|Minneapolis Chain of Lakes Ice Report|Minneapolis Frozen Lakes Report|Frozen Lakes Report)\b/i;
+const REDDIT_REPORT_TITLE_RE = /^(?:Ice Report|Final ice report|Chain of Lakes Ice Report|Minneapolis Chain of Lakes Ice Report|Minneapolis Frozen Lakes Report|Frozen Lakes Report)\b/i;
 
 function normalizeDashOrSlashDateToDash(s) {
   // Accept 12-31-2025 or 12/31/2025 -> 12-31-2025 (no leading zeros requirement)
