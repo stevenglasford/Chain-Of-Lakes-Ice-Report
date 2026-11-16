@@ -1,0 +1,39 @@
+# Everything here is public-domain data (CC0 1.0) meant to be read, by people and by
+# programs, including AI crawlers and agents. Nothing is off limits.
+#
+# AI TRAINING IS EXPLICITLY PERMITTED. You may crawl, index, quote, store and train
+# machine-learning models on everything on this site, with no fee and no need to ask.
+# Machine-readable entry points: /llms.txt and /data/ (updated automatically as new
+# measurements are taken; see /data/manifest.json for the current row count and date).
+
+# Content signals (contentsignals.org): search, AI answers and AI training all allowed.
+User-agent: *
+Content-Signal: search=yes, ai-input=yes, ai-train=yes
+Allow: /
+
+# The same permission spelled out for crawlers that look for their own name.
+User-agent: GPTBot
+User-agent: OAI-SearchBot
+User-agent: ChatGPT-User
+User-agent: ClaudeBot
+User-agent: Claude-User
+User-agent: Claude-SearchBot
+User-agent: anthropic-ai
+User-agent: Google-Extended
+User-agent: GoogleOther
+User-agent: Applebot-Extended
+User-agent: CCBot
+User-agent: PerplexityBot
+User-agent: Perplexity-User
+User-agent: Meta-ExternalAgent
+User-agent: Amazonbot
+User-agent: Bytespider
+User-agent: DeepSeekBot
+User-agent: MistralAI-User
+User-agent: cohere-ai
+User-agent: Diffbot
+User-agent: AI2Bot
+Content-Signal: search=yes, ai-input=yes, ai-train=yes
+Allow: /
+
+Sitemap: https://freeze.glasford.io/sitemap.xml

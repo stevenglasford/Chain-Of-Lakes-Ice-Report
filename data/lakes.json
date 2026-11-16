@@ -1,0 +1,242 @@
+[
+ {
+  "lake": "Lake of the Isles",
+  "lake_code": "IS",
+  "observations": 209,
+  "measurements": 205,
+  "first_date": "2024-12-31",
+  "last_date": "2026-03-11",
+  "centroid_latitude": 44.95446,
+  "centroid_longitude": -93.3065
+ },
+ {
+  "lake": "Bde Maka Ska",
+  "lake_code": "BK",
+  "observations": 191,
+  "measurements": 189,
+  "first_date": "2024-12-31",
+  "last_date": "2026-03-11",
+  "centroid_latitude": 44.94241,
+  "centroid_longitude": -93.31124
+ },
+ {
+  "lake": "Lake Harriet",
+  "lake_code": "HA",
+  "observations": 189,
+  "measurements": 183,
+  "first_date": "2024-12-31",
+  "last_date": "2026-03-11",
+  "centroid_latitude": 44.92278,
+  "centroid_longitude": -93.30413
+ },
+ {
+  "lake": "Cedar Lake",
+  "lake_code": "CD",
+  "observations": 181,
+  "measurements": 180,
+  "first_date": "2024-12-26",
+  "last_date": "2026-03-11",
+  "centroid_latitude": 44.96052,
+  "centroid_longitude": -93.32099
+ },
+ {
+  "lake": "Lake Nokomis",
+  "lake_code": "NK",
+  "observations": 99,
+  "measurements": 98,
+  "first_date": "2024-12-26",
+  "last_date": "2026-03-11",
+  "centroid_latitude": 44.9103,
+  "centroid_longitude": -93.24074
+ },
+ {
+  "lake": "Loring Pond",
+  "lake_code": "PD",
+  "observations": 96,
+  "measurements": 94,
+  "first_date": "2024-12-31",
+  "last_date": "2026-03-11",
+  "centroid_latitude": 44.96905,
+  "centroid_longitude": -93.28442
+ },
+ {
+  "lake": "Lake Hiawatha",
+  "lake_code": "HW",
+  "observations": 74,
+  "measurements": 69,
+  "first_date": "2024-12-26",
+  "last_date": "2026-03-11",
+  "centroid_latitude": 44.92107,
+  "centroid_longitude": -93.23641
+ },
+ {
+  "lake": "Powderhorn Lake",
+  "lake_code": "PO",
+  "observations": 0,
+  "measurements": 0,
+  "first_date": "",
+  "last_date": "",
+  "centroid_latitude": null,
+  "centroid_longitude": null
+ },
+ {
+  "lake": "Cedar Lake Channel",
+  "lake_code": "CH",
+  "observations": 30,
+  "measurements": 27,
+  "first_date": "2025-01-14",
+  "last_date": "2026-03-11",
+  "centroid_latitude": 44.95646,
+  "centroid_longitude": -93.31837
+ },
+ {
+  "lake": "Lake Street Bridge",
+  "lake_code": "SB",
+  "observations": 29,
+  "measurements": 26,
+  "first_date": "2025-01-07",
+  "last_date": "2026-03-11",
+  "centroid_latitude": 44.9493,
+  "centroid_longitude": -93.30735
+ },
+ {
+  "lake": "Kenilworth Lagoon",
+  "lake_code": "KG",
+  "observations": 27,
+  "measurements": 26,
+  "first_date": "2025-01-14",
+  "last_date": "2026-03-11",
+  "centroid_latitude": 44.95496,
+  "centroid_longitude": -93.31424
+ },
+ {
+  "lake": "Kenilworth Channel",
+  "lake_code": "KC",
+  "observations": 7,
+  "measurements": 7,
+  "first_date": "2024-12-31",
+  "last_date": "2025-12-17",
+  "centroid_latitude": 44.9548,
+  "centroid_longitude": -93.31306
+ },
+ {
+  "lake": "Midtown Greenway Bridge",
+  "lake_code": "MG",
+  "observations": 18,
+  "measurements": 17,
+  "first_date": "2025-01-14",
+  "last_date": "2026-03-11",
+  "centroid_latitude": 44.95053,
+  "centroid_longitude": -93.30616
+ },
+ {
+  "lake": "Dean Parkway Bridge",
+  "lake_code": "DP",
+  "observations": 17,
+  "measurements": 16,
+  "first_date": "2025-01-14",
+  "last_date": "2026-03-11",
+  "centroid_latitude": 44.95468,
+  "centroid_longitude": -93.31207
+ },
+ {
+  "lake": "Brownie Lake",
+  "lake_code": "BR",
+  "observations": 20,
+  "measurements": 20,
+  "first_date": "2024-12-26",
+  "last_date": "2024-12-26",
+  "centroid_latitude": 44.96757,
+  "centroid_longitude": -93.32423
+ },
+ {
+  "lake": "Brownie Tunnel",
+  "lake_code": "BW",
+  "observations": 10,
+  "measurements": 10,
+  "first_date": "2024-12-26",
+  "last_date": "2024-12-26",
+  "centroid_latitude": 44.96595,
+  "centroid_longitude": -93.32416
+ },
+ {
+  "lake": "East Lake of the Isles Parkway Bridge",
+  "lake_code": "EP",
+  "observations": 19,
+  "measurements": 18,
+  "first_date": "2024-12-31",
+  "last_date": "2026-03-11",
+  "centroid_latitude": 44.95126,
+  "centroid_longitude": -93.30642
+ },
+ {
+  "lake": "Burnham Bridge",
+  "lake_code": "BN",
+  "observations": 13,
+  "measurements": 12,
+  "first_date": "2025-01-14",
+  "last_date": "2026-03-11",
+  "centroid_latitude": 44.95619,
+  "centroid_longitude": -93.31776
+ },
+ {
+  "lake": "LRT Bridge",
+  "lake_code": "RT",
+  "observations": 10,
+  "measurements": 10,
+  "first_date": "2025-01-14",
+  "last_date": "2026-03-11",
+  "centroid_latitude": 44.95553,
+  "centroid_longitude": -93.3167
+ },
+ {
+  "lake": "Spring Lake",
+  "lake_code": "SG",
+  "observations": 7,
+  "measurements": 7,
+  "first_date": "2024-12-26",
+  "last_date": "2024-12-26",
+  "centroid_latitude": 44.97028,
+  "centroid_longitude": -93.29689
+ },
+ {
+  "lake": "Lake of the Isles Lagoon",
+  "lake_code": "IG",
+  "observations": 0,
+  "measurements": 0,
+  "first_date": "",
+  "last_date": "",
+  "centroid_latitude": null,
+  "centroid_longitude": null
+ },
+ {
+  "lake": "Lake Street Channel",
+  "lake_code": "",
+  "observations": 1,
+  "measurements": 1,
+  "first_date": "2025-01-28",
+  "last_date": "2025-01-28",
+  "centroid_latitude": 44.95089,
+  "centroid_longitude": -93.30617
+ },
+ {
+  "lake": "Lake Street Lagoon",
+  "lake_code": "",
+  "observations": 1,
+  "measurements": 1,
+  "first_date": "2025-01-14",
+  "last_date": "2025-01-14",
+  "centroid_latitude": 44.95,
+  "centroid_longitude": -93.30667
+ },
+ {
+  "lake": "Lake of the Isles Lagoon and Channel",
+  "lake_code": "",
+  "observations": 4,
+  "measurements": 4,
+  "first_date": "2024-12-31",
+  "last_date": "2024-12-31",
+  "centroid_latitude": 44.95092,
+  "centroid_longitude": -93.30612
+ }
+]

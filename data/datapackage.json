@@ -1,0 +1,425 @@
+{
+ "profile": "tabular-data-package",
+ "name": "minneapolis-frozen-lakes-ice-thickness",
+ "title": "Minneapolis Frozen Lakes Report: ice thickness measurements",
+ "description": "Ice thickness measured by hand through drilled holes on the lakes, ponds, channels and lagoons of Minneapolis, Minnesota, USA, about weekly while the ice lasts. These are spot measurements at single drilled holes. Ice thickness varies a great deal over short distances and changes from day to day; a measurement here does not mean the ice is safe anywhere, including at the same spot later. Nothing in this dataset is safety advice.",
+ "homepage": "https://freeze.glasford.io/",
+ "licenses": [
+  {
+   "name": "CC0-1.0",
+   "title": "Creative Commons Zero v1.0 Universal (public domain)",
+   "path": "https://creativecommons.org/publicdomain/zero/1.0/"
+  }
+ ],
+ "keywords": [
+  "ice thickness",
+  "lake ice",
+  "Minneapolis",
+  "Minnesota",
+  "Chain of Lakes",
+  "citizen science",
+  "winter",
+  "limnology"
+ ],
+ "contributors": [
+  {
+   "title": "Minneapolis Frozen Lakes Report",
+   "path": "https://freeze.glasford.io/",
+   "role": "author"
+  }
+ ],
+ "sources": [
+  {
+   "title": "Google Sheet the measurements are entered in",
+   "path": "https://docs.google.com/spreadsheets/d/1012ms_FIXpCG7HNW-EJgl8cTf3a_haNKsNlgpZhoxqo/edit"
+  }
+ ],
+ "temporal": {
+  "start": "2024-12-26",
+  "end": "2026-03-11"
+ },
+ "spatial": {
+  "description": "Minneapolis, Minnesota, USA",
+  "bbox": [
+   -93.4,
+   44.85,
+   -93.15,
+   45.06
+  ]
+ },
+ "timezone": "America/Chicago",
+ "resources": [
+  {
+   "name": "ice-thickness",
+   "path": "ice-thickness.csv",
+   "format": "csv",
+   "mediatype": "text/csv",
+   "encoding": "utf-8",
+   "description": "Every observation, all seasons.",
+   "schema": {
+    "fields": [
+     {
+      "name": "id",
+      "type": "string",
+      "description": "Identifier for this observation, derived from its date, time, place, position and thickness. Stable unless one of those is corrected in the source sheet.",
+      "constraints": {
+       "required": true
+      }
+     },
+     {
+      "name": "season",
+      "type": "string",
+      "description": "Winter the observation belongs to, named by both calendar years (July to June), e.g. 2025-26.",
+      "constraints": {
+       "required": true
+      }
+     },
+     {
+      "name": "date",
+      "type": "date",
+      "description": "Local calendar date of the observation (America/Chicago), YYYY-MM-DD.",
+      "constraints": {
+       "required": true
+      }
+     },
+     {
+      "name": "time",
+      "type": "string",
+      "description": "Local time of day, HH:MM:SS, when it was recorded. Empty for observations that were logged by date only (all of them before the 2026-27 season)."
+     },
+     {
+      "name": "lake",
+      "type": "string",
+      "description": "Lake, pond, channel, lagoon or bridge where the hole was cut."
+     },
+     {
+      "name": "lake_code",
+      "type": "string",
+      "description": "Two-letter code for the place (see lakes.csv). Empty when the name in the sheet is not one of the listed places."
+     },
+     {
+      "name": "latitude",
+      "type": "number",
+      "description": "WGS84 latitude of the hole, decimal degrees. Empty when no position was recorded.",
+      "constraints": {
+       "minimum": -90,
+       "maximum": 90
+      }
+     },
+     {
+      "name": "longitude",
+      "type": "number",
+      "description": "WGS84 longitude of the hole, decimal degrees (negative = west).",
+      "constraints": {
+       "minimum": -180,
+       "maximum": 180
+      }
+     },
+     {
+      "name": "thickness_mm",
+      "type": "integer",
+      "description": "Thickness of SOLID ice in millimetres, measured through a drilled hole. It does not include honeycombed (candled) ice, which is in honeycomb_mm. 0 means there was no solid ice at that spot: open water, or honeycomb only. Empty when no measurement was taken (see comment).",
+      "unit": "mm",
+      "constraints": {
+       "minimum": 0
+      }
+     },
+     {
+      "name": "thickness_in",
+      "type": "number",
+      "description": "The same thickness in inches (thickness_mm / 25.4, 2 decimals)."
+     },
+     {
+      "name": "thickness_cm",
+      "type": "number",
+      "description": "The same thickness in centimetres (thickness_mm / 10)."
+     },
+     {
+      "name": "honeycomb_mm",
+      "type": "integer",
+      "description": "Thickness of honeycombed (candled) ice in millimetres, in addition to thickness_mm. Candled ice has rotted into loose vertical crystals: it is like shredded ice, carries very little load, and can look as strong as solid ice. 0 when the observer wrote 'no honey'. Empty when honeycomb was not recorded, which is not the same as none. Read from the comment text."
+     },
+     {
+      "name": "open_water",
+      "type": "boolean",
+      "description": "true when there was no solid ice (thickness_mm 0 or empty) and the comment reports open or flowing water at that spot. Derived from the comment text."
+     },
+     {
+      "name": "comment",
+      "type": "string",
+      "description": "The observer's note, as written. For seasons before 2026-27 it begins with the reading as originally written down in inches and fractions (e.g. '9 1/2')."
+     },
+     {
+      "name": "flags",
+      "type": "string",
+      "description": "Semicolon-separated notes added by the export: uncertain (the observer marked the reading with '?'), thickness_from_comment (millimetres were worked out from inches written in the comment), position_outside_area (coordinates fall outside Minneapolis), position_stale (the phone's position was several minutes old), unlisted_place (the place name is not in lakes.csv), honeycomb_noted (the comment records honeycombed ice), honeycomb_only (no solid ice at all, only honeycombed ice: thickness_mm is 0 and the whole sheet is weak, whatever it looks like)."
+     }
+    ],
+    "primaryKey": "id",
+    "missingValues": [
+     ""
+    ]
+   }
+  },
+  {
+   "name": "ice-thickness-2024-25",
+   "path": "seasons/2024-25.csv",
+   "format": "csv",
+   "mediatype": "text/csv",
+   "encoding": "utf-8",
+   "description": "Observations from the 2024-25 winter.",
+   "schema": {
+    "fields": [
+     {
+      "name": "id",
+      "type": "string",
+      "description": "Identifier for this observation, derived from its date, time, place, position and thickness. Stable unless one of those is corrected in the source sheet.",
+      "constraints": {
+       "required": true
+      }
+     },
+     {
+      "name": "season",
+      "type": "string",
+      "description": "Winter the observation belongs to, named by both calendar years (July to June), e.g. 2025-26.",
+      "constraints": {
+       "required": true
+      }
+     },
+     {
+      "name": "date",
+      "type": "date",
+      "description": "Local calendar date of the observation (America/Chicago), YYYY-MM-DD.",
+      "constraints": {
+       "required": true
+      }
+     },
+     {
+      "name": "time",
+      "type": "string",
+      "description": "Local time of day, HH:MM:SS, when it was recorded. Empty for observations that were logged by date only (all of them before the 2026-27 season)."
+     },
+     {
+      "name": "lake",
+      "type": "string",
+      "description": "Lake, pond, channel, lagoon or bridge where the hole was cut."
+     },
+     {
+      "name": "lake_code",
+      "type": "string",
+      "description": "Two-letter code for the place (see lakes.csv). Empty when the name in the sheet is not one of the listed places."
+     },
+     {
+      "name": "latitude",
+      "type": "number",
+      "description": "WGS84 latitude of the hole, decimal degrees. Empty when no position was recorded.",
+      "constraints": {
+       "minimum": -90,
+       "maximum": 90
+      }
+     },
+     {
+      "name": "longitude",
+      "type": "number",
+      "description": "WGS84 longitude of the hole, decimal degrees (negative = west).",
+      "constraints": {
+       "minimum": -180,
+       "maximum": 180
+      }
+     },
+     {
+      "name": "thickness_mm",
+      "type": "integer",
+      "description": "Thickness of SOLID ice in millimetres, measured through a drilled hole. It does not include honeycombed (candled) ice, which is in honeycomb_mm. 0 means there was no solid ice at that spot: open water, or honeycomb only. Empty when no measurement was taken (see comment).",
+      "unit": "mm",
+      "constraints": {
+       "minimum": 0
+      }
+     },
+     {
+      "name": "thickness_in",
+      "type": "number",
+      "description": "The same thickness in inches (thickness_mm / 25.4, 2 decimals)."
+     },
+     {
+      "name": "thickness_cm",
+      "type": "number",
+      "description": "The same thickness in centimetres (thickness_mm / 10)."
+     },
+     {
+      "name": "honeycomb_mm",
+      "type": "integer",
+      "description": "Thickness of honeycombed (candled) ice in millimetres, in addition to thickness_mm. Candled ice has rotted into loose vertical crystals: it is like shredded ice, carries very little load, and can look as strong as solid ice. 0 when the observer wrote 'no honey'. Empty when honeycomb was not recorded, which is not the same as none. Read from the comment text."
+     },
+     {
+      "name": "open_water",
+      "type": "boolean",
+      "description": "true when there was no solid ice (thickness_mm 0 or empty) and the comment reports open or flowing water at that spot. Derived from the comment text."
+     },
+     {
+      "name": "comment",
+      "type": "string",
+      "description": "The observer's note, as written. For seasons before 2026-27 it begins with the reading as originally written down in inches and fractions (e.g. '9 1/2')."
+     },
+     {
+      "name": "flags",
+      "type": "string",
+      "description": "Semicolon-separated notes added by the export: uncertain (the observer marked the reading with '?'), thickness_from_comment (millimetres were worked out from inches written in the comment), position_outside_area (coordinates fall outside Minneapolis), position_stale (the phone's position was several minutes old), unlisted_place (the place name is not in lakes.csv), honeycomb_noted (the comment records honeycombed ice), honeycomb_only (no solid ice at all, only honeycombed ice: thickness_mm is 0 and the whole sheet is weak, whatever it looks like)."
+     }
+    ],
+    "primaryKey": "id",
+    "missingValues": [
+     ""
+    ]
+   }
+  },
+  {
+   "name": "ice-thickness-2025-26",
+   "path": "seasons/2025-26.csv",
+   "format": "csv",
+   "mediatype": "text/csv",
+   "encoding": "utf-8",
+   "description": "Observations from the 2025-26 winter.",
+   "schema": {
+    "fields": [
+     {
+      "name": "id",
+      "type": "string",
+      "description": "Identifier for this observation, derived from its date, time, place, position and thickness. Stable unless one of those is corrected in the source sheet.",
+      "constraints": {
+       "required": true
+      }
+     },
+     {
+      "name": "season",
+      "type": "string",
+      "description": "Winter the observation belongs to, named by both calendar years (July to June), e.g. 2025-26.",
+      "constraints": {
+       "required": true
+      }
+     },
+     {
+      "name": "date",
+      "type": "date",
+      "description": "Local calendar date of the observation (America/Chicago), YYYY-MM-DD.",
+      "constraints": {
+       "required": true
+      }
+     },
+     {
+      "name": "time",
+      "type": "string",
+      "description": "Local time of day, HH:MM:SS, when it was recorded. Empty for observations that were logged by date only (all of them before the 2026-27 season)."
+     },
+     {
+      "name": "lake",
+      "type": "string",
+      "description": "Lake, pond, channel, lagoon or bridge where the hole was cut."
+     },
+     {
+      "name": "lake_code",
+      "type": "string",
+      "description": "Two-letter code for the place (see lakes.csv). Empty when the name in the sheet is not one of the listed places."
+     },
+     {
+      "name": "latitude",
+      "type": "number",
+      "description": "WGS84 latitude of the hole, decimal degrees. Empty when no position was recorded.",
+      "constraints": {
+       "minimum": -90,
+       "maximum": 90
+      }
+     },
+     {
+      "name": "longitude",
+      "type": "number",
+      "description": "WGS84 longitude of the hole, decimal degrees (negative = west).",
+      "constraints": {
+       "minimum": -180,
+       "maximum": 180
+      }
+     },
+     {
+      "name": "thickness_mm",
+      "type": "integer",
+      "description": "Thickness of SOLID ice in millimetres, measured through a drilled hole. It does not include honeycombed (candled) ice, which is in honeycomb_mm. 0 means there was no solid ice at that spot: open water, or honeycomb only. Empty when no measurement was taken (see comment).",
+      "unit": "mm",
+      "constraints": {
+       "minimum": 0
+      }
+     },
+     {
+      "name": "thickness_in",
+      "type": "number",
+      "description": "The same thickness in inches (thickness_mm / 25.4, 2 decimals)."
+     },
+     {
+      "name": "thickness_cm",
+      "type": "number",
+      "description": "The same thickness in centimetres (thickness_mm / 10)."
+     },
+     {
+      "name": "honeycomb_mm",
+      "type": "integer",
+      "description": "Thickness of honeycombed (candled) ice in millimetres, in addition to thickness_mm. Candled ice has rotted into loose vertical crystals: it is like shredded ice, carries very little load, and can look as strong as solid ice. 0 when the observer wrote 'no honey'. Empty when honeycomb was not recorded, which is not the same as none. Read from the comment text."
+     },
+     {
+      "name": "open_water",
+      "type": "boolean",
+      "description": "true when there was no solid ice (thickness_mm 0 or empty) and the comment reports open or flowing water at that spot. Derived from the comment text."
+     },
+     {
+      "name": "comment",
+      "type": "string",
+      "description": "The observer's note, as written. For seasons before 2026-27 it begins with the reading as originally written down in inches and fractions (e.g. '9 1/2')."
+     },
+     {
+      "name": "flags",
+      "type": "string",
+      "description": "Semicolon-separated notes added by the export: uncertain (the observer marked the reading with '?'), thickness_from_comment (millimetres were worked out from inches written in the comment), position_outside_area (coordinates fall outside Minneapolis), position_stale (the phone's position was several minutes old), unlisted_place (the place name is not in lakes.csv), honeycomb_noted (the comment records honeycombed ice), honeycomb_only (no solid ice at all, only honeycombed ice: thickness_mm is 0 and the whole sheet is weak, whatever it looks like)."
+     }
+    ],
+    "primaryKey": "id",
+    "missingValues": [
+     ""
+    ]
+   }
+  },
+  {
+   "name": "ice-thickness-json",
+   "path": "ice-thickness.json",
+   "format": "json",
+   "mediatype": "application/json"
+  },
+  {
+   "name": "ice-thickness-ndjson",
+   "path": "ice-thickness.ndjson",
+   "format": "ndjson",
+   "mediatype": "application/x-ndjson"
+  },
+  {
+   "name": "ice-thickness-geojson",
+   "path": "ice-thickness.geojson",
+   "format": "geojson",
+   "mediatype": "application/geo+json"
+  },
+  {
+   "name": "lakes",
+   "path": "lakes.csv",
+   "format": "csv",
+   "mediatype": "text/csv"
+  },
+  {
+   "name": "seasons",
+   "path": "seasons.csv",
+   "format": "csv",
+   "mediatype": "text/csv"
+  },
+  {
+   "name": "latest",
+   "path": "latest.json",
+   "format": "json",
+   "mediatype": "application/json"
+  }
+ ]
+}

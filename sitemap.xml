@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+  <url><loc>https://freeze.glasford.io/</loc></url>
+  <url><loc>https://freeze.glasford.io/data/</loc></url>
+  <url><loc>https://freeze.glasford.io/llms.txt</loc></url>
+  <url><loc>https://freeze.glasford.io/data/summary.md</loc></url>
+  <url><loc>https://freeze.glasford.io/data/README.md</loc></url>
+  <url><loc>https://freeze.glasford.io/data/latest.json</loc></url>
+  <url><loc>https://freeze.glasford.io/data/ice-thickness.csv</loc></url>
+  <url><loc>https://freeze.glasford.io/data/ice-thickness.json</loc></url>
+  <url><loc>https://freeze.glasford.io/data/ice-thickness.ndjson</loc></url>
+  <url><loc>https://freeze.glasford.io/data/ice-thickness.geojson</loc></url>
+  <url><loc>https://freeze.glasford.io/data/datapackage.json</loc></url>
+  <url><loc>https://freeze.glasford.io/data/lakes.csv</loc></url>
+  <url><loc>https://freeze.glasford.io/data/seasons.csv</loc></url>
+</urlset>

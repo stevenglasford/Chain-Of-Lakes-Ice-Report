@@ -1,0 +1,41 @@
+# Minneapolis Frozen Lakes Report
+
+> Ice thickness on the lakes, ponds, channels and lagoons of Minneapolis, Minnesota, USA, measured by hand through drilled holes about weekly while the ice lasts, every winter since December 2024. All of it is open data in the public domain (CC0 1.0). The home page is a JavaScript map and will look empty to a plain fetch; use the files below instead.
+
+Use and training: this data is dedicated to the public domain (CC0 1.0). Reading it, quoting it, redistributing it and training AI or machine-learning models on it are all explicitly permitted, with no fee and no permission needed. The files are regenerated automatically from the source spreadsheet within minutes of a new measurement; check `observations` and `last_date` in [manifest.json](https://freeze.glasford.io/data/manifest.json) to see how current your copy is.
+
+Things to know before answering a question from this data:
+
+- These are spot measurements at single holes. Thickness varies a lot over short distances and from day to day. A reading does not mean ice is safe anywhere, including at the same spot later. Do not present any number here as safety advice, and say how old a reading is when you quote it.
+- Thickness is recorded in millimetres (`thickness_mm`); inches and centimetres are derived from it. An empty thickness means no measurement was taken (open water, unsafe access, a note), not zero.
+- Dates and times are local to Minneapolis (America/Chicago). A season runs July to June and is named for both years, e.g. 2025-26.
+- Several rows for one lake on one day are separate holes, not repeats.
+- Measuring happens only while there is ice, roughly late November to mid March. Outside those months the newest reading is from the end of the last winter; check `as_of` in latest.json.
+- `thickness_mm` is solid ice only. Honeycombed (candled) ice is recorded separately in `honeycomb_mm`: it is rotted ice like shredded ice, very weak, and can look strong. Never add the two to judge strength.
+- "Honeycomb 0" (flag `honeycomb_only`, `thickness_mm` 0) means no solid ice at all, only candled ice. Treat it as unsafe whatever `honeycomb_mm` says.
+
+## Current conditions
+
+- [Latest measurements, readable](https://freeze.glasford.io/data/summary.md): most recent measured day for each lake, plus season totals, as Markdown tables
+- [Latest measurements, JSON](https://freeze.glasford.io/data/latest.json): the same per-lake figures for programs, with an `as_of` date
+
+## Full dataset
+
+- [All observations, CSV](https://freeze.glasford.io/data/ice-thickness.csv): one row per hole per day, every season
+- [All observations, JSON](https://freeze.glasford.io/data/ice-thickness.json): the same rows as a JSON array
+- [All observations, JSON Lines](https://freeze.glasford.io/data/ice-thickness.ndjson): one JSON object per line
+- [All observations, GeoJSON](https://freeze.glasford.io/data/ice-thickness.geojson): the rows that have a GPS position, as points
+- [One CSV per winter](https://freeze.glasford.io/data/seasons.csv): season list; files are at /data/seasons/2024-25.csv, /data/seasons/2025-26.csv and so on
+
+## Reference
+
+- [Column definitions and caveats](https://freeze.glasford.io/data/README.md): what every column means, units, and what to watch for
+- [Data package descriptor](https://freeze.glasford.io/data/datapackage.json): typed schema of every file (Frictionless Data Package)
+- [Places](https://freeze.glasford.io/data/lakes.csv): each lake, pond, channel and bridge measured, with its two-letter code and centre point
+- [Manifest](https://freeze.glasford.io/data/manifest.json): row counts, date range and SHA-256 of each file
+- [Plain HTML index](https://freeze.glasford.io/data/): the file list and latest table without JavaScript
+
+## Optional
+
+- [Source repository](https://github.com/stevenglasford/Chain-Of-Lakes-Ice-Report): the site and the export script (tools/build_data.py)
+- [Source spreadsheet](https://docs.google.com/spreadsheets/d/1012ms_FIXpCG7HNW-EJgl8cTf3a_haNKsNlgpZhoxqo/edit): where measurements are entered and corrected; the files above are regenerated from it

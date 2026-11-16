@@ -1,0 +1,100 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Data: Minneapolis Frozen Lakes Report</title>
+<meta name="description" content="Download every ice thickness measurement from the Minneapolis Frozen Lakes Report as CSV, JSON or GeoJSON. Public domain.">
+<link rel="canonical" href="https://freeze.glasford.io/data/">
+<link rel="alternate" type="text/csv" href="ice-thickness.csv" title="All observations (CSV)">
+<link rel="alternate" type="application/json" href="ice-thickness.json" title="All observations (JSON)">
+<link rel="alternate" type="application/geo+json" href="ice-thickness.geojson" title="All observations (GeoJSON)">
+<style>
+body{font:16px/1.5 system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif;max-width:60rem;margin:0 auto;padding:1rem;color:#111;background:#fff}
+table{border-collapse:collapse;width:100%;margin:1rem 0;font-size:.92rem}
+th,td{border:1px solid #ccc;padding:.3rem .5rem;text-align:left;vertical-align:top}
+th{background:#f1f5f9}
+.scroll{overflow-x:auto}
+@media (prefers-color-scheme:dark){body{background:#0f172a;color:#e2e8f0}th{background:#1e293b}th,td{border-color:#334155}a{color:#7dd3fc}}
+</style>
+</head>
+<body>
+<h1>Minneapolis Frozen Lakes Report: the data</h1>
+<p>Ice thickness measured by hand through drilled holes on the lakes of Minneapolis, Minnesota. 1252 observations from 2024-12-26 to 2026-03-11. Public domain (CC0 1.0). <a href="../">Back to the map and tables</a>.</p>
+<p>These are spot measurements at single drilled holes. Ice thickness varies a great deal over short distances and changes from day to day; a measurement here does not mean the ice is safe anywhere, including at the same spot later. Nothing in this dataset is safety advice.</p>
+<h2>Files</h2>
+<ul>
+<li><a href="ice-thickness.csv">ice-thickness.csv</a>: Every observation, CSV</li>
+<li><a href="ice-thickness.json">ice-thickness.json</a>: Every observation, JSON array</li>
+<li><a href="ice-thickness.ndjson">ice-thickness.ndjson</a>: Every observation, JSON Lines</li>
+<li><a href="ice-thickness.geojson">ice-thickness.geojson</a>: Observations with a position, GeoJSON</li>
+<li><a href="latest.json">latest.json</a>: Most recent measurement per place, JSON</li>
+<li><a href="summary.md">summary.md</a>: Latest measurements and season totals, Markdown</li>
+<li><a href="lakes.csv">lakes.csv</a>: The places measured</li>
+<li><a href="seasons.csv">seasons.csv</a>: One row per winter</li>
+<li><a href="README.md">README.md</a>: What every column means</li>
+<li><a href="datapackage.json">datapackage.json</a>: Machine-readable description of the files (Frictionless Data Package)</li>
+<li><a href="manifest.json">manifest.json</a>: Row counts and checksums</li>
+<li><a href="seasons/2024-25.csv">seasons/2024-25.csv</a>: The 2024-25 winter, CSV</li>
+<li><a href="seasons/2025-26.csv">seasons/2025-26.csv</a>: The 2025-26 winter, CSV</li>
+</ul>
+<h2>Most recent measurements (2025-26 season, as of 2026-03-11)</h2>
+<p>For each place, its most recent day with a measurement. Millimetres, inches in brackets. Change is the difference in the mean from the previous measured day, in millimetres.</p>
+<div class="scroll">
+<table>
+<thead><tr><th>Place</th><th>Measured on</th><th>Holes</th><th>Min</th><th>Max</th><th>Mean</th><th>Change</th><th>Notes</th></tr></thead>
+<tbody>
+<tr><td>Bde Maka Ska</td><td>2026-03-11</td><td>4</td><td>0 (0.0)</td><td>0 (0.0)</td><td>0 (0.0)</td><td>-398</td><td>HONEYCOMB ONLY (no solid ice). 12 honey, 12 centimetres cell disagrees (31.77405553); took the written 0 in; 9 3/4 honey, 9 3/4</td></tr>
+<tr><td>Burnham Bridge</td><td>2026-03-04</td><td>1</td><td>0 (0.0)</td><td>0 (0.0)</td><td>0 (0.0)</td><td>-89</td><td>Open water; Closed for season</td></tr>
+<tr><td>Cedar Lake</td><td>2026-03-11</td><td>1</td><td>0 (0.0)</td><td>0 (0.0)</td><td>0 (0.0)</td><td>-328</td><td>HONEYCOMB ONLY (no solid ice). 14 1/2 honey, 14 1/2 ice is no longer stable and likely will begin massive spring thaw within the next couple of days centimetres cell disagrees (38.42814519); took the written 0 in</td></tr>
+<tr><td>Cedar Lake Channel</td><td>2026-03-04</td><td>1</td><td>25 (1.0)</td><td>25 (1.0)</td><td>25 (1.0)</td><td>-96</td><td>Very thin, very weak; Closed for season</td></tr>
+<tr><td>Dean Parkway Bridge</td><td>2026-03-04</td><td>1</td><td>483 (19.0)</td><td>483 (19.0)</td><td>483 (19.0)</td><td>-12</td><td>No honey; Unchecked due to inaccessibility</td></tr>
+<tr><td>East Lake of the Isles Parkway Bridge</td><td>2026-03-11</td><td>1</td><td>354 (13.9)</td><td>354 (13.9)</td><td>354 (13.9)</td><td>-116</td><td>Closed for season</td></tr>
+<tr><td>Kenilworth Channel</td><td>2025-12-17</td><td>2</td><td>203 (8.0)</td><td>206 (8.1)</td><td>204 (8.0)</td><td></td><td></td></tr>
+<tr><td>Kenilworth Lagoon</td><td>2026-03-11</td><td>1</td><td>266 (10.5)</td><td>266 (10.5)</td><td>266 (10.5)</td><td>-90</td><td>Unsafe, unable to access the ice</td></tr>
+<tr><td>LRT Bridge</td><td>2026-03-11</td><td>1</td><td>376 (14.8)</td><td>376 (14.8)</td><td>376 (14.8)</td><td>-75</td><td>Closed for season</td></tr>
+<tr><td>Lake Harriet</td><td>2026-03-11</td><td>6</td><td>0 (0.0)</td><td>0 (0.0)</td><td>0 (0.0)</td><td>-372</td><td>HONEYCOMB ONLY (no solid ice). 15 1/4 honey, 15 1/4 centimetres cell disagrees (28.58614979); took the written 0 in; 15 honey, 15</td></tr>
+<tr><td>Lake Hiawatha</td><td>2026-02-25</td><td>4</td><td>511 (20.1)</td><td>540 (21.3)</td><td>529 (20.8)</td><td>+139</td><td>No measurement taken on 3-4-2026 due to technical issues; Unsafe, not able to access ice</td></tr>
+<tr><td>Lake Nokomis</td><td>2026-03-11</td><td>3</td><td>0 (0.0)</td><td>0 (0.0)</td><td>0 (0.0)</td><td>-391</td><td>HONEYCOMB ONLY (no solid ice). 13 honey, 13; 10 3/8 honey, 10 3/8</td></tr>
+<tr><td>Lake Street Bridge</td><td>2026-03-04</td><td>1</td><td>0 (0.0)</td><td>0 (0.0)</td><td>0 (0.0)</td><td>-121</td><td>Open water; Closed for season</td></tr>
+<tr><td>Lake of the Isles</td><td>2026-03-11</td><td>1</td><td>0 (0.0)</td><td>0 (0.0)</td><td>0 (0.0)</td><td>-385</td><td>HONEYCOMB ONLY (no solid ice). 15 1/4 honey, 15 1/4</td></tr>
+<tr><td>Loring Pond</td><td>2026-03-04</td><td>3</td><td>225 (8.9)</td><td>270 (10.6)</td><td>243 (9.6)</td><td>-194</td><td>1/2 honey, 15 1/8; No measurements taken, significant and obvious amounts of spring thaw is occuring, no longer safe, ice is not consistent anymore, some patches of thin and thick</td></tr>
+<tr><td>Midtown Greenway Bridge</td><td>2026-03-04</td><td>1</td><td>229 (9.0)</td><td>229 (9.0)</td><td>229 (9.0)</td><td>-50</td><td>3 honey, 12; Ice thickness unknown due to inaccessibility</td></tr>
+</tbody>
+</table>
+</div>
+<h2>Seasons</h2>
+<div class="scroll">
+<table>
+<thead><tr><th>Season</th><th>Observations</th><th>Measurements</th><th>Places</th><th>First measurement</th><th>Last measurement</th><th>Thickest, mm (in)</th></tr></thead>
+<tbody>
+<tr><td>2024-25</td><td>547</td><td>528</td><td>22</td><td>2024-12-26</td><td>2025-03-04</td><td>641 (25.2)</td></tr>
+<tr><td>2025-26</td><td>705</td><td>692</td><td>16</td><td>2025-11-28</td><td>2026-03-11</td><td>597 (23.5)</td></tr>
+</tbody>
+</table>
+</div>
+<h2>Columns</h2>
+<div class="scroll">
+<table>
+<thead><tr><th>Column</th><th>Type</th><th>Meaning</th></tr></thead>
+<tbody>
+<tr><td>id</td><td>string</td><td>Identifier for this observation, derived from its date, time, place, position and thickness. Stable unless one of those is corrected in the source sheet.</td></tr>
+<tr><td>season</td><td>string</td><td>Winter the observation belongs to, named by both calendar years (July to June), e.g. 2025-26.</td></tr>
+<tr><td>date</td><td>date</td><td>Local calendar date of the observation (America/Chicago), YYYY-MM-DD.</td></tr>
+<tr><td>time</td><td>string</td><td>Local time of day, HH:MM:SS, when it was recorded. Empty for observations that were logged by date only (all of them before the 2026-27 season).</td></tr>
+<tr><td>lake</td><td>string</td><td>Lake, pond, channel, lagoon or bridge where the hole was cut.</td></tr>
+<tr><td>lake_code</td><td>string</td><td>Two-letter code for the place (see lakes.csv). Empty when the name in the sheet is not one of the listed places.</td></tr>
+<tr><td>latitude</td><td>number</td><td>WGS84 latitude of the hole, decimal degrees. Empty when no position was recorded.</td></tr>
+<tr><td>longitude</td><td>number</td><td>WGS84 longitude of the hole, decimal degrees (negative = west).</td></tr>
+<tr><td>thickness_mm</td><td>integer</td><td>Thickness of SOLID ice in millimetres, measured through a drilled hole. It does not include honeycombed (candled) ice, which is in honeycomb_mm. 0 means there was no solid ice at that spot: open water, or honeycomb only. Empty when no measurement was taken (see comment).</td></tr>
+<tr><td>thickness_in</td><td>number</td><td>The same thickness in inches (thickness_mm / 25.4, 2 decimals).</td></tr>
+<tr><td>thickness_cm</td><td>number</td><td>The same thickness in centimetres (thickness_mm / 10).</td></tr>
+<tr><td>honeycomb_mm</td><td>integer</td><td>Thickness of honeycombed (candled) ice in millimetres, in addition to thickness_mm. Candled ice has rotted into loose vertical crystals: it is like shredded ice, carries very little load, and can look as strong as solid ice. 0 when the observer wrote 'no honey'. Empty when honeycomb was not recorded, which is not the same as none. Read from the comment text.</td></tr>
+<tr><td>open_water</td><td>boolean</td><td>true when there was no solid ice (thickness_mm 0 or empty) and the comment reports open or flowing water at that spot. Derived from the comment text.</td></tr>
+<tr><td>comment</td><td>string</td><td>The observer's note, as written. For seasons before 2026-27 it begins with the reading as originally written down in inches and fractions (e.g. '9 1/2').</td></tr>
+<tr><td>flags</td><td>string</td><td>Semicolon-separated notes added by the export: uncertain (the observer marked the reading with '?'), thickness_from_comment (millimetres were worked out from inches written in the comment), position_outside_area (coordinates fall outside Minneapolis), position_stale (the phone's position was several minutes old), unlisted_place (the place name is not in lakes.csv), honeycomb_noted (the comment records honeycombed ice), honeycomb_only (no solid ice at all, only honeycombed ice: thickness_mm is 0 and the whole sheet is weak, whatever it looks like).</td></tr>
+</tbody>
+</table>
+</div>
+</body>
+</html>

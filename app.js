@@ -1,25 +1,31 @@
 // ==========================
 //  CONFIG — EDIT THESE ONLY
 // ==========================
-const SHEET_ID = "10smiQBJ8mBWax24aOagG9LdzrrnhFmj0tfRESunUJNI";
+// The "Ice" spreadsheet: one tab per season plus AllData, which combines them.
+// Readings dictated by phone land in the current season's tab; anything typed
+// by hand goes in the same place.
+const SHEET_ID = "1012ms_FIXpCG7HNW-EJgl8cTf3a_haNKsNlgpZhoxqo";
 
-// Option A (recommended): if you publish to web, use CSV export like below.
-// You must set the gid of your data tab.
-// If you're not sure, open your sheet and look for ".../edit#gid=123456"
-const GID = "2029178353";
+// The gid of the AllData tab (".../edit#gid=123456").
+const GID = "969405456";
 
 // Name of the tab that contains the combined dataset
 const DATA_SHEET_NAME = "AllData";
 
-// If using Publish-to-web CSV, this works well:
 const CSV_URL = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/export?format=csv&gid=${GID}`;
 
-// Option B (fallback): Google Visualization JSON endpoint (sometimes blocked).
+// Option B: Google Visualization JSON endpoint (sometimes blocked).
 const GVIZ_URL = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:json&sheet=${encodeURIComponent(DATA_SHEET_NAME)}`;
 
-// Choose fetch mode:
-// GViz usually works without needing "Publish to web", so it's the safest default.
-const FETCH_MODE = "csv"; // "csv" or "gviz"
+// Choose fetch mode for the live sheet: "csv" or "gviz"
+const FETCH_MODE = "csv";
+
+// The same observations as plain files on this site (see /data/). Used when
+// the sheet cannot be reached, so the page never depends on Google alone.
+const STATIC_DATA_URL = "data/ice-thickness.json";
+
+// How long to wait for the sheet before falling back to the copy on this site.
+const SHEET_TIMEOUT_MS = 12000;
 
 // ==========================
 
@@ -315,23 +321,44 @@ function buildDateRegexFromSearch(s) {
   return new RegExp(`^(?:${matches.join("|")})$`, "i");
 }
 
+function isoToDashDate(raw) {
+  // "2026-12-05T14:22:11" or "2026-12-05" -> "12-5-2026" (the form the page uses everywhere)
+  const m = String(raw || "").trim().match(/^(\d{4})-(\d{1,2})-(\d{1,2})(?:[T ].*)?$/);
+  return m ? `${Number(m[2])}-${Number(m[3])}-${m[1]}` : null;
+}
+
+function numberOrNull(v) {
+  if (v === "" || v == null) return null;
+  const n = Number(String(v).replace(/,/g, "").trim());
+  return isFinite(n) ? n : null;
+}
+
 function normRow(obj) {
-  // Flexible header matching
-  const dateRaw = obj["Date"] ?? obj["date"] ?? obj["DATE"];
+  // Flexible header matching. Two layouts are understood: the current sheet
+  // (datetime, lake, Coordinates, Thickness_mm, Comment, Thickness_in) and the
+  // older one (Date, Lake, Coordinates, Thickness (Inches), Info, Thickness (cm)).
+  let dateRaw = obj["Date"] ?? obj["date"] ?? obj["DATE"] ?? obj["datetime"] ?? "";
+  const dashed = isoToDashDate(dateRaw);
+  if (dashed) dateRaw = dashed;
+  else if (dateRaw) dateRaw = String(dateRaw).trim().replace(/\//g, "-").split(/\s+/)[0];
+
   const lake = (obj["Lake"] ?? obj["lake"] ?? "").toString().trim();
   const coordsRaw = obj["Coordinates"] ?? obj["coords"] ?? obj["Coordinate"] ?? "";
-  const info = (obj["Info"] ?? obj["info"] ?? "").toString().trim();
+  const info = (obj["Info"] ?? obj["info"] ?? obj["Comment"] ?? obj["comment"] ?? "").toString().trim();
 
-  const thicknessInRaw = obj["Thickness (Inches)"] ?? obj["thickness_in"] ?? obj["Thickness"] ?? obj["thickness"] ?? "";
+  const mm = numberOrNull(obj["Thickness_mm"] ?? obj["thickness_mm"]);
+  const thicknessInRaw = obj["Thickness (Inches)"] ?? obj["Thickness_in"] ?? obj["thickness_in"] ?? obj["Thickness"] ?? obj["thickness"] ?? "";
   const thicknessCmRaw = obj["Thickness (cm)"] ?? obj["Thickness_cm"] ?? obj["Thickness (cm) "] ?? obj["thickness_cm"] ?? "";
 
   const dateObj = parseDate(dateRaw);
   const coords = parseCoords(coordsRaw);
 
-  const thickness_in = parseMixedFractionToInches(thicknessInRaw);
-  const thickness_cm = (thicknessCmRaw !== "" && thicknessCmRaw != null && isFinite(Number(thicknessCmRaw)))
-    ? Number(thicknessCmRaw)
-    : (thickness_in != null ? inchesToCm(thickness_in) : null);
+  // Millimetres are what is recorded now; inches and centimetres follow from them.
+  const thickness_in = mm != null ? mm / 25.4 : parseMixedFractionToInches(thicknessInRaw);
+  const thickness_cm = mm != null ? mm / 10
+    : (thicknessCmRaw !== "" && thicknessCmRaw != null && isFinite(Number(thicknessCmRaw)))
+      ? Number(thicknessCmRaw)
+      : (thickness_in != null ? inchesToCm(thickness_in) : null);
 
   return {
     date_raw: dateRaw ? String(dateRaw).trim() : "",
@@ -349,83 +376,102 @@ function normRow(obj) {
 }
 
 function csvToObjects(csvText) {
-  // Simple CSV parser good enough for this sheet.
-  const lines = csvText.replace(/\r/g, "").split("\n").filter(l => l.trim().length);
-  if (!lines.length) return [];
-  const headers = splitCsvLine(lines[0]).map(h => h.trim());
-  const out = [];
-  for (let i = 1; i < lines.length; i++) {
-    const cols = splitCsvLine(lines[i]);
+  // RFC 4180: quoted fields may contain commas, doubled quotes and line breaks.
+  const text = String(csvText || "").replace(/^\uFEFF/, "").replace(/\r\n?/g, "\n");
+  const records = [];
+  let field = "", record = [], inQuotes = false;
+  for (let i = 0; i < text.length; i++) {
+    const ch = text[i];
+    if (inQuotes) {
+      if (ch === '"') {
+        if (text[i + 1] === '"') { field += '"'; i++; }
+        else inQuotes = false;
+      } else field += ch;
+    } else if (ch === '"') inQuotes = true;
+    else if (ch === ",") { record.push(field); field = ""; }
+    else if (ch === "\n") { record.push(field); field = ""; records.push(record); record = []; }
+    else field += ch;
+  }
+  if (field !== "" || record.length) { record.push(field); records.push(record); }
+
+  const rows = records.filter(r => r.some(c => String(c).trim().length));
+  if (!rows.length) return [];
+  const headers = rows[0].map(h => String(h).trim());
+  return rows.slice(1).map(cols => {
     const obj = {};
     headers.forEach((h, idx) => obj[h] = cols[idx] ?? "");
-    out.push(obj);
-  }
-  return out;
+    return obj;
+  });
 }
 
-function splitCsvLine(line) {
-  const res = [];
-  let cur = "";
-  let inQuotes = false;
-  for (let i = 0; i < line.length; i++) {
-    const ch = line[i];
-    if (ch === '"') {
-      // toggle quotes or escaped quote
-      if (inQuotes && line[i + 1] === '"') {
-        cur += '"';
-        i++;
-      } else {
-        inQuotes = !inQuotes;
-      }
-    } else if (ch === "," && !inQuotes) {
-      res.push(cur);
-      cur = "";
-    } else {
-      cur += ch;
+async function fetchSheetRows() {
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), SHEET_TIMEOUT_MS);
+  try {
+    if (FETCH_MODE === "csv") {
+      const resp = await fetch(CSV_URL + `&_=${Date.now()}`, { cache: "no-store", signal: controller.signal });
+      if (!resp.ok) throw new Error("CSV fetch failed");
+      return csvToObjects(await resp.text());
     }
+    const resp = await fetch(GVIZ_URL + `&_=${Date.now()}`, { cache: "no-store", signal: controller.signal });
+    if (!resp.ok) throw new Error("GVIZ fetch failed");
+    const text = await resp.text();
+    const json = JSON.parse(text.substring(text.indexOf("{"), text.lastIndexOf("}") + 1));
+    const table = json.table;
+    const headers = table.cols.map(c => c.label);
+    return table.rows.map(r => {
+      const obj = {};
+      r.c.forEach((cell, i) => obj[headers[i]] = cell ? (cell.v ?? "") : "");
+      return obj;
+    });
+  } finally {
+    clearTimeout(timer);
   }
-  res.push(cur);
-  return res;
+}
+
+async function fetchStaticRows() {
+  // The copy published on this site: data/ice-thickness.json
+  const resp = await fetch(STATIC_DATA_URL, { cache: "no-cache" });
+  if (!resp.ok) throw new Error("static data fetch failed");
+  const list = await resp.json();
+  return list.map(o => ({
+    datetime: o.date,
+    lake: o.lake,
+    Coordinates: (o.latitude != null && o.longitude != null) ? `${o.latitude}, ${o.longitude}` : "",
+    Thickness_mm: o.thickness_mm == null ? "" : o.thickness_mm,
+    Comment: o.comment || "",
+  }));
+}
+
+function usableRows(rawRows) {
+  return rawRows
+    .map(normRow)
+    // A row needs a date, and either a place or a position, to be shown.
+    .filter(r => r.date && (r.lake || r.coords));
 }
 
 async function fetchData() {
   setStatus(t(state.lang, "status_loading"));
 
+  let rows = [];
   try {
-    let rawRows = [];
-    if (FETCH_MODE === "csv") {
-      const resp = await fetch(CSV_URL + `&_=${Date.now()}`, { cache: "no-store" });
-      if (!resp.ok) throw new Error("CSV fetch failed");
-      const text = await resp.text();
-      rawRows = csvToObjects(text);
-    } else {
-      const resp = await fetch(GVIZ_URL + `&_=${Date.now()}`, { cache: "no-store" });
-      if (!resp.ok) throw new Error("GVIZ fetch failed");
-      const text = await resp.text();
-      const json = JSON.parse(text.substring(text.indexOf("{"), text.lastIndexOf("}") + 1));
-      const table = json.table;
-      const headers = table.cols.map(c => c.label);
-      rawRows = table.rows.map(r => {
-        const obj = {};
-        r.c.forEach((cell, i) => obj[headers[i]] = cell ? (cell.v ?? "") : "");
-        return obj;
-      });
-    }
-
-    const rows = rawRows
-      .map(normRow)
-      .filter(r => r.lake || r.date_raw || r.coords_raw || r.info || r.thickness_in != null || r.thickness_cm != null);
-
-    // Sort newest first by default
-    rows.sort((a,b) => b.date_sort - a.date_sort);
-
-    state.rows = rows;
-    setStatus(t(state.lang, "status_loaded", rows.length));
+    rows = usableRows(await fetchSheetRows());
+    // A sheet that answers with a handful of rows is a broken read, not the archive.
+    if (rows.length < 50) throw new Error("sheet returned too little");
   } catch (e) {
-    console.error(e);
-    setStatus(t(state.lang, "status_error"));
-    state.rows = [];
+    console.warn("Live sheet unavailable, using the published copy:", e);
+    try {
+      rows = usableRows(await fetchStaticRows());
+    } catch (e2) {
+      console.error(e2);
+      rows = [];
+    }
   }
+
+  // Sort newest first by default
+  rows.sort((a,b) => b.date_sort - a.date_sort);
+  state.rows = rows;
+  setStatus(rows.length ? t(state.lang, "status_loaded", rows.length) : t(state.lang, "status_error"));
 }
 
 function lakeColor(thicknessIn) {

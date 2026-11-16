@@ -1,0 +1,44 @@
+# Regenerates data/ from the Google Sheet.
+#
+# The home server does this every few minutes during the season (tools/publish.sh).
+# This is the second route, for when that machine is off: once a day, and
+# whenever somebody presses "Run workflow". GitHub pauses scheduled workflows in
+# a repository with no activity for 60 days, so after a quiet summer it may need
+# re-enabling from the Actions tab.
+name: Update data
+
+on:
+  schedule:
+    - cron: "23 11 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: data
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.x"
+      - name: Test the exporter
+        run: python3 -m unittest discover -s tools -p 'test_*.py'
+      - name: Export the sheet
+        run: python3 tools/build_data.py
+      - name: Commit if anything changed
+        run: |
+          git add data
+          if git diff --cached --quiet; then
+            echo "No change."
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git commit -m "data: update from the sheet"
+          git push

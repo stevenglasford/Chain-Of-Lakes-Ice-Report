@@ -1,0 +1,32 @@
+{
+ "title": "Minneapolis Frozen Lakes Report: ice thickness measurements",
+ "observations": 1252,
+ "measurements": 1220,
+ "first_date": "2024-12-26",
+ "last_date": "2026-03-11",
+ "seasons": [
+  "2024-25",
+  "2025-26"
+ ],
+ "source": "https://docs.google.com/spreadsheets/d/1012ms_FIXpCG7HNW-EJgl8cTf3a_haNKsNlgpZhoxqo/edit",
+ "rows_needing_attention": [
+  "row 1254 (2026-09-01): no lake and no position; row left out"
+ ],
+ "sha256": {
+  "ice-thickness.csv": "30431bd81e97b7eadaa4d480639d8664da38a3b2ed99ec3d1183298e1ebca96c",
+  "ice-thickness.json": "0ed281aabe4d6542f3619bbd3bad8ecbc196b31488d6d27bf12dfeb84fc50271",
+  "ice-thickness.ndjson": "92604976fc9897c3c38c04c1423ddf53b00737563c524618de5ba02604a3e183",
+  "ice-thickness.geojson": "cf3072b00939bf6db1fdc75e0e338514b7b5e389e7bd02646099bafd78eecefb",
+  "seasons/2024-25.csv": "b76a5c00d2c972441f54ed79aa366444f3748306d4734128b4b3aa625ccd282c",
+  "seasons/2025-26.csv": "3215bf095033dc48b2283ce1f4fc80160de31b99f62176b9f0acc896ee351730",
+  "lakes.csv": "44225617c34c10808a7683fdaf9351b84436ffb15aac9ab6c7600c0f1d0de2ad",
+  "lakes.json": "da6dccc633b08d40ac12911ec24c2e42e3c57af7d77fac75f8e877a7c552a7ed",
+  "seasons.csv": "da48472c0c82ebcf59dbc7ebaaf40ab95a62fabef433721d605bbddc98d16992",
+  "seasons.json": "45d72d1e71a688465ecfc38e524ae9a610ca58bed07863f34922b9c0aca4170d",
+  "latest.json": "c72afac26d9cb37f427eaab44ec4f2ff9f6e240c524816aae26142bae69b83f9",
+  "summary.md": "6d038ac6ff5264a3ca4a2a94f317b44d7df7e14609ebbb2b9ff1586d3e799220",
+  "README.md": "ad7dd89c4a067e7004e8b542ac3f165f119962c0a9b277e563fd1e849c1210eb",
+  "datapackage.json": "beaa2bc32d640d2f36ef43e8121f2ada1254ea01c8358cd20054efce5e4a893d",
+  "index.html": "33478fcd65836b96f4488e6069185188667b4a3d5b8009966ae98a0fc5658b63"
+ }
+}
